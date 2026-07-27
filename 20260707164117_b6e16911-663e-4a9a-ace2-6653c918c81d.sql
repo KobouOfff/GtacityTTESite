@@ -1,0 +1,1 @@
+DELETE FROM public.discord_users WHERE discord_id IN ('debug-presence-test', 'debug-presence-node');
