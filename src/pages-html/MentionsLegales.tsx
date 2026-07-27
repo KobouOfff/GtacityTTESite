@@ -98,6 +98,25 @@ export default function MentionsLegalesPage() {
             </aside>
 
             <article className="legal-article">
+              <div className="legal-document">
+                <div>
+                  <span>Document officiel · Version 1.0</span>
+                  <h2>Conditions Générales de Transport</h2>
+                  <p>
+                    Conditions de vente et de transport, règlement des voyageurs,
+                    bagages, sécurité et responsabilité.
+                  </p>
+                </div>
+                <a
+                  className="btn btn-primary"
+                  href="/conditions-generales-transport-tte-v1.pdf"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Consulter le document PDF
+                </a>
+              </div>
+
               <section id="editeur">
                 <h2>Éditeur du site</h2>
                 <p>Le présent site est édité par :</p>
@@ -273,6 +292,16 @@ export default function MentionsLegalesPage() {
           </div>
           <div className="foot-bot">
             <p>© 2026 Townsend Transit Express. Tous droits réservés.</p>
+            <div className="links">
+              <a href="/mentions-legales">Mentions légales</a>
+              <a
+                href="/conditions-generales-transport-tte-v1.pdf"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Conditions de transport
+              </a>
+            </div>
           </div>
         </div>
       </footer>
