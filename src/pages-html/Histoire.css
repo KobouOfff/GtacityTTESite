@@ -1,0 +1,52 @@
+.history-page{background:#fff;color:var(--ink)}
+.mainnav a.active{background:var(--blue-50);color:var(--blue-700)}
+.history-hero{background:linear-gradient(135deg,#0a2148 0%,#143f8c 68%,#1a50b0 100%);color:#fff;padding:5.5rem 0 6rem;position:relative;overflow:hidden}
+.history-hero::after{content:"";position:absolute;width:420px;height:420px;border:70px solid rgba(255,255,255,.05);border-radius:50%;right:-100px;top:-150px}
+.history-crumb{display:flex;gap:.55rem;align-items:center;color:#afc8f0;font-size:13px;margin-bottom:2rem}
+.history-crumb a{color:#afc8f0}
+.history-hero .eyebrow{color:#9ec0f2}
+.history-hero h1{font-family:var(--ff-head);font-size:clamp(2.4rem,5vw,4.5rem);line-height:1.02;letter-spacing:-2px;max-width:850px;margin-top:.8rem}
+.history-hero p{font-size:1.15rem;color:#d6e3f6;line-height:1.7;max-width:760px;margin-top:1.5rem}
+.history-intro{padding:4.5rem 0;border-bottom:1px solid var(--line)}
+.history-intro-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:4rem;align-items:start}
+.history-intro h2,.history-heading h2,.history-future h2{font-family:var(--ff-head);color:var(--navy);font-size:clamp(1.8rem,3vw,2.7rem);line-height:1.12;letter-spacing:-.7px;margin-top:.7rem}
+.history-intro p{font-size:1.12rem;line-height:1.8;color:var(--ink-2)}
+.history-timeline-section{padding:5rem 0;background:var(--bg-alt)}
+.history-heading{max-width:760px;margin-bottom:2.6rem}
+.history-timeline{position:relative;margin-left:3rem}
+.history-timeline::before{content:"";position:absolute;left:78px;top:14px;bottom:14px;width:2px;background:#b9ccec}
+.history-event{display:grid;grid-template-columns:80px 1fr;gap:2.2rem;position:relative;padding-bottom:2.2rem}
+.history-event:last-child{padding-bottom:0}
+.history-year{font-family:var(--ff-head);font-size:1.05rem;font-weight:800;color:var(--blue);padding-top:1.35rem}
+.history-event::after{content:"";position:absolute;left:72px;top:1.55rem;width:14px;height:14px;border-radius:50%;background:var(--blue);border:3px solid var(--bg-alt);box-shadow:0 0 0 2px var(--blue)}
+.history-event-body{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.35rem 1.5rem;box-shadow:var(--shadow)}
+.history-event-body>span{font-size:11px;font-family:var(--ff-head);font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--blue)}
+.history-event h3{font-family:var(--ff-head);color:var(--navy);font-size:1.15rem;margin:.35rem 0}
+.history-event p{color:var(--muted);font-size:14.5px;line-height:1.65}
+.history-commitments{padding:5rem 0;background:var(--navy-2);color:#fff}
+.history-heading.light h2{color:#fff}
+.history-heading.light p{color:#b9cae5;margin-top:1rem;font-size:1.05rem}
+.history-heading.light .eyebrow{color:#8fb3ec}
+.history-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.history-stats article{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:1.5rem}
+.history-stats strong{font-family:var(--ff-head);font-size:2rem;color:#8fb3ec}
+.history-stats h3{font-family:var(--ff-head);font-size:1rem;margin:.55rem 0}
+.history-stats p{font-size:13.5px;color:#b9cae5;line-height:1.55}
+.history-future{padding:5rem 0}
+.history-future-card{border:1px solid var(--line);border-radius:18px;background:linear-gradient(120deg,#f4f8fc,#eaf1fb);padding:2.4rem 2.6rem;display:flex;align-items:center;justify-content:space-between;gap:2rem}
+.history-future-card>div{max-width:750px}
+.history-future p{color:var(--muted);font-size:1rem;line-height:1.65;margin-top:1rem}
+@media(max-width:900px){
+  .history-intro-grid{grid-template-columns:1fr;gap:1.5rem}
+  .history-stats{grid-template-columns:1fr 1fr}
+}
+@media(max-width:650px){
+  .history-hero{padding:3.5rem 0 4rem}
+  .history-timeline{margin-left:0}
+  .history-timeline::before{left:12px}
+  .history-event{grid-template-columns:1fr;padding-left:2.5rem;gap:.35rem}
+  .history-event::after{left:6px}
+  .history-year{padding-top:0}
+  .history-stats{grid-template-columns:1fr}
+  .history-future-card{align-items:flex-start;flex-direction:column;padding:1.7rem}
+}

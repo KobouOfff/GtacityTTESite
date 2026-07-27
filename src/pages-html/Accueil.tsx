@@ -56,7 +56,7 @@ export default function AccueilPage() {
       <a href="#gares">Gares</a>
       <a href="#townsend">Townsend</a>
       <a href="#tarifs">Tarifs</a>
-      <a href="#engagement">Histoire</a>
+      <a href="/histoire">Histoire</a>
       <a href="#infos">Infos voyageurs</a>
     </nav>
     <div className="hdr-sp"></div>
@@ -643,7 +643,7 @@ export default function AccueilPage() {
           <div className="meta"><span className="tag" style={{background: "rgba(154,107,22,.14)", color: "#7A540F"}}>Histoire</span><span className="date">18 juin 2026</span></div>
           <h3>La Ligne T, là où tout a commencé pour TTE</h3>
           <p>Retour sur la première ligne historique de la société : le train urbain de Townsend, d'où est né l'ensemble du réseau régional et InterCité d'aujourd'hui.</p>
-          <span className="more">Lire la suite →</span>
+          <a className="more" href="/histoire">Lire la suite →</a>
         </div>
       </article>
 
@@ -767,101 +767,6 @@ export default function AccueilPage() {
   </div>
 </section>
 
-{/* ===== HISTOIRE & ENGAGEMENT ===== */}
-<section className="section" id="engagement">
-  <div className="wrap">
-    <div className="shead">
-      <span className="eyebrow">Notre histoire &amp; nos engagements</span>
-      <h2 className="stitle">D'une ligne urbaine à un réseau régional</h2>
-      <p className="slede">Townsend Transit Express est né d'une seule ligne de train urbain, la Ligne T, ouverte pour relier la gare au quartier résidentiel et à l'hôpital. Plus d'un siècle plus tard, c'est tout l'est du Tennessee qui voyage sur nos rails — sans renier ce qui a tout commencé.</p>
-    </div>
-
-    <div className="eng-grid">
-      <div className="eng-block">
-        <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 8v5l3 2" /><circle cx="12" cy="12" r="9" /></svg> Notre histoire</h3>
-        <div className="timeline">
-          <div className="tl-item origin">
-            <div className="tl-year">1921 · LIGNE T</div>
-            <div className="tl-title">La première ligne, à Townsend</div>
-            <div className="tl-desc">Ouverture du train urbain entre la gare et l'hôpital TMC. C'est la ligne fondatrice de TTE, encore en service aujourd'hui, toutes les 15 minutes.</div>
-          </div>
-          <div className="tl-item">
-            <div className="tl-year">1948 · R1 / R2</div>
-            <div className="tl-title">Extension vers les Smokies et Knoxville</div>
-            <div className="tl-desc">Premières lignes régionales : vers Sevierville par les vallées des Smokies, et vers Knoxville par Maryville.</div>
-          </div>
-          <div className="tl-item">
-            <div className="tl-year">1973 · R3 / R4</div>
-            <div className="tl-title">Le corridor est-sud du Tennessee</div>
-            <div className="tl-desc">Mise en service des liaisons Knoxville–Greeneville (R3) et Knoxville–Chattanooga (R4).</div>
-          </div>
-          <div className="tl-item">
-            <div className="tl-year">1996 · IC1</div>
-            <div className="tl-title">Premier InterCité vers Nashville</div>
-            <div className="tl-desc">TTE devient un opérateur inter-régional avec une liaison directe vers la capitale de l'État.</div>
-          </div>
-          <div className="tl-item">
-            <div className="tl-year">2019 · IC2</div>
-            <div className="tl-title">Smoky Express, la liaison rapide</div>
-            <div className="tl-desc">Lancement du Smoky Express : Townsend–Nashville en 3 h 20 avec arrêt rapide à Knoxville.</div>
-          </div>
-          <div className="tl-item">
-            <div className="tl-year">2026 · AUJOURD'HUI</div>
-            <div className="tl-title">Bus local &amp; modernisation</div>
-            <div className="tl-desc">Le bus de Townsend complète la desserte locale ; modernisation du matériel et nouveaux écrans temps réel en gare.</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="eng-block">
-        <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 2L4 7v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V7l-8-5Z" /><path d="M9 12l2 2 4-4" /></svg> Notre impact &amp; nos engagements</h3>
-        <div className="impact">
-          <div className="imp green">
-            <div className="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 20c5-3 9-9 11-17-8 2-14 6-17 11 2 2 4 4 6 6Z" /><path d="M3 21c4-3 7-6 10-9" /></svg></div>
-            <b>−74 %</b>
-            <span>de CO₂ émis vs trajet équivalent en voiture individuelle</span>
-            <small>Base : voyageur seul, moyenne réseau 2025.</small>
-          </div>
-          <div className="imp">
-            <div className="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h4l2 5 4-12 2 7h6" /></svg></div>
-            <b>96,3 %</b>
-            <span>des trains à l'heure ou avec moins de 5 min de retard</span>
-            <small>Moyenne 12 mois glissants, toutes lignes.</small>
-          </div>
-          <div className="imp green">
-            <div className="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8Z" /></svg></div>
-            <b>82 %</b>
-            <span>de la traction assurée par de l'électricité bas-carbone</span>
-            <small>Mix énergétique fourni par TVA, exercice 2025.</small>
-          </div>
-          <div className="imp warn">
-            <div className="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 22h20L12 2Z" /><path d="M12 10v5M12 18h.01" /></svg></div>
-            <b>0,02 %</b>
-            <span>d'incidents de sécurité signalés à bord pour 100 000 trajets</span>
-            <small>Présence de personnel formé sur toutes les lignes IC.</small>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {/* ===== REJOINDRE TTE ===== */}
-    <div className="hire" id="rejoindre">
-      <div className="hire-l">
-        <span className="eyebrow">Rejoignez-nous</span>
-        <h3>Faire rouler le Tennessee, ça vous parle ?</h3>
-        <p>Conducteurs, agents de gare, équipes de maintenance, contrôleurs, ingénieurs voie : TTE recrute toute l'année pour faire grandir le réseau. Formations rémunérées, mutations possibles entre dépôts, intéressement collectif.</p>
-        <a className="hire-cta" href="#">Voir toutes nos offres <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M5 12h14M13 5l7 7-7 7" /></svg></a>
-      </div>
-      <div className="jobs">
-        <div className="job"><div><b>Conducteur·rice de train</b><span>Dépôt de Knoxville · CDI</span></div><span className="pill">12 postes</span></div>
-        <div className="job"><div><b>Agent·e d'accueil en gare</b><span>Townsend, Nashville · CDI</span></div><span className="pill">5 postes</span></div>
-        <div className="job"><div><b>Technicien·ne maintenance</b><span>Atelier de Maryville · CDI</span></div><span className="pill">8 postes</span></div>
-        <div className="job"><div><b>Apprenti·e contrôleur·euse</b><span>Réseau régional · Alternance</span></div><span className="pill">6 postes</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
 {/* ===== ESPACE EMPLOYÉS ===== */}
 <section className="section staff-sec" id="employes">
   <div className="wrap">
@@ -926,7 +831,7 @@ export default function AccueilPage() {
 
       <div className="fcol">
         <h4>Entreprise</h4>
-        <a href="#engagement">Notre histoire</a>
+        <a href="/histoire">Notre histoire</a>
         <a href="#rejoindre">Recrutement</a>
         <a href="/contact#presse">Presse</a>
         <a href="/espace-employes">Espace employés</a>
