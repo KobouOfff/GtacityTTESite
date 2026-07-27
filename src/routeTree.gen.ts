@@ -14,6 +14,7 @@ import { Route as CentreRegulationRouteImport } from './routes/centre-regulation
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as EspaceEmployesRouteImport } from './routes/espace-employes'
 import { Route as HistoireRouteImport } from './routes/histoire'
+import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as MesDemandesRouteImport } from './routes/mes-demandes'
 import { Route as SuiviDemandesRouteImport } from './routes/suivi-demandes'
 import { Route as ApiPvRouteImport } from './routes/api/pv'
@@ -46,6 +47,11 @@ const EspaceEmployesRoute = EspaceEmployesRouteImport.update({
 const HistoireRoute = HistoireRouteImport.update({
   id: '/histoire',
   path: '/histoire',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
+  id: '/mentions-legales',
+  path: '/mentions-legales',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MesDemandesRoute = MesDemandesRouteImport.update({
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/espace-employes': typeof EspaceEmployesRoute
   '/histoire': typeof HistoireRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
   '/api/pv': typeof ApiPvRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/espace-employes': typeof EspaceEmployesRoute
   '/histoire': typeof HistoireRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
   '/api/pv': typeof ApiPvRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/espace-employes': typeof EspaceEmployesRoute
   '/histoire': typeof HistoireRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
   '/api/pv': typeof ApiPvRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/espace-employes'
     | '/histoire'
+    | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
     | '/api/pv'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/espace-employes'
     | '/histoire'
+    | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
     | '/api/pv'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/espace-employes'
     | '/histoire'
+    | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
     | '/api/pv'
@@ -190,6 +202,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   EspaceEmployesRoute: typeof EspaceEmployesRoute
   HistoireRoute: typeof HistoireRoute
+  MentionsLegalesRoute: typeof MentionsLegalesRoute
   MesDemandesRoute: typeof MesDemandesRoute
   SuiviDemandesRoute: typeof SuiviDemandesRoute
   ApiPvRoute: typeof ApiPvRoute
@@ -235,6 +248,13 @@ declare module '@tanstack/react-router' {
       path: '/histoire'
       fullPath: '/histoire'
       preLoaderRoute: typeof HistoireRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentions-legales': {
+      id: '/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof MentionsLegalesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mes-demandes': {
@@ -302,6 +322,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   EspaceEmployesRoute: EspaceEmployesRoute,
   HistoireRoute: HistoireRoute,
+  MentionsLegalesRoute: MentionsLegalesRoute,
   MesDemandesRoute: MesDemandesRoute,
   SuiviDemandesRoute: SuiviDemandesRoute,
   ApiPvRoute: ApiPvRoute,
