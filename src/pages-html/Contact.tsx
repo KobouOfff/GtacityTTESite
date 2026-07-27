@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import "./Contact.css";
+import { TTELogo } from "@/components/TTELogo";
 import { script } from "./Contact.script";
 import { useCurrentUser } from "@/components/DiscordAuth";
 import { canManageContactRequests, type DiscordSessionUser } from "@/lib/discord-roles";
@@ -59,10 +60,7 @@ export default function ContactPage() {
 <header className="hdr" id="hdr">
   <div className="hdr-in">
     <a href="/" className="brand" aria-label="Townsend Transit Express \u2014 accueil">
-      <svg className="logo" viewBox="0 0 156 44" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TTE">
-        <g fill="#4B92DD"><rect x="2" y="25" width="150" height="6" rx="3" opacity=".45" /><rect x="0" y="25" width="30" height="6" rx="3" /><rect x="126" y="25" width="30" height="6" rx="3" opacity=".55" /></g>
-        <text x="4" y="34" fontFamily="'Libre Franklin',sans-serif" fontSize="35" fontWeight="800" fontStyle="italic" letterSpacing="-1.5" fill="#1A50B0">TTE</text>
-      </svg>
+      <TTELogo className="logo" />
       <span className="brand-tx">
         <span className="nm">Townsend Transit Express</span>
         <span className="tg">Réseau ferroviaire du Tennessee</span>
@@ -346,10 +344,7 @@ export default function ContactPage() {
   <div className="wrap">
     <div className="foot-top">
       <div className="foot-brand">
-        <svg className="logo-f" viewBox="0 0 156 44" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TTE">
-          <g fill="#4B92DD"><rect x="2" y="25" width="150" height="6" rx="3" opacity=".5" /><rect x="0" y="25" width="30" height="6" rx="3" /><rect x="126" y="25" width="30" height="6" rx="3" opacity=".6" /></g>
-          <text x="4" y="34" fontFamily="'Libre Franklin',sans-serif" fontSize="35" fontWeight="800" fontStyle="italic" letterSpacing="-1.5" fill="#6FA8E8">TTE</text>
-        </svg>
+        <TTELogo className="logo-f" />
         <p>Townsend Transit Express — le réseau ferroviaire de l'est du Tennessee, au départ de Townsend et des Great Smoky Mountains.</p>
         <div className="addr">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="10" r="3" /><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8Z" /></svg>

@@ -1,6 +1,7 @@
 import "./EspaceEmployes.css";
 import { useCurrentUser } from "@/components/DiscordAuth";
 import { getPrimaryRole } from "@/lib/discord-roles";
+import { TTELogo } from "@/components/TTELogo";
 
 export default function EspaceEmployesPage() {
   const { data: user } = useCurrentUser();
@@ -11,14 +12,7 @@ export default function EspaceEmployesPage() {
       <div className="bar">
         <div className="bar-in">
           <div className="brand">
-            <svg className="logo" viewBox="0 0 156 44" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TTE">
-              <g fill="#4B92DD">
-                <rect x="2" y="25" width="150" height="6" rx="3" opacity=".5" />
-                <rect x="0" y="25" width="30" height="6" rx="3" />
-                <rect x="126" y="25" width="30" height="6" rx="3" opacity=".6" />
-              </g>
-              <text x="4" y="34" fontFamily="'Libre Franklin',sans-serif" fontSize="35" fontWeight="800" fontStyle="italic" letterSpacing="-1.5" fill="#6FA8E8">TTE</text>
-            </svg>
+            <TTELogo className="logo" />
             <span className="who">Espace employés</span>
           </div>
           <a className="back" href="/">
