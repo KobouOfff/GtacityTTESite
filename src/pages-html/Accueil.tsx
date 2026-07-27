@@ -74,7 +74,7 @@ export default function AccueilPage() {
 </header>
 
 {/* ===== ALERTE TRAFIC ===== */}
-<div className="alert-bar" id="alertBar">
+<div className="alert-bar" id="alertBar" style={{ display: "none" }}>
   <div className="alert-in">
     <span className="tag">⚠ Info trafic</span>
     <p><b>Ligne R4 (Knoxville – Chattanooga)</b> : retard d'environ 10 minutes en raison de travaux entre Athens et Cleveland. Les autres lignes circulent normalement.</p>
@@ -446,7 +446,7 @@ export default function AccueilPage() {
               <td><div className="t-pair">Knoxville → Chattanooga</div><div className="t-via">via Lenoir City · Sweetwater · Athens · Cleveland</div></td>
               <td><span className="t-time">07:00</span><span className="t-time">11:30</span><span className="t-time">15:00</span><span className="t-time">18:30</span></td>
               <td><span className="t-dur">2 h 30</span></td>
-              <td><span className="st st-warn">Retard ~10 min</span></td>
+              <td><span className="st st-ok">À l'heure</span></td>
             </tr>
             <tr data-type="ic" data-search="ic1 intercite townsend nashville knoxville oak ridge crossville cookeville lebanon">
               <td><span className="bullet" style={{background: "var(--l-ic1)"}}>IC1</span></td>
