@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CentreRegulationRouteImport } from './routes/centre-regulation'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as EspaceEmployesRouteImport } from './routes/espace-employes'
+import { Route as HistoireRouteImport } from './routes/histoire'
 import { Route as MesDemandesRouteImport } from './routes/mes-demandes'
 import { Route as SuiviDemandesRouteImport } from './routes/suivi-demandes'
 import { Route as ApiPvRouteImport } from './routes/api/pv'
@@ -40,6 +41,11 @@ const ContactRoute = ContactRouteImport.update({
 const EspaceEmployesRoute = EspaceEmployesRouteImport.update({
   id: '/espace-employes',
   path: '/espace-employes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoireRoute = HistoireRouteImport.update({
+  id: '/histoire',
+  path: '/histoire',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MesDemandesRoute = MesDemandesRouteImport.update({
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/centre-regulation': typeof CentreRegulationRoute
   '/contact': typeof ContactRoute
   '/espace-employes': typeof EspaceEmployesRoute
+  '/histoire': typeof HistoireRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
   '/api/pv': typeof ApiPvRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/centre-regulation': typeof CentreRegulationRoute
   '/contact': typeof ContactRoute
   '/espace-employes': typeof EspaceEmployesRoute
+  '/histoire': typeof HistoireRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
   '/api/pv': typeof ApiPvRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/centre-regulation': typeof CentreRegulationRoute
   '/contact': typeof ContactRoute
   '/espace-employes': typeof EspaceEmployesRoute
+  '/histoire': typeof HistoireRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
   '/api/pv': typeof ApiPvRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/centre-regulation'
     | '/contact'
     | '/espace-employes'
+    | '/histoire'
     | '/mes-demandes'
     | '/suivi-demandes'
     | '/api/pv'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/centre-regulation'
     | '/contact'
     | '/espace-employes'
+    | '/histoire'
     | '/mes-demandes'
     | '/suivi-demandes'
     | '/api/pv'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/centre-regulation'
     | '/contact'
     | '/espace-employes'
+    | '/histoire'
     | '/mes-demandes'
     | '/suivi-demandes'
     | '/api/pv'
@@ -177,6 +189,7 @@ export interface RootRouteChildren {
   CentreRegulationRoute: typeof CentreRegulationRoute
   ContactRoute: typeof ContactRoute
   EspaceEmployesRoute: typeof EspaceEmployesRoute
+  HistoireRoute: typeof HistoireRoute
   MesDemandesRoute: typeof MesDemandesRoute
   SuiviDemandesRoute: typeof SuiviDemandesRoute
   ApiPvRoute: typeof ApiPvRoute
@@ -215,6 +228,13 @@ declare module '@tanstack/react-router' {
       path: '/espace-employes'
       fullPath: '/espace-employes'
       preLoaderRoute: typeof EspaceEmployesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/histoire': {
+      id: '/histoire'
+      path: '/histoire'
+      fullPath: '/histoire'
+      preLoaderRoute: typeof HistoireRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mes-demandes': {
@@ -281,6 +301,7 @@ const rootRouteChildren: RootRouteChildren = {
   CentreRegulationRoute: CentreRegulationRoute,
   ContactRoute: ContactRoute,
   EspaceEmployesRoute: EspaceEmployesRoute,
+  HistoireRoute: HistoireRoute,
   MesDemandesRoute: MesDemandesRoute,
   SuiviDemandesRoute: SuiviDemandesRoute,
   ApiPvRoute: ApiPvRoute,
