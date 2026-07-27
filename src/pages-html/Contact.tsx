@@ -372,7 +372,7 @@ export default function ContactPage() {
       <p>© 2026 Townsend Transit Express. Tous droits réservés.</p>
       <div className="links">
         <a href="/mentions-legales">Mentions légales</a>
-        <a href="#">Conditions de transport</a>
+        <a href="/conditions-generales-transport-tte-v1.pdf" target="_blank" rel="noreferrer">Conditions de transport</a>
         <a href="#">Confidentialité</a>
         <a href="/">Accueil</a>
       </div>
