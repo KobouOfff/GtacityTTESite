@@ -40,9 +40,9 @@ export default function ContactPage() {
 <div className="util">
   <div className="util-in">
     <div className="util-grp u-left">
-      <a href="tte-accueil.html#reseau">Plan du réseau</a>
-      <a href="tte-accueil.html#lignes">Horaires</a>
-      <a href="tte-accueil.html#infos">Gares &amp; services</a>
+      <a href="/#reseau">Plan du réseau</a>
+      <a href="/#lignes">Horaires</a>
+      <a href="/#infos">Gares &amp; services</a>
       <a href="/contact" className="cur">Aide &amp; contact</a>
     </div>
     <div className="util-grp">
@@ -67,15 +67,15 @@ export default function ContactPage() {
       </span>
     </a>
     <nav className="mainnav">
-      <a href="tte-accueil.html#reseau">Le réseau</a>
-      <a href="tte-accueil.html#lignes">Lignes &amp; horaires</a>
-      <a href="tte-accueil.html#townsend">Townsend</a>
-      <a href="tte-accueil.html#tarifs">Tarifs &amp; titres</a>
-      <a href="tte-accueil.html#infos">Infos voyageurs</a>
+      <a href="/#reseau">Le réseau</a>
+      <a href="/#lignes">Lignes &amp; horaires</a>
+      <a href="/#townsend">Townsend</a>
+      <a href="/#tarifs">Tarifs &amp; titres</a>
+      <a href="/#infos">Infos voyageurs</a>
     </nav>
     <div className="hdr-sp"></div>
     <div className="hdr-act">
-      <a href="tte-accueil.html#finder" className="btn btn-primary">Rechercher un horaire</a>
+      <a href="/#finder" className="btn btn-primary">Rechercher un horaire</a>
       <button className="burger" id="burger" aria-label="Ouvrir le menu"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -353,16 +353,16 @@ export default function ContactPage() {
       </div>
       <div className="fcol">
         <h4>Voyageurs</h4>
-        <a href="tte-accueil.html#lignes">Lignes &amp; horaires</a>
-        <a href="tte-accueil.html#tarifs">Tarifs &amp; titres</a>
-        <a href="tte-contact.html#remboursement">Remboursement</a>
-        <a href="tte-contact.html#objets">Objets trouvés</a>
-        <a href="tte-contact.html#accessibilite">Accessibilité</a>
+        <a href="/#lignes">Lignes &amp; horaires</a>
+        <a href="/#tarifs">Tarifs &amp; titres</a>
+        <a href="/contact#remboursement">Remboursement</a>
+        <a href="/contact#objets">Objets trouvés</a>
+        <a href="/contact#accessibilite">Accessibilité</a>
       </div>
       <div className="fcol">
         <h4>Entreprise</h4>
         <a href="#">À propos de TTE</a>
-        <a href="tte-contact.html#presse">Presse &amp; médias</a>
+        <a href="/contact#presse">Presse &amp; médias</a>
         <a href="#">Recrutement</a>
         <a href="/espace-employes">Espace employés</a>
         <a href="/contact">Nous contacter</a>

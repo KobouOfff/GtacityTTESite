@@ -48,7 +48,7 @@ export const script = `
   if(selType){ selType.addEventListener('change', function(){ setCat(selType.value, false); }); }
 
   var h=(location.hash||'').replace('#','');
-  if(h && LABELS[h]){ setCat(h, false); }
+  if(h && LABELS[h]){ setCat(h, true); }
 
   var form=document.getElementById('reqForm');
   var err=document.getElementById('formErr');
