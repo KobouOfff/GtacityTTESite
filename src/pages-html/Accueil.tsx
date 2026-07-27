@@ -842,7 +842,7 @@ export default function AccueilPage() {
     <div className="foot-bot">
       <p>© 2026 Townsend Transit Express. Tous droits réservés.</p>
       <div className="links">
-        <a href="#">Mentions légales</a>
+        <a href="/mentions-legales">Mentions légales</a>
         <a href="#">Conditions de transport</a>
         <a href="#">Confidentialité</a>
         <a href="#">Plan du site</a>

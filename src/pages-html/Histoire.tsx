@@ -245,6 +245,7 @@ export default function HistoirePage() {
           </div>
           <div className="foot-bot">
             <p>© 2026 Townsend Transit Express. Tous droits réservés.</p>
+            <a href="/mentions-legales">Mentions légales</a>
           </div>
         </div>
       </footer>
