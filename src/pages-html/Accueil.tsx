@@ -2,12 +2,13 @@ import { useEffect, type CSSProperties as _CSS } from "react";
 import * as React from "react";
 import "./Accueil.css";
 import { script } from "./Accueil.script";
+import { trafficPublicScript } from "./AccueilTrafficShared.script";
 import { DiscordAuthButton } from "@/components/DiscordAuth";
 
 export default function AccueilPage() {
   useEffect(() => {
     const el = document.createElement("script");
-    el.textContent = script;
+    el.textContent = script + trafficPublicScript;
     document.body.appendChild(el);
     return () => { el.remove(); };
   }, []);

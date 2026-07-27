@@ -16,6 +16,7 @@ import { Route as EspaceEmployesRouteImport } from './routes/espace-employes'
 import { Route as MesDemandesRouteImport } from './routes/mes-demandes'
 import { Route as SuiviDemandesRouteImport } from './routes/suivi-demandes'
 import { Route as ApiPvRouteImport } from './routes/api/pv'
+import { Route as ApiTrafficRouteImport } from './routes/api/traffic'
 import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact/submit'
 import { Route as ApiPublicDiscordCallbackRouteImport } from './routes/api/public/discord/callback'
 import { Route as ApiPublicDiscordLoginRouteImport } from './routes/api/public/discord/login'
@@ -56,6 +57,11 @@ const ApiPvRoute = ApiPvRouteImport.update({
   path: '/api/pv',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTrafficRoute = ApiTrafficRouteImport.update({
+  id: '/api/traffic',
+  path: '/api/traffic',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicContactSubmitRoute = ApiPublicContactSubmitRouteImport.update({
   id: '/api/public/contact/submit',
   path: '/api/public/contact/submit',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
   '/api/pv': typeof ApiPvRoute
+  '/api/traffic': typeof ApiTrafficRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/discord/login': typeof ApiPublicDiscordLoginRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
   '/api/pv': typeof ApiPvRoute
+  '/api/traffic': typeof ApiTrafficRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/discord/login': typeof ApiPublicDiscordLoginRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
   '/api/pv': typeof ApiPvRoute
+  '/api/traffic': typeof ApiTrafficRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/discord/login': typeof ApiPublicDiscordLoginRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/mes-demandes'
     | '/suivi-demandes'
     | '/api/pv'
+    | '/api/traffic'
     | '/api/public/contact/submit'
     | '/api/public/discord/callback'
     | '/api/public/discord/login'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/mes-demandes'
     | '/suivi-demandes'
     | '/api/pv'
+    | '/api/traffic'
     | '/api/public/contact/submit'
     | '/api/public/discord/callback'
     | '/api/public/discord/login'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/mes-demandes'
     | '/suivi-demandes'
     | '/api/pv'
+    | '/api/traffic'
     | '/api/public/contact/submit'
     | '/api/public/discord/callback'
     | '/api/public/discord/login'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   MesDemandesRoute: typeof MesDemandesRoute
   SuiviDemandesRoute: typeof SuiviDemandesRoute
   ApiPvRoute: typeof ApiPvRoute
+  ApiTrafficRoute: typeof ApiTrafficRoute
   ApiPublicContactSubmitRoute: typeof ApiPublicContactSubmitRoute
   ApiPublicDiscordCallbackRoute: typeof ApiPublicDiscordCallbackRoute
   ApiPublicDiscordLoginRoute: typeof ApiPublicDiscordLoginRoute
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPvRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/traffic': {
+      id: '/api/traffic'
+      path: '/api/traffic'
+      fullPath: '/api/traffic'
+      preLoaderRoute: typeof ApiTrafficRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/contact/submit': {
       id: '/api/public/contact/submit'
       path: '/api/public/contact/submit'
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   MesDemandesRoute: MesDemandesRoute,
   SuiviDemandesRoute: SuiviDemandesRoute,
   ApiPvRoute: ApiPvRoute,
+  ApiTrafficRoute: ApiTrafficRoute,
   ApiPublicContactSubmitRoute: ApiPublicContactSubmitRoute,
   ApiPublicDiscordCallbackRoute: ApiPublicDiscordCallbackRoute,
   ApiPublicDiscordLoginRoute: ApiPublicDiscordLoginRoute,

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import "./CentreRegulation.css";
 import { script } from "./CentreRegulation.script";
+import { trafficSharedScript } from "./CentreRegulationTrafficShared.script";
 import WeatherPanel from "@/components/WeatherPanel";
 import FleetPanel from "@/components/FleetPanel";
 import EffectifsPanel from "@/components/EffectifsPanel";
@@ -36,7 +37,7 @@ export default function CentreRegulationPage() {
     try { localStorage.setItem("tte_perm_trainings", permTrainings ? "1" : "0"); } catch {}
     try { localStorage.setItem("tte_perm_xing", permNet ? "1" : "0"); } catch {}
     const el = document.createElement("script");
-    el.textContent = script;
+    el.textContent = script + trafficSharedScript;
     document.body.appendChild(el);
     return () => { el.remove(); };
   }, [user, permTrainings, permNet]);
