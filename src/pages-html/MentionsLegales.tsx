@@ -294,6 +294,7 @@ export default function MentionsLegalesPage() {
             <p>© 2026 Townsend Transit Express. Tous droits réservés.</p>
             <div className="links">
               <a href="/mentions-legales">Mentions légales</a>
+              <a href="/confidentialite">Confidentialité</a>
               <a
                 href="/conditions-generales-transport-tte-v1.pdf"
                 target="_blank"

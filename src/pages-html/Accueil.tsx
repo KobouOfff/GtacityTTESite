@@ -844,7 +844,7 @@ export default function AccueilPage() {
       <div className="links">
         <a href="/mentions-legales">Mentions légales</a>
         <a href="/conditions-generales-transport-tte-v1.pdf" target="_blank" rel="noreferrer">Conditions de transport</a>
-        <a href="#">Confidentialité</a>
+        <a href="/confidentialite">Confidentialité</a>
         <a href="#">Plan du site</a>
       </div>
     </div>

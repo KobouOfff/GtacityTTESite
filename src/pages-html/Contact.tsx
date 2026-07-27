@@ -279,7 +279,7 @@ export default function ContactPage() {
             <div className="fld"><label htmlFor="sujet">Sujet <span className="req">*</span></label><input className="ctl" id="sujet" type="text" placeholder="R\u00e9sum\u00e9 en quelques mots" /></div>
             <div className="fld"><label htmlFor="message">Votre message <span className="req">*</span></label><textarea className="ctl" id="message" placeholder="D\u00e9crivez votre demande avec le plus de d\u00e9tails possible\u2026"></textarea></div>
 
-            <label className="check" id="consentWrap"><input type="checkbox" id="consent" /> <span>J'autorise Townsend Transit Express à traiter ma demande, associée à mon compte Discord, conformément à sa politique de confidentialité. <span className="req">*</span></span></label>
+            <label className="check" id="consentWrap"><input type="checkbox" id="consent" /> <span>J'autorise Townsend Transit Express à traiter ma demande, associée à mon compte Discord, conformément à sa <a href="/confidentialite" target="_blank" rel="noreferrer">politique de confidentialité</a>. <span className="req">*</span></span></label>
 
             <div className="submit">
               <button type="submit" className="btn btn-primary">
@@ -373,7 +373,7 @@ export default function ContactPage() {
       <div className="links">
         <a href="/mentions-legales">Mentions légales</a>
         <a href="/conditions-generales-transport-tte-v1.pdf" target="_blank" rel="noreferrer">Conditions de transport</a>
-        <a href="#">Confidentialité</a>
+        <a href="/confidentialite">Confidentialité</a>
         <a href="/">Accueil</a>
       </div>
     </div>
