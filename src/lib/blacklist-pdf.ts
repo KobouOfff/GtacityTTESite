@@ -1,5 +1,7 @@
 import { jsPDF } from "jspdf";
 import type { BlacklistRow } from "./blacklist.server";
+import liberationSansRegular from "pdfjs-dist/standard_fonts/LiberationSans-Regular.ttf?inline";
+import liberationSansBold from "pdfjs-dist/standard_fonts/LiberationSans-Bold.ttf?inline";
 
 const SCOPE_LABELS: Record<string, string> = {
   all: "Toutes les infrastructures TTE",
@@ -41,8 +43,17 @@ export function blacklistPdfFilename(row: BlacklistRow) {
   return `Blacklist_${row.ref}_${row.last_name}_${row.first_name}.pdf`;
 }
 
+function fontBase64(dataUrl: string) {
+  const comma = dataUrl.indexOf(",");
+  return comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+}
+
 export function createBlacklistPdf(row: BlacklistRow) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
+  doc.addFileToVFS("LiberationSans-Regular.ttf", fontBase64(liberationSansRegular));
+  doc.addFont("LiberationSans-Regular.ttf", "LiberationSans", "normal");
+  doc.addFileToVFS("LiberationSans-Bold.ttf", fontBase64(liberationSansBold));
+  doc.addFont("LiberationSans-Bold.ttf", "LiberationSans", "bold");
   const width = doc.internal.pageSize.getWidth();
   const margin = 50;
   let y = margin;
@@ -50,18 +61,18 @@ export function createBlacklistPdf(row: BlacklistRow) {
   doc.setFillColor(30, 58, 138);
   doc.rect(0, 0, width, 90, "F");
   doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
+  doc.setFont("LiberationSans", "bold");
   doc.setFontSize(20);
   doc.text("TOWNSEND TRANSIT EXPRESS", margin, 40);
   doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
+  doc.setFont("LiberationSans", "normal");
   doc.text("Direction de la Sûreté & Supervision — Département juridique", margin, 60);
   doc.setFontSize(9);
   doc.text(`Document officiel n° ${row.pdf_document_number ?? row.ref}`, margin, 78);
 
   y = 130;
   doc.setTextColor(20, 20, 20);
-  doc.setFont("helvetica", "bold");
+  doc.setFont("LiberationSans", "bold");
   doc.setFontSize(16);
   doc.text("NOTIFICATION D'INTERDICTION D'ACCÈS", width / 2, y, { align: "center" });
   y += 8;
@@ -70,12 +81,12 @@ export function createBlacklistPdf(row: BlacklistRow) {
   doc.line(margin, y, width - margin, y);
   y += 30;
 
-  doc.setFont("helvetica", "normal");
+  doc.setFont("LiberationSans", "normal");
   doc.setFontSize(10);
   doc.text(`Émis à Townsend, le ${fmtDate(row.created_at)}`, width - margin, y, { align: "right" });
   y += 30;
 
-  doc.setFont("helvetica", "bold");
+  doc.setFont("LiberationSans", "bold");
   doc.setFontSize(11);
   doc.text("PERSONNE CONCERNÉE", margin, y);
   y += 6;
@@ -85,7 +96,7 @@ export function createBlacklistPdf(row: BlacklistRow) {
   y += 18;
   doc.setFontSize(11);
   doc.text(`${row.first_name} ${row.last_name.toUpperCase()}`, margin, y);
-  doc.setFont("helvetica", "normal");
+  doc.setFont("LiberationSans", "normal");
   y += 16;
   if (row.alias) {
     doc.text(`Alias / surnom : ${row.alias}`, margin, y);
@@ -116,7 +127,7 @@ export function createBlacklistPdf(row: BlacklistRow) {
   }
 
   y += 10;
-  doc.setFont("helvetica", "normal");
+  doc.setFont("LiberationSans", "normal");
   doc.setFontSize(10.5);
   const intro =
     "Par la présente, la Direction de la Sûreté de Townsend Transit Express, en application de son règlement " +
@@ -130,17 +141,17 @@ export function createBlacklistPdf(row: BlacklistRow) {
   const boxTop = y;
   doc.setDrawColor(30, 58, 138);
   doc.setLineWidth(1);
-  doc.setFont("helvetica", "bold");
+  doc.setFont("LiberationSans", "bold");
   doc.setFontSize(11);
   doc.text("PORTÉE DE L'INTERDICTION", margin + 12, y + 20);
   y += 30;
-  doc.setFont("helvetica", "normal");
+  doc.setFont("LiberationSans", "normal");
   doc.setFontSize(10.5);
   doc.text(`Périmètre : ${SCOPE_LABELS[row.scope] ?? row.scope}`, margin + 12, y);
   y += 14;
   doc.text(`Prise d'effet : ${fmtDate(row.start_date)}`, margin + 12, y);
   y += 14;
-  doc.setFont("helvetica", "bold");
+  doc.setFont("LiberationSans", "bold");
   doc.text(
     row.is_permanent
       ? "Durée : INTERDICTION PERMANENTE (à durée indéterminée)"
@@ -148,30 +159,30 @@ export function createBlacklistPdf(row: BlacklistRow) {
     margin + 12,
     y,
   );
-  doc.setFont("helvetica", "normal");
+  doc.setFont("LiberationSans", "normal");
   y += 20;
   doc.rect(margin, boxTop, width - margin * 2, y - boxTop);
   y += 18;
 
-  doc.setFont("helvetica", "bold");
+  doc.setFont("LiberationSans", "bold");
   doc.setFontSize(11);
   doc.text("MOTIF DE LA MESURE", margin, y);
   y += 6;
   doc.setDrawColor(120, 120, 120);
   doc.line(margin, y, margin + 200, y);
   y += 16;
-  doc.setFont("helvetica", "normal");
+  doc.setFont("LiberationSans", "normal");
   doc.setFontSize(10.5);
   const reasonLines = doc.splitTextToSize(row.reason, width - margin * 2);
   doc.text(reasonLines, margin, y);
   y += reasonLines.length * 13 + 12;
 
   if (row.infractions?.length) {
-    doc.setFont("helvetica", "bold");
+    doc.setFont("LiberationSans", "bold");
     doc.setFontSize(11);
     doc.text("INFRACTIONS RETENUES", margin, y);
     y += 14;
-    doc.setFont("helvetica", "normal");
+    doc.setFont("LiberationSans", "normal");
     doc.setFontSize(10.5);
     for (const infraction of row.infractions) {
       const lines = doc.splitTextToSize(`•  ${infraction}`, width - margin * 2 - 10);
@@ -182,13 +193,13 @@ export function createBlacklistPdf(row: BlacklistRow) {
   }
 
   y += 4;
-  doc.setFont("helvetica", "bold");
+  doc.setFont("LiberationSans", "bold");
   doc.setFontSize(11);
   doc.text("CONSÉQUENCES", margin, y);
   y += 6;
   doc.line(margin, y, margin + 200, y);
   y += 14;
-  doc.setFont("helvetica", "normal");
+  doc.setFont("LiberationSans", "normal");
   doc.setFontSize(10);
   const consequences =
     "Tout manquement à la présente interdiction expose la personne concernée à une reconduite immédiate hors " +
@@ -199,14 +210,14 @@ export function createBlacklistPdf(row: BlacklistRow) {
   doc.text(consequenceLines, margin, y);
   y += consequenceLines.length * 12 + 24;
 
-  doc.setFont("helvetica", "bold");
+  doc.setFont("LiberationSans", "bold");
   doc.setFontSize(10.5);
   doc.text("Pour la Direction de la Sûreté TTE :", margin, y);
   y += 40;
   doc.setDrawColor(80, 80, 80);
   doc.line(margin, y, margin + 220, y);
   y += 12;
-  doc.setFont("helvetica", "normal");
+  doc.setFont("LiberationSans", "normal");
   doc.setFontSize(10);
   doc.text(row.created_by_username, margin, y);
   y += 12;
