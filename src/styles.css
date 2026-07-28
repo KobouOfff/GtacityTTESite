@@ -142,3 +142,172 @@
     color: var(--color-foreground);
   }
 }
+
+.tte-theme-toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: #08111f;
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  font: 700 13px/1 system-ui, sans-serif;
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+.tte-theme-toggle:hover {
+  transform: translateY(-2px);
+  background: #153a70;
+}
+
+.tte-theme-toggle svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html.dark {
+  --navy: #111c2f;
+  --navy-2: #080d16;
+  --navy-3: #03060b;
+  --blue: #4b92dd;
+  --blue-700: #82b9f0;
+  --blue-300: #69a8e8;
+  --blue-50: #17253a;
+  --ink: #f2f5fa;
+  --ink-2: #d0d8e4;
+  --muted: #9ba9bb;
+  --line: #344155;
+  --line-2: #273143;
+  --bg: #0c111a;
+  --bg-alt: #070b12;
+  --ok-bg: #102a1c;
+  --warn-bg: #302510;
+  --alert-bg: #351719;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px rgba(0, 0, 0, 0.26);
+}
+
+html.dark body,
+html.dark .history-page,
+html.dark .legal-page {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+html.dark :where(
+  .hdr,
+  .finder,
+  .tile,
+  .map-card,
+  .fig,
+  .tcard,
+  .fare,
+  .amen .a,
+  .step,
+  .staff-card,
+  .statusboard,
+  .fx-r,
+  .gare,
+  .na,
+  .imp,
+  .cat,
+  .form-card,
+  .success,
+  .card,
+  .panel,
+  .topbar,
+  .kpi,
+  .pub,
+  .history-event-body,
+  .legal-summary,
+  .legal-article
+) {
+  background: #111827;
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+html.dark :where(
+  input,
+  select,
+  textarea,
+  .ctl,
+  .st-sel,
+  .btn-outline,
+  .btn-ghost,
+  .btn.ghost,
+  .burger,
+  .discord-prof .dx,
+  .steam-profile .dx,
+  .tool-btn
+) {
+  background-color: #0c1421;
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+html.dark :where(.btn.ghost:hover, .btn-outline:hover, .btn-ghost:hover, .tool-btn:hover) {
+  background-color: #17253a;
+}
+
+html.dark :where(.brand-tx .nm, .mainnav a, h1, h2, h3, h4, .sec-h, .fld label, .fg label) {
+  color: var(--ink);
+}
+
+html.dark :where(.legal-summary strong, .legal-summary a, .legal-article p, .legal-article li) {
+  color: var(--ink-2);
+}
+
+html.dark .legal-document,
+html.dark .history-future-card,
+html.dark .privacy-notice {
+  background: #132034;
+  border-color: var(--line);
+}
+
+html.dark .privacy-notice strong {
+  color: #7ee0c2;
+}
+
+html.dark .privacy-notice p {
+  color: var(--ink-2);
+}
+
+html.dark .hdr.open .mainnav {
+  background: #111827;
+}
+
+html.dark .tte-theme-toggle {
+  background: #f3f6fb;
+  color: #08111f;
+  border-color: #d7deea;
+}
+
+html.dark .tte-theme-toggle:hover {
+  background: #dce8f8;
+}
+
+@media (max-width: 600px) {
+  .tte-theme-toggle {
+    right: 12px;
+    bottom: 12px;
+    width: 42px;
+    padding: 10px;
+  }
+
+  .tte-theme-toggle span {
+    display: none;
+  }
+}
