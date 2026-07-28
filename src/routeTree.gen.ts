@@ -18,9 +18,12 @@ import { Route as HistoireRouteImport } from './routes/histoire'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as MesDemandesRouteImport } from './routes/mes-demandes'
 import { Route as SuiviDemandesRouteImport } from './routes/suivi-demandes'
+import { Route as ApiAuditLogsRouteImport } from './routes/api/audit-logs'
 import { Route as ApiDeparturesRouteImport } from './routes/api/departures'
+import { Route as ApiIncidentsRouteImport } from './routes/api/incidents'
 import { Route as ApiLostFoundRouteImport } from './routes/api/lost-found'
 import { Route as ApiPvRouteImport } from './routes/api/pv'
+import { Route as ApiTownsendLineRouteImport } from './routes/api/townsend-line'
 import { Route as ApiTrafficRouteImport } from './routes/api/traffic'
 import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact/submit'
 import { Route as ApiPublicDiscordCallbackRouteImport } from './routes/api/public/discord/callback'
@@ -72,9 +75,19 @@ const SuiviDemandesRoute = SuiviDemandesRouteImport.update({
   path: '/suivi-demandes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuditLogsRoute = ApiAuditLogsRouteImport.update({
+  id: '/api/audit-logs',
+  path: '/api/audit-logs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDeparturesRoute = ApiDeparturesRouteImport.update({
   id: '/api/departures',
   path: '/api/departures',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIncidentsRoute = ApiIncidentsRouteImport.update({
+  id: '/api/incidents',
+  path: '/api/incidents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiLostFoundRoute = ApiLostFoundRouteImport.update({
@@ -85,6 +98,11 @@ const ApiLostFoundRoute = ApiLostFoundRouteImport.update({
 const ApiPvRoute = ApiPvRouteImport.update({
   id: '/api/pv',
   path: '/api/pv',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTownsendLineRoute = ApiTownsendLineRouteImport.update({
+  id: '/api/townsend-line',
+  path: '/api/townsend-line',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTrafficRoute = ApiTrafficRouteImport.update({
@@ -124,9 +142,12 @@ export interface FileRoutesByFullPath {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
+  '/api/audit-logs': typeof ApiAuditLogsRoute
   '/api/departures': typeof ApiDeparturesRoute
+  '/api/incidents': typeof ApiIncidentsRoute
   '/api/lost-found': typeof ApiLostFoundRoute
   '/api/pv': typeof ApiPvRoute
+  '/api/townsend-line': typeof ApiTownsendLineRoute
   '/api/traffic': typeof ApiTrafficRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
@@ -143,9 +164,12 @@ export interface FileRoutesByTo {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
+  '/api/audit-logs': typeof ApiAuditLogsRoute
   '/api/departures': typeof ApiDeparturesRoute
+  '/api/incidents': typeof ApiIncidentsRoute
   '/api/lost-found': typeof ApiLostFoundRoute
   '/api/pv': typeof ApiPvRoute
+  '/api/townsend-line': typeof ApiTownsendLineRoute
   '/api/traffic': typeof ApiTrafficRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
@@ -163,9 +187,12 @@ export interface FileRoutesById {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
+  '/api/audit-logs': typeof ApiAuditLogsRoute
   '/api/departures': typeof ApiDeparturesRoute
+  '/api/incidents': typeof ApiIncidentsRoute
   '/api/lost-found': typeof ApiLostFoundRoute
   '/api/pv': typeof ApiPvRoute
+  '/api/townsend-line': typeof ApiTownsendLineRoute
   '/api/traffic': typeof ApiTrafficRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
@@ -184,9 +211,12 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
+    | '/api/audit-logs'
     | '/api/departures'
+    | '/api/incidents'
     | '/api/lost-found'
     | '/api/pv'
+    | '/api/townsend-line'
     | '/api/traffic'
     | '/api/public/contact/submit'
     | '/api/public/discord/callback'
@@ -203,9 +233,12 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
+    | '/api/audit-logs'
     | '/api/departures'
+    | '/api/incidents'
     | '/api/lost-found'
     | '/api/pv'
+    | '/api/townsend-line'
     | '/api/traffic'
     | '/api/public/contact/submit'
     | '/api/public/discord/callback'
@@ -222,9 +255,12 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
+    | '/api/audit-logs'
     | '/api/departures'
+    | '/api/incidents'
     | '/api/lost-found'
     | '/api/pv'
+    | '/api/townsend-line'
     | '/api/traffic'
     | '/api/public/contact/submit'
     | '/api/public/discord/callback'
@@ -242,9 +278,12 @@ export interface RootRouteChildren {
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MesDemandesRoute: typeof MesDemandesRoute
   SuiviDemandesRoute: typeof SuiviDemandesRoute
+  ApiAuditLogsRoute: typeof ApiAuditLogsRoute
   ApiDeparturesRoute: typeof ApiDeparturesRoute
+  ApiIncidentsRoute: typeof ApiIncidentsRoute
   ApiLostFoundRoute: typeof ApiLostFoundRoute
   ApiPvRoute: typeof ApiPvRoute
+  ApiTownsendLineRoute: typeof ApiTownsendLineRoute
   ApiTrafficRoute: typeof ApiTrafficRoute
   ApiPublicContactSubmitRoute: typeof ApiPublicContactSubmitRoute
   ApiPublicDiscordCallbackRoute: typeof ApiPublicDiscordCallbackRoute
@@ -317,11 +356,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuiviDemandesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/audit-logs': {
+      id: '/api/audit-logs'
+      path: '/api/audit-logs'
+      fullPath: '/api/audit-logs'
+      preLoaderRoute: typeof ApiAuditLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/departures': {
       id: '/api/departures'
       path: '/api/departures'
       fullPath: '/api/departures'
       preLoaderRoute: typeof ApiDeparturesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/incidents': {
+      id: '/api/incidents'
+      path: '/api/incidents'
+      fullPath: '/api/incidents'
+      preLoaderRoute: typeof ApiIncidentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/lost-found': {
@@ -336,6 +389,13 @@ declare module '@tanstack/react-router' {
       path: '/api/pv'
       fullPath: '/api/pv'
       preLoaderRoute: typeof ApiPvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/townsend-line': {
+      id: '/api/townsend-line'
+      path: '/api/townsend-line'
+      fullPath: '/api/townsend-line'
+      preLoaderRoute: typeof ApiTownsendLineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/traffic': {
@@ -386,9 +446,12 @@ const rootRouteChildren: RootRouteChildren = {
   MentionsLegalesRoute: MentionsLegalesRoute,
   MesDemandesRoute: MesDemandesRoute,
   SuiviDemandesRoute: SuiviDemandesRoute,
+  ApiAuditLogsRoute: ApiAuditLogsRoute,
   ApiDeparturesRoute: ApiDeparturesRoute,
+  ApiIncidentsRoute: ApiIncidentsRoute,
   ApiLostFoundRoute: ApiLostFoundRoute,
   ApiPvRoute: ApiPvRoute,
+  ApiTownsendLineRoute: ApiTownsendLineRoute,
   ApiTrafficRoute: ApiTrafficRoute,
   ApiPublicContactSubmitRoute: ApiPublicContactSubmitRoute,
   ApiPublicDiscordCallbackRoute: ApiPublicDiscordCallbackRoute,

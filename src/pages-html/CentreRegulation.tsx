@@ -4,6 +4,10 @@ import { script } from "./CentreRegulation.script";
 import { trafficSharedScript } from "./CentreRegulationTrafficShared.script";
 import { lostFoundSharedScript } from "./CentreRegulationLostFoundShared.script";
 import { departuresSharedScript } from "./CentreRegulationDeparturesShared.script";
+import {
+  auditLogBridgePrelude,
+  incidentsLogsSharedScript,
+} from "./CentreRegulationIncidentsLogsShared.script";
 import BlacklistPanel from "@/components/BlacklistPanel";
 import WeatherPanel from "@/components/WeatherPanel";
 import FleetPanel from "@/components/FleetPanel";
@@ -18,6 +22,7 @@ import {
   canWriteNetworkAssets,
   canManageTrainings,
   canManageBlacklist,
+  canViewAuditLogs,
 } from "@/lib/discord-roles";
 
 export default function CentreRegulationPage() {
@@ -29,6 +34,7 @@ export default function CentreRegulationPage() {
   const permNet = canWriteNetworkAssets(u);
   const permTrainings = canManageTrainings(u);
   const permBlacklist = canManageBlacklist(u);
+  const permAuditLogs = canViewAuditLogs(u);
 
   useEffect(() => {
     // Injecte l'identité Discord courante avant le script legacy
@@ -42,11 +48,18 @@ export default function CentreRegulationPage() {
     }
     try { localStorage.setItem("tte_perm_trainings", permTrainings ? "1" : "0"); } catch {}
     try { localStorage.setItem("tte_perm_xing", permNet ? "1" : "0"); } catch {}
+    (window as Window & { __tteCanViewAuditLogs?: boolean }).__tteCanViewAuditLogs = permAuditLogs;
     const el = document.createElement("script");
-    el.textContent = script + trafficSharedScript + lostFoundSharedScript + departuresSharedScript;
+    el.textContent =
+      auditLogBridgePrelude +
+      script +
+      trafficSharedScript +
+      lostFoundSharedScript +
+      departuresSharedScript +
+      incidentsLogsSharedScript;
     document.body.appendChild(el);
     return () => { el.remove(); };
-  }, [user, permTrainings, permNet]);
+  }, [user, permTrainings, permNet, permAuditLogs]);
 
 
 
@@ -117,7 +130,9 @@ export default function CentreRegulationPage() {
       <a data-view="form"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 8l9-5 9 5-9 5-9-5Z" /><path d="M7 11v5c0 1.5 2.5 3 5 3s5-1.5 5-3v-5" /></svg> Formations</a>
       <a data-view="eff"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="9" r="3.5" /><path d="M3 19a6 6 0 0 1 12 0" /><circle cx="17" cy="8" r="2.8" /><path d="M15 19a5 5 0 0 1 7-4.6" /></svg> Effectifs en service</a>
       <div className="grp">Suivi</div>
-      <a data-view="log"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg> Journal des actions</a>
+      {permAuditLogs && (
+        <a data-view="log"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg> Journal des actions</a>
+      )}
       <a data-view="radio"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 11a8 8 0 0 1 16 0" /><path d="M7 14a5 5 0 0 1 10 0" /><circle cx="12" cy="17" r="1.5" /></svg> Radio codes (10-codes)</a>
       <a data-view="help"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.5 2.5 0 1 1 3.7 2.2c-.7.4-1.2 1-1.2 1.8v.5M12 17h.01" /></svg> Aide & procédures</a>
     </nav>
@@ -183,7 +198,7 @@ export default function CentreRegulationPage() {
               <select name="line" required>
                 <option value="">— Réseau entier —</option>
                 <option>R1</option><option>R2</option><option>R3</option><option selected>R4</option>
-                <option>IC1</option><option>IC2</option><option>T</option><option>BUS</option>
+                <option>IC1</option><option>IC2</option><option value="T">T — Townsend</option><option>BUS</option>
               </select>
             </div>
             <div className="fg col-3"><label>Gravité</label>
@@ -245,8 +260,8 @@ export default function CentreRegulationPage() {
 
       {/* ===== RÉGULATION DÉPARTS ===== */}
       <section className="view" id="v-dep">
-        <h1 className="vt">Régulation des départs — quai 1</h1>
-        <p className="vt-sub">Townsend Central dispose d'un seul quai voyageurs. Coordonnez les passages et signalez tout retard ou suppression.</p>
+        <h1 className="vt">Régulation des départs</h1>
+        <p className="vt-sub">Coordonnez les prochaines circulations et l’occupation du quai 1.</p>
         {!permDep && (
           <div className="perm-banner">Consultation seule — la gestion des départs est réservée aux régulateurs, à la maintenance, aux gérants de branche et à la supervision.</div>
         )}
@@ -717,9 +732,15 @@ export default function CentreRegulationPage() {
 
       <section className="view" id="v-log">
         <h1 className="vt">Journal des actions</h1>
-        <p className="vt-sub">Traçabilité des opérations effectuées depuis ce poste.</p>
+        <p className="vt-sub">Traçabilité partagée des opérations effectuées par chaque employé. Accès réservé à la Direction et à la Supervision.</p>
         <div className="card">
           <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg> Historique</h2>
+          <div className="btn-row" style={{marginBottom: "12px"}}>
+            <select id="logEmployeeFilter" aria-label="Filtrer le journal par employé" style={{maxWidth: "320px"}}>
+              <option value="">Tous les employés</option>
+            </select>
+            <button className="btn ghost sm" id="logRefresh">Actualiser</button>
+          </div>
           <ul className="log" id="logList"></ul>
           <div className="btn-row">
             <button className="btn ghost sm" id="logClear">Vider le journal</button>

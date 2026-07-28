@@ -162,6 +162,13 @@ export function canManageBlacklist(user: DiscordSessionUser | null): boolean {
   return hasAny(user, DIRECTION_ROLES);
 }
 
+// Journal d'audit complet des actions des employés :
+// réservé à la Direction et à la Supervision.
+export function canViewAuditLogs(user: DiscordSessionUser | null): boolean {
+  if (!user) return false;
+  return hasAny(user, DIRECTION_ROLES);
+}
+
 export function getPrimaryRole(roleIds: string[]): { name: string; color: string } | null {
   let best: { name: string; color: string; level: number } | null = null;
   for (const id of roleIds) {
