@@ -7,6 +7,11 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  // Le site est déployé sur Vercel. Le rendu PNG fidèle des PDF utilise le
+  // runtime Node.js de Vercel (Canvas natif), il ne peut pas cibler Cloudflare.
+  nitro: {
+    preset: "vercel",
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
