@@ -49,6 +49,7 @@ export default function CentreRegulationPage() {
     try { localStorage.setItem("tte_perm_trainings", permTrainings ? "1" : "0"); } catch {}
     try { localStorage.setItem("tte_perm_xing", permNet ? "1" : "0"); } catch {}
     (window as Window & { __tteCanViewAuditLogs?: boolean }).__tteCanViewAuditLogs = permAuditLogs;
+    (window as Window & { __tteCanManageDepartures?: boolean }).__tteCanManageDepartures = permDep;
     const el = document.createElement("script");
     el.textContent =
       auditLogBridgePrelude +
@@ -59,7 +60,7 @@ export default function CentreRegulationPage() {
       incidentsLogsSharedScript;
     document.body.appendChild(el);
     return () => { el.remove(); };
-  }, [user, permTrainings, permNet, permAuditLogs]);
+  }, [user, permTrainings, permNet, permAuditLogs, permDep]);
 
 
 
@@ -266,12 +267,17 @@ export default function CentreRegulationPage() {
           <div className="perm-banner">Consultation seule — la gestion des départs est réservée aux régulateurs, à la maintenance, aux gérants de branche et à la supervision.</div>
         )}
         <div className="card">
-          <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg> Prochains départs (12 h)</h2>
+          <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg> Horaire voyageurs partagé</h2>
+          <div className="btn-row" style={{alignItems: "end", marginBottom: "14px"}}>
+            <label style={{fontSize: "12px", fontWeight: 700}}>Date<br /><input type="date" id="depDate" style={{marginTop: 4, padding: "7px 9px", border: "1px solid var(--line)", borderRadius: 7}} /></label>
+            <label style={{fontSize: "12px", fontWeight: 700}}>Ligne<br /><select id="depLineFilter" className="st-sel" style={{marginTop: 4}}><option value="">Toutes</option><option>R1</option><option>R2</option><option>R3</option><option>R4</option><option>IC1</option><option>IC2</option><option>T</option></select></label>
+            <button className="btn ghost" id="depRefresh" type="button">Actualiser</button>
+          </div>
           <table className="tbl">
-            <thead><tr><th style={{width: "90px"}}>Départ</th><th>Ligne</th><th>Destination</th><th style={{width: "80px"}}>Quai</th><th style={{width: "180px"}}>État</th></tr></thead>
+            <thead><tr><th>Départ</th><th>Ligne</th><th>Destination</th><th>Quai</th><th>État</th><th>Retard</th><th>Information publique</th></tr></thead>
             <tbody id="depBody"></tbody>
           </table>
-          <p style={{fontSize: "12px", color: "var(--muted)", marginTop: ".9rem"}}><b>Astuce&nbsp;:</b> en mettant un départ en « Quai modifié » ou « Supprimé », pensez à publier une info trafic associée pour informer les voyageurs.</p>
+          <p style={{fontSize: "12px", color: "var(--muted)", marginTop: ".9rem"}}>Toute modification apparaît automatiquement sur la page trafic, la recherche d’horaires et les pages des gares.</p>
         </div>
       </section>
 

@@ -3,13 +3,14 @@ import * as React from "react";
 import "./Accueil.css";
 import { script } from "./Accueil.script";
 import { trafficPublicScript } from "./AccueilTrafficShared.script";
+import { timetablePublicScript } from "./AccueilTimetableShared.script";
 import { DiscordAuthButton } from "@/components/DiscordAuth";
 import { TTELogo } from "@/components/TTELogo";
 
 export default function AccueilPage() {
   useEffect(() => {
     const el = document.createElement("script");
-    el.textContent = script + trafficPublicScript;
+    el.textContent = script + trafficPublicScript + timetablePublicScript;
     document.body.appendChild(el);
     return () => { el.remove(); };
   }, []);
@@ -26,6 +27,7 @@ export default function AccueilPage() {
       <a href="#reseau">Plan du réseau</a>
       <a href="#lignes">Horaires</a>
       <a href="#gares">Gares &amp; services</a>
+      <a href="/trafic">Info trafic</a>
       <a href="/contact">Aide &amp; contact</a>
     </div>
     <div className="util-grp" style={{ alignItems: "center", gap: 12 }}>
@@ -58,6 +60,7 @@ export default function AccueilPage() {
       <a href="#tarifs">Tarifs</a>
       <a href="/histoire">Histoire</a>
       <a href="#infos">Infos voyageurs</a>
+      <a href="/trafic">Trafic</a>
     </nav>
     <div className="hdr-sp"></div>
     <div className="hdr-act">
@@ -66,16 +69,6 @@ export default function AccueilPage() {
     </div>
   </div>
 </header>
-
-{/* ===== ALERTE TRAFIC ===== */}
-<div className="alert-bar" id="alertBar" style={{ display: "none" }}>
-  <div className="alert-in">
-    <span className="tag">⚠ Info trafic</span>
-    <p><b>Ligne R4 (Knoxville – Chattanooga)</b> : retard d'environ 10 minutes en raison de travaux entre Athens et Cleveland. Les autres lignes circulent normalement.</p>
-    <a href="#lignes">Voir tout le trafic</a>
-    <button className="alert-x" id="alertX" aria-label="Fermer">×</button>
-  </div>
-</div>
 
 {/* ===== HERO ===== */}
 <main id="main">
@@ -499,7 +492,7 @@ export default function AccueilPage() {
         <div className="gh">
           <span className="gi" style={{background: "var(--navy)"}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 9l8-5 8 5v11H4V9Z" /><path d="M9 20v-5h6v5M4 9h16" /></svg></span>
           <div>
-            <h3>Townsend — Gare centrale</h3>
+            <h3><a href="/gares/townsend">Townsend — Gare centrale</a></h3>
             <div className="role">Cœur du réseau · correspondance de toutes les lignes</div>
             <div className="glines"><span className="bullet" style={{background: "var(--l-r1)"}}>R1</span><span className="bullet" style={{background: "var(--l-r2)"}}>R2</span><span className="bullet" style={{background: "var(--l-ic1)"}}>IC1</span><span className="bullet" style={{background: "var(--l-ic2)"}}>IC2</span><span className="bullet" style={{background: "var(--l-t)"}}>T</span><span className="bullet" style={{background: "var(--l-bus)"}}>BUS</span></div>
           </div>
@@ -519,7 +512,7 @@ export default function AccueilPage() {
         <div className="gh">
           <span className="gi" style={{background: "var(--l-r2)"}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 9l8-5 8 5v11H4V9Z" /><path d="M9 20v-5h6v5M4 9h16" /></svg></span>
           <div>
-            <h3>Knoxville</h3>
+            <h3><a href="/gares/knoxville">Knoxville</a></h3>
             <div className="role">Correspondance majeure · est du Tennessee</div>
             <div className="glines"><span className="bullet" style={{background: "var(--l-r2)"}}>R2</span><span className="bullet" style={{background: "var(--l-r3)"}}>R3</span><span className="bullet" style={{background: "var(--l-r4)"}}>R4</span><span className="bullet" style={{background: "var(--l-ic1)"}}>IC1</span><span className="bullet" style={{background: "var(--l-ic2)"}}>IC2</span></div>
           </div>
@@ -538,7 +531,7 @@ export default function AccueilPage() {
         <div className="gh">
           <span className="gi" style={{background: "var(--l-ic1)"}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 9l8-5 8 5v11H4V9Z" /><path d="M9 20v-5h6v5M4 9h16" /></svg></span>
           <div>
-            <h3>Nashville</h3>
+            <h3><a href="/gares/nashville">Nashville</a></h3>
             <div className="role">Terminus ouest · liaisons InterCité</div>
             <div className="glines"><span className="bullet" style={{background: "var(--l-ic1)"}}>IC1</span><span className="bullet" style={{background: "var(--l-ic2)"}}>IC2</span></div>
           </div>
@@ -556,7 +549,7 @@ export default function AccueilPage() {
         <div className="gh">
           <span className="gi" style={{background: "var(--l-r4)"}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 9l8-5 8 5v11H4V9Z" /><path d="M9 20v-5h6v5M4 9h16" /></svg></span>
           <div>
-            <h3>Chattanooga</h3>
+            <h3><a href="/gares/chattanooga">Chattanooga</a></h3>
             <div className="role">Terminus sud · corridor R4</div>
             <div className="glines"><span className="bullet" style={{background: "var(--l-r4)"}}>R4</span></div>
           </div>

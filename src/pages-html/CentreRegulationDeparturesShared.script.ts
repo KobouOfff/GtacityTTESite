@@ -1,148 +1,122 @@
 export const departuresSharedScript = String.raw`
 (function(){
   "use strict";
-
-  var records = {};
   var loading = false;
-  var announcedError = false;
-  var rowKeys = {
-    "R1|Sevierville":"d-r1",
-    "IC2|Nashville":"d-ic2",
-    "T|Hôpital TMC":"d-t1",
-    "R2|Mascot":"d-r2",
-    "BUS|Quartier résid.":"d-bus",
-    "IC1|Nashville":"d-ic1",
-    "R4|Chattanooga":"d-r4"
+  var canWrite = window.__tteCanManageDepartures === true;
+  var statusLabels = {
+    on_time:"À l'heure",
+    boarding:"Embarquement",
+    delayed:"Retard",
+    platform_changed:"Quai modifié",
+    cancelled:"Supprimé"
   };
-  var urbanCounter = 0;
+  var lineColors = {
+    R1:"#2A9D5B",R2:"#2979C9",R3:"#7A51B5",R4:"#E25B37",
+    IC1:"#163D7A",IC2:"#B02A72",T:"#E6007E",BUS:"#E09A12"
+  };
 
-  function notifyShared(message, type){
-    var toast = document.getElementById("toast");
-    if(!toast) return;
-    toast.className = "toast show " + (type || "");
-    toast.textContent = message;
+  function esc(value){
+    var node=document.createElement("div");
+    node.textContent=String(value==null?"":value);
+    return node.innerHTML;
+  }
+  function notify(message,type){
+    var toast=document.getElementById("toast"); if(!toast) return;
+    toast.className="toast show "+(type||"");
+    toast.textContent=message;
     clearTimeout(window.__tteDepartureToastTimer);
-    window.__tteDepartureToastTimer = setTimeout(function(){
-      toast.classList.remove("show");
-    }, 3000);
+    window.__tteDepartureToastTimer=setTimeout(function(){toast.classList.remove("show");},3200);
   }
-
-  function classFor(status){
-    if(/Supprim/.test(status)) return "alert";
-    if(/Retard|Quai modifi/.test(status)) return "warn";
-    return "";
-  }
-
-  function saveCache(){
-    try {
-      localStorage.setItem(
-        "tte_depart_overrides",
-        JSON.stringify(Object.keys(records).map(function(id){
-          return { id:id, st:records[id].st };
-        }))
-      );
-    } catch(e) {}
-  }
-
-  async function api(options){
-    var response = await fetch("/api/departures", options || {
-      headers:{ "Accept":"application/json" },
-      cache:"no-store"
-    });
-    var json = await response.json().catch(function(){ return {}; });
-    if(!response.ok || !json.ok) throw new Error(json.reason || "request_failed");
+  async function api(url,options){
+    var response=await fetch(url,options||{headers:{Accept:"application/json"},cache:"no-store"});
+    var json=await response.json().catch(function(){return {};});
+    if(!response.ok||!json.ok) throw new Error(json.reason||"request_failed");
     return json;
   }
-
-  function resolveRows(){
-    var rows = document.querySelectorAll("#depBody tr");
-    urbanCounter = 0;
-    rows.forEach(function(row){
-      var code = row.children[1] ? row.children[1].textContent.trim() : "";
-      var destination = row.children[2] && row.children[2].querySelector("b")
-        ? row.children[2].querySelector("b").textContent.trim()
-        : "";
-      var key = rowKeys[code + "|" + destination];
-      if(code === "T" && destination === "Hôpital TMC"){
-        urbanCounter += 1;
-        key = urbanCounter === 1 ? "d-t1" : "d-t2";
-      }
-      if(key) row.dataset.departureKey = key;
-    });
+  function today(){
+    var d=new Date(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");
+    return d.getFullYear()+"-"+m+"-"+day;
   }
-
-  function bindRows(){
-    resolveRows();
-    document.querySelectorAll("#depBody tr[data-departure-key]").forEach(function(row){
-      var id = row.dataset.departureKey;
-      var oldSelect = row.querySelector("select");
-      if(!oldSelect) return;
-      var status = records[id] ? records[id].st : "À l'heure";
-
-      if(oldSelect.dataset.sharedDeparture !== "1"){
-        var select = oldSelect.cloneNode(true);
-        select.dataset.sharedDeparture = "1";
-        oldSelect.replaceWith(select);
-        oldSelect = select;
-        select.addEventListener("change", async function(){
-          var previous = records[id] ? records[id].st : "À l'heure";
-          select.disabled = true;
-          try {
-            var json = await api({
-              method:"PATCH",
-              headers:{ "Content-Type":"application/json" },
-              body:JSON.stringify({ id:id, status:select.value })
-            });
-            records[id] = json.record;
-            saveCache();
-            select.className = "st-sel " + classFor(select.value);
-            notifyShared("État du départ partagé avec tous les agents", "ok");
-          } catch(error) {
-            console.error("[departures/update]", error);
-            select.value = previous;
-            notifyShared("Impossible de partager l’état du départ", "err");
-          } finally {
-            select.disabled = false;
-          }
-        });
-      }
-
-      oldSelect.value = status;
-      oldSelect.className = "st-sel " + classFor(status);
-      if(records[id] && row.children[4]){
-        oldSelect.title = "Mis à jour par " + records[id].author + " le " +
-          new Date(records[id].updatedAt).toLocaleString("fr-FR");
-      }
-    });
+  function options(selected){
+    return Object.keys(statusLabels).map(function(value){
+      return '<option value="'+value+'"'+(selected===value?" selected":"")+'>'+statusLabels[value]+'</option>';
+    }).join("");
   }
-
-  async function loadRecords(){
-    if(loading) return;
-    loading = true;
-    try {
-      var json = await api();
-      records = {};
-      (json.records || []).forEach(function(record){ records[record.id] = record; });
-      saveCache();
-      bindRows();
-      announcedError = false;
-    } catch(error) {
-      console.error("[departures/list]", error);
-      if(!announcedError){
-        notifyShared("Impossible de charger les départs partagés", "err");
-        announcedError = true;
-      }
-    } finally {
-      loading = false;
+  function render(records){
+    var body=document.getElementById("depBody"); if(!body) return;
+    if(!records.length){
+      body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--muted)">Aucun service programmé ce jour.</td></tr>';
+      return;
+    }
+    body.innerHTML=records.map(function(record){
+      var statusClass=record.status==="cancelled"?"alert":(record.status==="delayed"||record.status==="platform_changed"?"warn":"");
+      return '<tr data-service="'+esc(record.id)+'">'+
+        '<td><b style="font-family:var(--ff-mono)">'+esc(record.scheduledDeparture)+'</b></td>'+
+        '<td><span class="ln-tag" style="background:'+(lineColors[record.line]||"#17458A")+'">'+esc(record.line)+'</span></td>'+
+        '<td><b>'+esc(record.destination)+'</b><div style="font-size:11px;color:var(--muted)">'+esc(record.serviceName)+'</div></td>'+
+        '<td><input data-field="platform" value="'+esc(record.platform==="—"?"":record.platform)+'" placeholder="—" style="width:58px;padding:6px;border:1px solid var(--line);border-radius:6px"></td>'+
+        '<td><select data-field="status" class="st-sel '+statusClass+'">'+options(record.status)+'</select></td>'+
+        '<td><input data-field="delay" type="number" min="0" max="360" value="'+esc(record.delayMinutes||0)+'" style="width:68px;padding:6px;border:1px solid var(--line);border-radius:6px"> min</td>'+
+        '<td><input data-field="message" value="'+esc(record.message||"")+'" placeholder="Message voyageurs" style="min-width:190px;width:100%;padding:6px;border:1px solid var(--line);border-radius:6px">'+
+        '<div style="margin-top:6px;display:flex;gap:5px"><button class="btn sm" data-action="save">Enregistrer</button><button class="btn ghost sm" data-action="reset">Réinitialiser</button></div></td>'+
+      '</tr>';
+    }).join("");
+    if(!canWrite){
+      body.querySelectorAll("input,select,button").forEach(function(el){el.disabled=true;});
     }
   }
+  async function load(){
+    if(loading) return; loading=true;
+    var dateInput=document.getElementById("depDate");
+    var lineInput=document.getElementById("depLineFilter");
+    var date=(dateInput&&dateInput.value)||today();
+    var line=(lineInput&&lineInput.value)||"";
+    try{
+      var json=await api("/api/departures?date="+encodeURIComponent(date)+"&limit=200"+(line?"&line="+encodeURIComponent(line):""));
+      render(json.records||[]);
+    }catch(error){
+      console.error("[departures/list]",error);
+      notify("Impossible de charger l'horaire partagé. Vérifiez la migration Supabase.","err");
+    }finally{loading=false;}
+  }
+  async function saveRow(row){
+    var date=document.getElementById("depDate").value;
+    var status=row.querySelector('[data-field="status"]').value;
+    var delay=Number(row.querySelector('[data-field="delay"]').value||0);
+    var platform=row.querySelector('[data-field="platform"]').value;
+    var message=row.querySelector('[data-field="message"]').value;
+    try{
+      await api("/api/departures",{
+        method:"PATCH",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({serviceId:row.dataset.service,date:date,status:status,delayMinutes:delay,platform:platform,message:message})
+      });
+      notify("Horaire publié sur le site voyageurs.","ok"); await load();
+    }catch(error){console.error("[departures/update]",error);notify("Impossible d'enregistrer cet horaire.","err");}
+  }
+  async function resetRow(row){
+    var date=document.getElementById("depDate").value;
+    try{
+      await api("/api/departures?serviceId="+encodeURIComponent(row.dataset.service)+"&date="+encodeURIComponent(date),{method:"DELETE"});
+      notify("Le train est revenu à son horaire normal.","ok"); await load();
+    }catch(error){console.error("[departures/reset]",error);notify("Impossible de réinitialiser cet horaire.","err");}
+  }
 
-  document.querySelectorAll('aside.side nav a[data-view="dep"]').forEach(function(link){
-    link.addEventListener("click", loadRecords);
+  var dateInput=document.getElementById("depDate");
+  if(dateInput&&!dateInput.value) dateInput.value=today();
+  ["depDate","depLineFilter"].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.addEventListener("change",load);
   });
-
+  var refresh=document.getElementById("depRefresh"); if(refresh) refresh.addEventListener("click",load);
+  var body=document.getElementById("depBody");
+  if(body) body.addEventListener("click",function(event){
+    var button=event.target.closest("button"); if(!button||!canWrite) return;
+    var row=button.closest("tr[data-service]"); if(!row) return;
+    if(button.dataset.action==="save") saveRow(row);
+    if(button.dataset.action==="reset") resetRow(row);
+  });
+  document.querySelectorAll('aside.side nav a[data-view="dep"]').forEach(function(link){link.addEventListener("click",load);});
   clearInterval(window.__tteDeparturesSharedTimer);
-  window.__tteDeparturesSharedTimer = setInterval(loadRecords, 7000);
-  loadRecords();
+  window.__tteDeparturesSharedTimer=setInterval(load,20000);
+  load();
 })();
 `;

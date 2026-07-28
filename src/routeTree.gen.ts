@@ -18,6 +18,7 @@ import { Route as HistoireRouteImport } from './routes/histoire'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as MesDemandesRouteImport } from './routes/mes-demandes'
 import { Route as SuiviDemandesRouteImport } from './routes/suivi-demandes'
+import { Route as TraficRouteImport } from './routes/trafic'
 import { Route as ApiAuditLogsRouteImport } from './routes/api/audit-logs'
 import { Route as ApiDeparturesRouteImport } from './routes/api/departures'
 import { Route as ApiIncidentsRouteImport } from './routes/api/incidents'
@@ -25,6 +26,7 @@ import { Route as ApiLostFoundRouteImport } from './routes/api/lost-found'
 import { Route as ApiPvRouteImport } from './routes/api/pv'
 import { Route as ApiTownsendLineRouteImport } from './routes/api/townsend-line'
 import { Route as ApiTrafficRouteImport } from './routes/api/traffic'
+import { Route as GaresStationRouteImport } from './routes/gares/$station'
 import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact/submit'
 import { Route as ApiPublicDiscordCallbackRouteImport } from './routes/api/public/discord/callback'
 import { Route as ApiPublicDiscordLoginRouteImport } from './routes/api/public/discord/login'
@@ -75,6 +77,11 @@ const SuiviDemandesRoute = SuiviDemandesRouteImport.update({
   path: '/suivi-demandes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TraficRoute = TraficRouteImport.update({
+  id: '/trafic',
+  path: '/trafic',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuditLogsRoute = ApiAuditLogsRouteImport.update({
   id: '/api/audit-logs',
   path: '/api/audit-logs',
@@ -110,6 +117,11 @@ const ApiTrafficRoute = ApiTrafficRouteImport.update({
   path: '/api/traffic',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GaresStationRoute = GaresStationRouteImport.update({
+  id: '/gares/$station',
+  path: '/gares/$station',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicContactSubmitRoute = ApiPublicContactSubmitRouteImport.update({
   id: '/api/public/contact/submit',
   path: '/api/public/contact/submit',
@@ -142,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
+  '/trafic': typeof TraficRoute
   '/api/audit-logs': typeof ApiAuditLogsRoute
   '/api/departures': typeof ApiDeparturesRoute
   '/api/incidents': typeof ApiIncidentsRoute
@@ -149,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/api/pv': typeof ApiPvRoute
   '/api/townsend-line': typeof ApiTownsendLineRoute
   '/api/traffic': typeof ApiTrafficRoute
+  '/gares/$station': typeof GaresStationRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/discord/login': typeof ApiPublicDiscordLoginRoute
@@ -164,6 +178,7 @@ export interface FileRoutesByTo {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
+  '/trafic': typeof TraficRoute
   '/api/audit-logs': typeof ApiAuditLogsRoute
   '/api/departures': typeof ApiDeparturesRoute
   '/api/incidents': typeof ApiIncidentsRoute
@@ -171,6 +186,7 @@ export interface FileRoutesByTo {
   '/api/pv': typeof ApiPvRoute
   '/api/townsend-line': typeof ApiTownsendLineRoute
   '/api/traffic': typeof ApiTrafficRoute
+  '/gares/$station': typeof GaresStationRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/discord/login': typeof ApiPublicDiscordLoginRoute
@@ -187,6 +203,7 @@ export interface FileRoutesById {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
+  '/trafic': typeof TraficRoute
   '/api/audit-logs': typeof ApiAuditLogsRoute
   '/api/departures': typeof ApiDeparturesRoute
   '/api/incidents': typeof ApiIncidentsRoute
@@ -194,6 +211,7 @@ export interface FileRoutesById {
   '/api/pv': typeof ApiPvRoute
   '/api/townsend-line': typeof ApiTownsendLineRoute
   '/api/traffic': typeof ApiTrafficRoute
+  '/gares/$station': typeof GaresStationRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/discord/login': typeof ApiPublicDiscordLoginRoute
@@ -211,6 +229,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
+    | '/trafic'
     | '/api/audit-logs'
     | '/api/departures'
     | '/api/incidents'
@@ -218,6 +237,7 @@ export interface FileRouteTypes {
     | '/api/pv'
     | '/api/townsend-line'
     | '/api/traffic'
+    | '/gares/$station'
     | '/api/public/contact/submit'
     | '/api/public/discord/callback'
     | '/api/public/discord/login'
@@ -233,6 +253,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
+    | '/trafic'
     | '/api/audit-logs'
     | '/api/departures'
     | '/api/incidents'
@@ -240,6 +261,7 @@ export interface FileRouteTypes {
     | '/api/pv'
     | '/api/townsend-line'
     | '/api/traffic'
+    | '/gares/$station'
     | '/api/public/contact/submit'
     | '/api/public/discord/callback'
     | '/api/public/discord/login'
@@ -255,6 +277,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
+    | '/trafic'
     | '/api/audit-logs'
     | '/api/departures'
     | '/api/incidents'
@@ -262,6 +285,7 @@ export interface FileRouteTypes {
     | '/api/pv'
     | '/api/townsend-line'
     | '/api/traffic'
+    | '/gares/$station'
     | '/api/public/contact/submit'
     | '/api/public/discord/callback'
     | '/api/public/discord/login'
@@ -278,6 +302,7 @@ export interface RootRouteChildren {
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MesDemandesRoute: typeof MesDemandesRoute
   SuiviDemandesRoute: typeof SuiviDemandesRoute
+  TraficRoute: typeof TraficRoute
   ApiAuditLogsRoute: typeof ApiAuditLogsRoute
   ApiDeparturesRoute: typeof ApiDeparturesRoute
   ApiIncidentsRoute: typeof ApiIncidentsRoute
@@ -285,6 +310,7 @@ export interface RootRouteChildren {
   ApiPvRoute: typeof ApiPvRoute
   ApiTownsendLineRoute: typeof ApiTownsendLineRoute
   ApiTrafficRoute: typeof ApiTrafficRoute
+  GaresStationRoute: typeof GaresStationRoute
   ApiPublicContactSubmitRoute: typeof ApiPublicContactSubmitRoute
   ApiPublicDiscordCallbackRoute: typeof ApiPublicDiscordCallbackRoute
   ApiPublicDiscordLoginRoute: typeof ApiPublicDiscordLoginRoute
@@ -356,6 +382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuiviDemandesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trafic': {
+      id: '/trafic'
+      path: '/trafic'
+      fullPath: '/trafic'
+      preLoaderRoute: typeof TraficRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/audit-logs': {
       id: '/api/audit-logs'
       path: '/api/audit-logs'
@@ -405,6 +438,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTrafficRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gares/$station': {
+      id: '/gares/$station'
+      path: '/gares/$station'
+      fullPath: '/gares/$station'
+      preLoaderRoute: typeof GaresStationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/contact/submit': {
       id: '/api/public/contact/submit'
       path: '/api/public/contact/submit'
@@ -446,6 +486,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentionsLegalesRoute: MentionsLegalesRoute,
   MesDemandesRoute: MesDemandesRoute,
   SuiviDemandesRoute: SuiviDemandesRoute,
+  TraficRoute: TraficRoute,
   ApiAuditLogsRoute: ApiAuditLogsRoute,
   ApiDeparturesRoute: ApiDeparturesRoute,
   ApiIncidentsRoute: ApiIncidentsRoute,
@@ -453,6 +494,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPvRoute: ApiPvRoute,
   ApiTownsendLineRoute: ApiTownsendLineRoute,
   ApiTrafficRoute: ApiTrafficRoute,
+  GaresStationRoute: GaresStationRoute,
   ApiPublicContactSubmitRoute: ApiPublicContactSubmitRoute,
   ApiPublicDiscordCallbackRoute: ApiPublicDiscordCallbackRoute,
   ApiPublicDiscordLoginRoute: ApiPublicDiscordLoginRoute,

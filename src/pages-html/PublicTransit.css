@@ -1,0 +1,19 @@
+.transit-page{min-height:100vh;background:var(--bg,#f5f7fb);color:var(--ink,#152238);font-family:"Source Sans 3",sans-serif}
+.transit-header{background:var(--navy,#0c2a60);color:#fff}
+.transit-header-in{max-width:1180px;margin:auto;padding:16px 24px;display:flex;align-items:center;gap:24px}
+.transit-brand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;font-weight:800}.transit-brand .logo{width:84px;height:42px;object-fit:contain}
+.transit-nav{margin-left:auto;display:flex;gap:18px;align-items:center}.transit-nav a{color:#dbe8ff;text-decoration:none;font-weight:700}.transit-nav a:hover,.transit-nav a.active{color:#fff;text-decoration:underline}
+.transit-hero{background:linear-gradient(135deg,#123b7d,#0c2a60);color:#fff;padding:54px 24px}
+.transit-wrap{max-width:1120px;margin:auto}.transit-crumb{font-size:13px;color:#bed3f5;margin-bottom:18px}.transit-crumb a{color:inherit}
+.transit-hero h1{font:800 clamp(32px,5vw,54px)/1.06 "Libre Franklin",sans-serif;margin:0 0 14px}.transit-hero p{font-size:18px;max-width:760px;color:#dce9ff;margin:0}
+.transit-main{padding:36px 24px 60px}.transit-section{margin-bottom:30px}.transit-section h2{font:800 24px/1.2 "Libre Franklin",sans-serif;margin:0 0 14px}
+.traffic-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.traffic-line-card,.transit-card{background:var(--surface,#fff);border:1px solid var(--line,#d9e1ec);border-radius:12px;padding:18px;box-shadow:0 5px 18px rgba(13,42,96,.05)}
+.traffic-line-card strong{display:block;font:800 18px "Libre Franklin",sans-serif;margin-bottom:4px}.traffic-ok{color:#16814d}.traffic-warn{color:#b36d00}.traffic-alert{color:#cf3429}
+.traffic-list{display:grid;gap:12px}.traffic-item{border-left:6px solid #368ad4}.traffic-item.warn{border-left-color:#d98e00}.traffic-item.alert{border-left-color:#d63c2f}.traffic-item h3{margin:0 0 5px;font-size:18px}.traffic-item p{margin:0;color:var(--ink-2,#45556f)}.traffic-item small{display:block;margin-top:8px;color:var(--muted,#66758c)}
+.public-table-wrap{overflow-x:auto;background:var(--surface,#fff);border:1px solid var(--line,#d9e1ec);border-radius:12px}.public-table{width:100%;border-collapse:collapse;min-width:720px}.public-table th,.public-table td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line,#d9e1ec)}.public-table th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted,#66758c)}.public-table tr:last-child td{border-bottom:0}
+.line-pill{display:inline-flex;color:white;border-radius:5px;padding:3px 8px;font-weight:800;font-size:12px}.status-pill{font-weight:800;font-size:12px}.status-pill.delayed,.status-pill.platform_changed{color:#b36d00}.status-pill.cancelled{color:#cf3429}.status-pill.on_time,.status-pill.boarding{color:#16814d}
+.station-meta{display:grid;grid-template-columns:1.4fr .8fr;gap:18px}.station-lines{display:flex;gap:7px;flex-wrap:wrap}.station-services{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.station-services span{background:var(--bg-alt,#eef3f9);border-radius:99px;padding:6px 10px;font-size:13px}
+.station-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.station-links a{background:var(--surface,#fff);border:1px solid var(--line,#d9e1ec);border-radius:9px;padding:12px;color:var(--navy,#0c2a60);font-weight:700;text-decoration:none}.station-links a:hover{border-color:#368ad4}
+.transit-empty{padding:24px;text-align:center;color:var(--muted,#66758c)}
+html.dark .transit-page{--bg:#090f19;--surface:#111b2d;--line:#34445e;--ink:#f3f7ff;--ink-2:#c9d8ec;--muted:#9db2cf;--bg-alt:#18263c}html.dark .transit-card,html.dark .traffic-line-card,html.dark .public-table-wrap,html.dark .station-links a{box-shadow:none}
+@media(max-width:720px){.transit-header-in{align-items:flex-start;flex-wrap:wrap}.transit-nav{width:100%;margin-left:0;overflow-x:auto}.station-meta{grid-template-columns:1fr}.transit-hero{padding-top:38px}}
