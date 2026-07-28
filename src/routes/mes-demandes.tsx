@@ -84,10 +84,13 @@ function ClientRequestCard({ row }: { row: ContactRequestRow }) {
 
   const mutation = useMutation({
     mutationFn: () => replyToMyContactRequest({ data: { id: row.id, message: reply.trim() } }),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.ok) {
         setReply("");
-        queryClient.invalidateQueries({ queryKey: ["my-contact-requests"] });
+        await queryClient.refetchQueries({
+          queryKey: ["my-contact-requests"],
+          type: "active",
+        });
       } else {
         alert(
           result.reason === "closed"

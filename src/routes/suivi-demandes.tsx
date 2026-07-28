@@ -68,7 +68,11 @@ function SuiviBody() {
     return s;
   }, [rows]);
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["all-contact-requests"] });
+  const refreshRequests = () =>
+    qc.refetchQueries({
+      queryKey: ["all-contact-requests"],
+      type: "active",
+    });
 
   return (
     <Shell>
@@ -121,7 +125,7 @@ function SuiviBody() {
       ) : (
         <div style={{ display: "grid", gap: 12 }}>
           {filtered.map((r) => (
-            <RequestCard key={r.id} row={r} onChange={invalidate} />
+            <RequestCard key={r.id} row={r} onChange={refreshRequests} />
           ))}
         </div>
       )}
@@ -129,7 +133,13 @@ function SuiviBody() {
   );
 }
 
-function RequestCard({ row, onChange }: { row: ContactRequestRow; onChange: () => void }) {
+function RequestCard({
+  row,
+  onChange,
+}: {
+  row: ContactRequestRow;
+  onChange: () => Promise<unknown>;
+}) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState(row.status);
   const [branch, setBranch] = useState<string>(row.assigned_branch ?? "");
@@ -145,11 +155,11 @@ function RequestCard({ row, onChange }: { row: ContactRequestRow; onChange: () =
       client_message?: string;
     }) =>
       updateContactRequest({ data: payload }),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       if (res?.ok) {
         setInternalMessage("");
         setClientMessage("");
-        onChange();
+        await onChange();
       } else {
         alert(
           res?.reason === "internal_message_required"
