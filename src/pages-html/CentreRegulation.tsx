@@ -3,6 +3,7 @@ import "./CentreRegulation.css";
 import { script } from "./CentreRegulation.script";
 import { trafficSharedScript } from "./CentreRegulationTrafficShared.script";
 import { lostFoundSharedScript } from "./CentreRegulationLostFoundShared.script";
+import { departuresSharedScript } from "./CentreRegulationDeparturesShared.script";
 import BlacklistPanel from "@/components/BlacklistPanel";
 import WeatherPanel from "@/components/WeatherPanel";
 import FleetPanel from "@/components/FleetPanel";
@@ -42,7 +43,7 @@ export default function CentreRegulationPage() {
     try { localStorage.setItem("tte_perm_trainings", permTrainings ? "1" : "0"); } catch {}
     try { localStorage.setItem("tte_perm_xing", permNet ? "1" : "0"); } catch {}
     const el = document.createElement("script");
-    el.textContent = script + trafficSharedScript + lostFoundSharedScript;
+    el.textContent = script + trafficSharedScript + lostFoundSharedScript + departuresSharedScript;
     document.body.appendChild(el);
     return () => { el.remove(); };
   }, [user, permTrainings, permNet]);
