@@ -41,6 +41,17 @@ export type ContactNote = {
   at: string;
 };
 
+export type ContactMessage = {
+  id: string;
+  contact_request_id: string;
+  visibility: "public" | "internal";
+  author_type: "client" | "staff";
+  author_discord_id: string;
+  author_name: string;
+  message: string;
+  created_at: string;
+};
+
 export type ContactRequestRow = {
   id: string;
   ref: string;
@@ -60,6 +71,7 @@ export type ContactRequestRow = {
   assigned_by_username: string | null;
   assigned_at: string | null;
   notes: ContactNote[];
+  messages: ContactMessage[];
   created_at: string;
   updated_at: string;
 };
@@ -111,7 +123,7 @@ export async function listRequestsByDiscordId(discordId: string): Promise<Contac
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) throw error;
-  return (data ?? []) as ContactRequestRow[];
+  return attachMessages((data ?? []) as ContactRequestRow[], "public");
 }
 
 export async function listAllRequests(filter?: {
@@ -128,7 +140,7 @@ export async function listAllRequests(filter?: {
   if (filter?.branch) q = q.eq("assigned_branch", filter.branch);
   const { data, error } = await q;
   if (error) throw error;
-  return (data ?? []) as ContactRequestRow[];
+  return attachMessages((data ?? []) as ContactRequestRow[]);
 }
 
 export async function getRequestById(id: string): Promise<ContactRequestRow | null> {
@@ -146,16 +158,14 @@ export async function getRequestById(id: string): Promise<ContactRequestRow | nu
 export async function updateRequest(
   id: string,
   actor: DiscordSessionUser,
-  patch: { status?: string; assigned_branch?: string | null; note?: string },
+  patch: {
+    status?: string;
+    assigned_branch?: string | null;
+    internal_message?: string;
+    client_message?: string;
+  },
 ): Promise<void> {
   const supabase = client();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: current, error: readErr } = await (supabase.from("contact_requests" as any) as any)
-    .select("notes")
-    .eq("id", id)
-    .single();
-  if (readErr) throw readErr;
-  const notes: ContactNote[] = ((current?.notes as ContactNote[] | undefined) ?? []).slice();
 
   const patchObj: Record<string, unknown> = {};
   if (patch.status) patchObj.status = patch.status;
@@ -168,19 +178,93 @@ export async function updateRequest(
       patchObj.status = patch.assigned_branch ? "transfere" : "nouveau";
     }
   }
-  if (patch.note && patch.note.trim()) {
-    notes.push({
-      author: actor.displayName || actor.username,
-      author_id: actor.discordId,
-      message: patch.note.trim(),
-      at: new Date().toISOString(),
-    });
-    patchObj.notes = notes;
+  if (patch.internal_message?.trim() || patch.client_message?.trim()) {
+    patchObj.updated_at = new Date().toISOString();
   }
-  if (Object.keys(patchObj).length === 0) return;
+  if (Object.keys(patchObj).length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from("contact_requests" as any) as any)
+      .update(patchObj)
+      .eq("id", id);
+    if (error) throw error;
+  }
+
+  if (patch.internal_message?.trim()) {
+    await insertMessage(id, actor, patch.internal_message, "internal", "staff");
+  }
+  if (patch.client_message?.trim()) {
+    await insertMessage(id, actor, patch.client_message, "public", "staff");
+  }
+}
+
+async function attachMessages(
+  rows: ContactRequestRow[],
+  visibility?: "public" | "internal",
+): Promise<ContactRequestRow[]> {
+  if (!rows.length) return rows;
+  const supabase = client();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let query: any = (supabase.from("contact_request_messages" as any) as any)
+    .select("*")
+    .in("contact_request_id", rows.map((row) => row.id))
+    .order("created_at", { ascending: true });
+  if (visibility) query = query.eq("visibility", visibility);
+  const { data, error } = await query;
+  if (error) throw error;
+
+  const byRequest = new Map<string, ContactMessage[]>();
+  for (const message of (data ?? []) as ContactMessage[]) {
+    const list = byRequest.get(message.contact_request_id) ?? [];
+    list.push(message);
+    byRequest.set(message.contact_request_id, list);
+  }
+  return rows.map((row) => ({
+    ...row,
+    messages: byRequest.get(row.id) ?? [],
+  }));
+}
+
+async function insertMessage(
+  requestId: string,
+  actor: DiscordSessionUser,
+  message: string,
+  visibility: "public" | "internal",
+  authorType: "client" | "staff",
+) {
+  const supabase = client();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from("contact_request_messages" as any) as any)
+    .insert({
+      contact_request_id: requestId,
+      visibility,
+      author_type: authorType,
+      author_discord_id: actor.discordId,
+      author_name: actor.displayName || actor.username,
+      message: message.trim(),
+    });
+  if (error) throw error;
+}
+
+export async function addClientReply(
+  requestId: string,
+  actor: DiscordSessionUser,
+  message: string,
+): Promise<void> {
+  const request = await getRequestById(requestId);
+  if (!request || request.requester_discord_id !== actor.discordId) {
+    throw new Error("forbidden");
+  }
+  if (request.status === "ferme") throw new Error("closed");
+
+  await insertMessage(requestId, actor, message, "public", "client");
+
+  const supabase = client();
+  // Une réponse du client rouvre une demande résolue et la replace en traitement.
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (request.status === "resolu") patch.status = "en_cours";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase.from("contact_requests" as any) as any)
-    .update(patchObj)
-    .eq("id", id);
+    .update(patch)
+    .eq("id", requestId);
   if (error) throw error;
 }
