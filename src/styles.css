@@ -526,3 +526,55 @@ html.dark body .cond-wrap .ttl,
 html.dark body .delays .d {
   color: #82b9f0 !important;
 }
+
+/*
+ * Centre de régulation : titres et aperçus qui utilisaient encore le bleu
+ * marine du thème clair sur des cartes sombres.
+ */
+html.dark body :where(
+  .pub .body .tt,
+  .kpi .v,
+  .log .who,
+  .log .ev b
+) {
+  color: #f2f5fa !important;
+}
+
+html.dark body :where(
+  .pub .body .ms,
+  .pub .body .meta b,
+  .kpi .d,
+  .log .ev
+) {
+  color: #d0d8e4 !important;
+}
+
+html.dark body .preview-bar {
+  background: #17253a !important;
+  color: #e8eef7 !important;
+  border-color: #3f5470 !important;
+}
+
+html.dark body .preview-bar.warn {
+  background: #302510 !important;
+  color: #f6d993 !important;
+  border-color: #6b5420 !important;
+}
+
+html.dark body .preview-bar.alert {
+  background: #351719 !important;
+  color: #ffc4bf !important;
+  border-color: #71302f !important;
+}
+
+html.dark body .perm-banner {
+  background: #302510 !important;
+  color: #f6d993 !important;
+  border-color: #6b5420 !important;
+}
+
+html.dark body .xing-modal-card {
+  background: #111827 !important;
+  color: #f2f5fa !important;
+  border: 1px solid #344155;
+}
