@@ -203,8 +203,8 @@ export function createBlacklistPdf(row: BlacklistRow) {
   doc.setFontSize(10);
   const consequences =
     "Tout manquement à la présente interdiction expose la personne concernée à une reconduite immédiate hors " +
-    "des emprises TTE par les agents de sûreté, à un signalement au Dickson County Sheriff's Office (DCSO), " +
-    "ainsi qu'à d'éventuelles poursuites pour intrusion (criminal trespass) au sens du Tennessee Code Annotated. " +
+    "des emprises TTE par les agents de sûreté, à un signalement au Davidson County Sheriff's Office (DCSO), " +
+    "ainsi qu'à d'éventuelles poursuites pour intrusion Art 420-3 au sens du Tennessee Code Penal. " +
     "Un recours écrit motivé peut être adressé à la Direction sous 30 jours à compter de la notification.";
   const consequenceLines = doc.splitTextToSize(consequences, width - margin * 2);
   doc.text(consequenceLines, margin, y);
