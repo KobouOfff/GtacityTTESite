@@ -168,6 +168,14 @@
   background: #153a70;
 }
 
+.backtop {
+  right: 92px !important;
+}
+
+.toast {
+  bottom: 74px !important;
+}
+
 .tte-theme-toggle svg {
   width: 19px;
   height: 19px;
@@ -310,4 +318,166 @@ html.dark .tte-theme-toggle:hover {
   .tte-theme-toggle span {
     display: none;
   }
+
+  .backtop {
+    right: 66px !important;
+  }
+}
+
+/*
+ * Corrections de contraste pour les anciennes pages HTML/CSS.
+ * Ces sélecteurs sont volontairement plus précis que les styles historiques.
+ */
+html.dark body :where(
+  .hdr,
+  .finder,
+  .tile,
+  .map-card,
+  .fig,
+  .tcard,
+  .fare,
+  .amen .a,
+  .step,
+  .staff-card,
+  .statusboard,
+  .fx-r,
+  .gare,
+  .na,
+  .imp,
+  .cat,
+  .form-card,
+  .success,
+  .card,
+  .panel,
+  .topbar,
+  .kpi,
+  .pub,
+  .history-event-body,
+  .legal-summary,
+  .legal-article
+) {
+  background: #111827 !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+html.dark body :where(
+  input,
+  select,
+  textarea,
+  .ctl,
+  .st-sel,
+  .f-swap button,
+  .btn-outline,
+  .btn-ghost,
+  .btn.ghost,
+  .burger,
+  .discord-prof .dx,
+  .steam-profile .dx,
+  .tool-btn
+) {
+  background-color: #0a101b !important;
+  color: #f2f5fa !important;
+  border-color: #3b4a60 !important;
+}
+
+html.dark body :where(input, textarea)::placeholder {
+  color: #8796aa !important;
+  opacity: 1;
+}
+
+html.dark body :where(
+  h1.vt,
+  .card h2,
+  .topbar .crumb b,
+  .finder-h b,
+  .f-results .rh,
+  .brand-tx .nm,
+  .tile h3,
+  .map-card .mh b,
+  .net-side h3,
+  .stitle,
+  .notice p,
+  .fare-nm,
+  .step h4,
+  .help h4,
+  .staff-card h3,
+  .sb-head b,
+  .fx-stat b,
+  .gare .gh h3,
+  .na h3,
+  .eng-block h3,
+  .tl-title,
+  .imp b,
+  .history-intro h2,
+  .history-heading h2,
+  .history-future h2,
+  .history-event h3,
+  .legal-document h2
+) {
+  color: #f2f5fa !important;
+}
+
+html.dark body :where(
+  .finder-h small,
+  .f-field label,
+  .finder-note,
+  .vt-sub,
+  .tile p,
+  .net-side p,
+  .fare-d,
+  .step p,
+  .help p,
+  .staff-card p,
+  .fx-stat span,
+  .gare .role,
+  .na p,
+  .tl-desc,
+  .history-intro p,
+  .history-event p
+) {
+  color: #aab6c7 !important;
+}
+
+html.dark body .mainnav a {
+  color: #dce5f2 !important;
+}
+
+html.dark body .mainnav a:hover,
+html.dark body .mainnav a.active {
+  color: #9dcbff !important;
+  background: #17253a !important;
+}
+
+html.dark body .alert-bar {
+  background: #2f250f !important;
+  border-color: #6b5420 !important;
+}
+
+html.dark body :where(.alert-in, .alert-in a, .alert-x) {
+  color: #f6d993 !important;
+}
+
+html.dark body .alert-in .tag {
+  background: #b67916 !important;
+  color: #fff !important;
+}
+
+html.dark body :where(.legal-document, .history-future-card, .privacy-notice) {
+  background: #132034 !important;
+  border-color: #344155 !important;
+}
+
+html.dark body .netmap {
+  background: #d9e3ef;
+  border-radius: 8px;
+}
+
+html.dark body .tbl th {
+  background: #0a101b;
+  color: #a9c9ed;
+}
+
+html.dark body :where(.tbl td, .t-pair, .f-dep .tm) {
+  color: #dbe4f0;
 }
