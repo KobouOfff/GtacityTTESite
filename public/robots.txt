@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+Disallow: /api/
+Disallow: /centre-regulation
+Disallow: /espace-employes
+Disallow: /mes-demandes
+Disallow: /suivi-demandes
+
+Sitemap: https://www.townsendtransitexpress.com/sitemap.xml
