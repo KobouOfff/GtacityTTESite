@@ -53,7 +53,8 @@ export const departuresSharedScript = String.raw`
       return '<tr data-service="'+esc(record.id)+'">'+
         '<td><b style="font-family:var(--ff-mono)">'+esc(record.scheduledDeparture)+'</b></td>'+
         '<td><span class="ln-tag" style="background:'+(lineColors[record.line]||"#17458A")+'">'+esc(record.line)+'</span></td>'+
-        '<td><b>'+esc(record.destination)+'</b><div style="font-size:11px;color:var(--muted)">'+esc(record.serviceName)+'</div></td>'+
+        '<td><b>'+esc(record.destination)+'</b><div style="font-size:11px;color:var(--muted)">'+esc(record.serviceName)+'</div>'+
+          (record.propagated?'<div style="font-size:11px;color:var(--warn);font-weight:700;margin-top:3px">Retard propagé automatiquement · quai unique</div>':"")+'</td>'+
         '<td><input data-field="platform" value="'+esc(record.platform==="—"?"":record.platform)+'" placeholder="—" style="width:58px;padding:6px;border:1px solid var(--line);border-radius:6px"></td>'+
         '<td><select data-field="status" class="st-sel '+statusClass+'">'+options(record.status)+'</select></td>'+
         '<td><input data-field="delay" type="number" min="0" max="360" value="'+esc(record.delayMinutes||0)+'" style="width:68px;padding:6px;border:1px solid var(--line);border-radius:6px"> min</td>'+

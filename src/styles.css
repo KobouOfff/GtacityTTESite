@@ -594,3 +594,25 @@ html.dark body .xing-modal-card {
   color: #f2f5fa !important;
   border: 1px solid #344155;
 }
+
+/* Accueil : surfaces et textes qui conservaient les couleurs du thème clair. */
+html.dark body :where(.depboard, .tiles + *, .section, .statusboard) {
+  border-color: var(--line) !important;
+}
+
+html.dark body :where(.tile, .gare, .fig, .map-card, .tcard, .fare, .step, .na, .imp) {
+  background: #111b2d !important;
+  border-color: #34445e !important;
+}
+
+html.dark body :where(.tile p, .gare .role, .fig span, .tcard p, .fare-d, .step p, .na p, .imp span) {
+  color: #b8c7db !important;
+}
+
+html.dark body :where(.tile h3, .gare h3, .fig b, .tcard h3, .fare-nm, .step h4, .na h3, .imp b) {
+  color: #f5f8ff !important;
+}
+
+html.dark body .section.alt {
+  background: #080e17 !important;
+}

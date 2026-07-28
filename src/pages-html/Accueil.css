@@ -127,7 +127,7 @@ img,svg{display:block;max-width:100%}
 .linkmore{font-family:var(--ff-head);font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:7px;color:var(--blue-700)}
 
 /* ===== TILES (préparer votre voyage) ===== */
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:-2.6rem;position:relative;z-index:5}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.5rem;position:relative;z-index:5}
 .tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:1.3rem 1.2rem;box-shadow:var(--shadow);transition:transform .16s,box-shadow .16s;display:block}
 .tile:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(16,32,62,.13);text-decoration:none}
 .tile .ic{width:42px;height:42px;border-radius:10px;background:var(--blue-50);color:var(--blue);display:flex;align-items:center;justify-content:center;margin-bottom:.8rem}
@@ -343,6 +343,14 @@ td{padding:14px 16px;font-size:13.5px;vertical-align:middle}
   .feature{grid-template-columns:1fr}
   .gares{grid-template-columns:1fr}
   .news{grid-template-columns:1fr}
+}
+@media (max-width:1280px){
+  .hdr-in{gap:.7rem}
+  .brand-tx{display:none}
+  .mainnav a{font-size:13px;padding:9px 7px}
+}
+@media (max-width:1080px){
+  .hdr-act .btn-primary{display:none}
 }
 @media (max-width:760px){
   .mainnav{display:none}

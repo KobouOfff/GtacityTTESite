@@ -29,6 +29,7 @@ type UpdateRow = {
   public_message: string | null;
   updated_by_name: string;
   updated_at: string;
+  propagated?: boolean;
 };
 
 async function currentUser(): Promise<DiscordSessionUser | null> {
@@ -80,14 +81,57 @@ function publicRecord(service: ServiceRow, update: UpdateRow | undefined, date: 
     scheduledArrival: timeFromMinutes(base + (destination?.offset ?? 0)),
     arrival: timeFromMinutes(base + (destination?.offset ?? 0) + delay),
     durationMinutes: Math.max(0, (destination?.offset ?? 0) - (origin?.offset ?? 0)),
-    platform: update?.platform_override || origin?.platform || "—",
+    platform: origin?.slug === "townsend" ? "1" : update?.platform_override || origin?.platform || "—",
     status: update?.status ?? "on_time",
     delayMinutes: delay,
     message: update?.public_message ?? "",
     via: between,
     updatedBy: update?.updated_by_name ?? "",
     updatedAt: update?.updated_at ?? "",
+    propagated: update?.propagated === true,
   };
+}
+
+function applyTownsendSinglePlatform(
+  services: ServiceRow[],
+  sourceUpdates: Map<string, UpdateRow>,
+) {
+  const effective = new Map(sourceUpdates);
+  const townsendDepartures = services
+    .filter((service) => {
+      const stops = Array.isArray(service.stops) ? service.stops : [];
+      return stops[0]?.slug === "townsend";
+    })
+    .sort((a, b) => minutesFromTime(a.departure_time) - minutesFromTime(b.departure_time));
+
+  let previousDeparture: number | null = null;
+  for (const service of townsendDepartures) {
+    const scheduled = minutesFromTime(service.departure_time);
+    const update = sourceUpdates.get(service.id);
+    if (update?.status === "cancelled") continue;
+    const manualDelay = update?.status === "delayed" ? update.delay_minutes : 0;
+    const requiredDelay = previousDeparture === null
+      ? manualDelay
+      : Math.max(manualDelay, previousDeparture + 5 - scheduled);
+
+    if (requiredDelay > manualDelay) {
+      effective.set(service.id, {
+        id: update?.id || `propagated-${service.id}`,
+        service_id: service.id,
+        service_date: update?.service_date || "",
+        status: "delayed",
+        delay_minutes: requiredDelay,
+        platform_override: "1",
+        public_message: update?.public_message ||
+          "Retard de régulation dû à l’occupation de l’unique quai de Townsend.",
+        updated_by_name: update?.updated_by_name || "Régulation automatique",
+        updated_at: update?.updated_at || new Date().toISOString(),
+        propagated: true,
+      });
+    }
+    previousDeparture = scheduled + requiredDelay;
+  }
+  return effective;
 }
 
 async function listDepartures(request: Request) {
@@ -110,7 +154,6 @@ async function listDepartures(request: Request) {
       .eq("active", true)
       .contains("days_of_week", [dayOfWeek])
       .order("departure_time", { ascending: true });
-    if (line) serviceQuery = serviceQuery.eq("line", line);
     const { data: serviceData, error: serviceError } = await serviceQuery;
     if (serviceError) throw serviceError;
 
@@ -126,9 +169,10 @@ async function listDepartures(request: Request) {
       if (error) throw error;
       updates = (data ?? []) as unknown as UpdateRow[];
     }
-    const byService = new Map(updates.map((update) => [update.service_id, update]));
+    const sourceUpdates = new Map(updates.map((update) => [update.service_id, update]));
+    const byService = applyTownsendSinglePlatform(services, sourceUpdates);
 
-    const records = services.flatMap((service) => {
+    const records = services.filter((service) => !line || service.line === line).flatMap((service) => {
       const stops = Array.isArray(service.stops) ? service.stops : [];
       let from: Stop | undefined;
       let to: Stop | undefined;
