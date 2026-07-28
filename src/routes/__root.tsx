@@ -103,7 +103,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      {
+        rel: "icon",
+        href: "/tte-logo-officiel.png?v=3",
+        type: "image/png",
+      },
+      {
+        rel: "shortcut icon",
+        href: "/tte-logo-officiel.png?v=3",
+        type: "image/png",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/tte-logo-officiel.png?v=3",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -138,4 +151,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-
