@@ -5,6 +5,25 @@ import "./Accueil.css";
 import "./MentionsLegales.css";
 import "./Confidentialite.css";
 
+const dataCategories = [
+  {
+    title: "Voyageurs",
+    text: "Demandes de renseignement, réclamations, objets perdus, demandes d’assistance et références nécessaires au suivi du dossier.",
+  },
+  {
+    title: "Comptes Discord",
+    text: "Identifiant, nom d’utilisateur, nom affiché, avatar, appartenance au serveur TTE et rôles utiles pour contrôler les accès.",
+  },
+  {
+    title: "Personnel TTE",
+    text: "Présence en service, affectation, actions réalisées dans les outils internes et identité de l’agent ayant publié une information.",
+  },
+  {
+    title: "Contrôles à bord",
+    text: "Identité déclarée, document présenté, date de naissance, motif du procès-verbal, ligne, montant, paiement et observations de l’agent.",
+  },
+];
+
 export default function ConfidentialitePage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -73,14 +92,15 @@ export default function ConfidentialitePage() {
               <span>›</span>
               <span>Confidentialité</span>
             </div>
-            <span className="eyebrow">Protection des données</span>
-            <h1>Politique de confidentialité</h1>
+            <span className="eyebrow">Charte TTE</span>
+            <h1>Confidentialité et protection des informations</h1>
             <p>
-              Cette politique explique quelles données Townsend Transit Express
-              collecte, pourquoi elles sont utilisées et comment exercer vos choix.
+              La confiance des voyageurs et des agents fait partie de nos engagements.
+              TTE limite l’accès aux informations et veille à ce qu’elles soient utilisées
+              uniquement pour assurer le transport et le bon fonctionnement du réseau.
             </p>
             <div className="privacy-version">
-              Version 1.0 · Mise à jour le 28 juillet 2026
+              Direction de la Sûreté et des Systèmes d’Information · Version 1.0
             </div>
           </div>
         </section>
@@ -89,254 +109,205 @@ export default function ConfidentialitePage() {
           <div className="wrap legal-layout">
             <aside className="legal-summary" aria-label="Sommaire">
               <strong>Sommaire</strong>
-              <a href="#responsable">Responsable</a>
-              <a href="#collecte">Données collectées</a>
+              <a href="#engagement">Notre engagement</a>
+              <a href="#informations">Informations concernées</a>
               <a href="#utilisation">Utilisation</a>
-              <a href="#discord">Connexion Discord</a>
-              <a href="#partage">Destinataires</a>
+              <a href="#acces">Accès internes</a>
+              <a href="#discord">Espace Discord</a>
               <a href="#conservation">Conservation</a>
-              <a href="#cookies">Cookies</a>
               <a href="#securite">Sécurité</a>
-              <a href="#droits">Vos droits</a>
-              <a href="#mineurs">Mineurs</a>
-              <a href="#contact">Nous contacter</a>
+              <a href="#droits">Demandes des voyageurs</a>
+              <a href="#personnel">Personnel TTE</a>
+              <a href="#contact">Contact</a>
             </aside>
 
             <article className="legal-article">
               <div className="privacy-notice">
-                <strong>L’essentiel</strong>
+                <strong>Principe TTE</strong>
                 <p>
-                  TTE ne vend pas vos données personnelles et n’utilise actuellement
-                  aucun cookie publicitaire. Les données sont utilisées pour assurer la
-                  connexion, répondre aux demandes et exploiter les services internes.
+                  Une information confiée à TTE reste réservée au service qui en a besoin.
+                  Elle n’est ni vendue, ni utilisée à des fins publicitaires, ni transmise
+                  à une personne extérieure sans motif opérationnel valable.
                 </p>
               </div>
 
-              <section id="responsable">
-                <h2>1. Responsable du traitement</h2>
-                <p>Les données traitées sur ce site sont placées sous la responsabilité de :</p>
-                <div className="legal-company">
-                  <strong>Townsend Transit Express (TTE)</strong>
-                  <span>
-                    Gare centrale de Townsend, Townsend, Tennessee, États-Unis
-                  </span>
-                  <a href="mailto:contact@townsendtransitexpress.com">
-                    contact@townsendtransitexpress.com
-                  </a>
-                </div>
+              <section id="engagement">
+                <h2>1. Notre engagement</h2>
+                <p>
+                  Townsend Transit Express protège les informations confiées par les
+                  voyageurs, les agents, les partenaires et les personnes contrôlées à
+                  bord de ses trains et autobus.
+                </p>
+                <p>
+                  Chaque membre du personnel doit respecter la discrétion professionnelle.
+                  La consultation d’un dossier sans rapport avec ses fonctions est
+                  interdite et peut entraîner le retrait immédiat des accès internes.
+                </p>
               </section>
 
-              <section id="collecte">
-                <h2>2. Données que nous collectons</h2>
+              <section id="informations">
+                <h2>2. Informations concernées</h2>
                 <div className="privacy-data-grid">
-                  <div>
-                    <h3>Compte Discord</h3>
-                    <p>
-                      Identifiant Discord, nom d’utilisateur, nom affiché ou surnom,
-                      avatar, appartenance au serveur TTE et identifiants des rôles.
-                    </p>
-                  </div>
-                  <div>
-                    <h3>Demandes de contact</h3>
-                    <p>
-                      Catégorie, objet, message, informations fournies dans le formulaire,
-                      statut de traitement, service destinataire et notes de suivi.
-                    </p>
-                  </div>
-                  <div>
-                    <h3>Activité professionnelle</h3>
-                    <p>
-                      Présence récente, opérations effectuées par les agents, publications
-                      d’information trafic et identité professionnelle de leur auteur.
-                    </p>
-                  </div>
-                  <div>
-                    <h3>Contrôle des titres</h3>
-                    <p>
-                      Lorsque cette fonction interne est utilisée : identité du
-                      contrevenant, référence du document présenté, date de naissance,
-                      motif, ligne, montant, statut de paiement et observations.
-                    </p>
-                  </div>
-                  <div>
-                    <h3>Données techniques</h3>
-                    <p>
-                      Cookie de session nécessaire, données de navigation techniquement
-                      transmises au serveur et informations de sécurité indispensables au
-                      fonctionnement et à la prévention des abus.
-                    </p>
-                  </div>
+                  {dataCategories.map((item) => (
+                    <div key={item.title}>
+                      <h3>{item.title}</h3>
+                      <p>{item.text}</p>
+                    </div>
+                  ))}
                 </div>
                 <p>
-                  Nous vous demandons de ne pas transmettre de données sensibles ou
+                  TTE demande uniquement les informations nécessaires au service concerné.
+                  Les voyageurs ne doivent pas ajouter de renseignements confidentiels
                   inutiles dans les champs de texte libre.
                 </p>
               </section>
 
               <section id="utilisation">
-                <h2>3. Pourquoi ces données sont utilisées</h2>
+                <h2>3. Utilisation des informations</h2>
+                <p>Les informations peuvent être utilisées pour :</p>
                 <ul>
-                  <li>authentifier les utilisateurs avec Discord ;</li>
-                  <li>vérifier l’appartenance au serveur TTE et les autorisations liées aux rôles ;</li>
-                  <li>recevoir, attribuer et traiter les demandes de contact ou réclamations ;</li>
-                  <li>afficher à l’utilisateur l’historique et l’état de ses demandes ;</li>
-                  <li>assurer le fonctionnement des espaces réservés au personnel ;</li>
-                  <li>publier et maintenir les informations relatives au trafic ;</li>
-                  <li>gérer les opérations de contrôle et leur traçabilité ;</li>
-                  <li>sécuriser le site, prévenir les abus et résoudre les incidents techniques ;</li>
-                  <li>respecter les obligations légales et répondre aux demandes officielles valides.</li>
+                  <li>répondre à une demande de renseignement ou d’assistance ;</li>
+                  <li>retrouver et restituer un objet perdu ;</li>
+                  <li>examiner une réclamation ou une demande de remboursement ;</li>
+                  <li>vérifier l’identité et les autorisations d’un agent ;</li>
+                  <li>organiser le service, la régulation et l’information voyageurs ;</li>
+                  <li>établir et suivre un procès-verbal de contrôle ;</li>
+                  <li>assurer la sécurité des voyageurs, du personnel et des installations ;</li>
+                  <li>conserver la traçabilité d’une décision prise par un service TTE.</li>
                 </ul>
+              </section>
+
+              <section id="acces">
+                <h2>4. Accès aux dossiers</h2>
+                <p>
+                  Les dossiers sont répartis entre les services compétents : Service
+                  Clientèle, Objets trouvés, Accessibilité, Sûreté ferroviaire, Contrôle,
+                  Recouvrement, Centre de Régulation, Ressources humaines et Direction.
+                </p>
+                <p>
+                  Les niveaux d’accès dépendent du poste et du rôle de chaque agent. Un
+                  superviseur peut consulter les dossiers nécessaires au suivi de son
+                  équipe, tandis qu’un agent ne voit que les informations utiles à sa
+                  mission.
+                </p>
+                <p>
+                  Toute consultation, modification ou transmission non autorisée est
+                  contraire au règlement intérieur de Townsend Transit Express.
+                </p>
               </section>
 
               <section id="discord">
-                <h2>4. Connexion avec Discord</h2>
+                <h2>5. Connexion à l’espace Discord TTE</h2>
                 <p>
-                  La connexion utilise le protocole OAuth2 de Discord avec l’autorisation
-                  d’identifier votre compte. TTE reçoit les informations de profil
-                  mentionnées ci-dessus, puis vérifie votre appartenance et vos rôles sur
-                  le serveur Discord TTE.
+                  La connexion Discord sert à identifier les voyageurs et les employés,
+                  à vérifier leur appartenance au serveur officiel TTE et à appliquer les
+                  autorisations correspondant à leurs rôles.
                 </p>
                 <p>
-                  TTE ne reçoit jamais votre mot de passe Discord. Discord traite
-                  également des données selon sa propre politique de confidentialité.
-                  Vous pouvez mettre fin à la session TTE en utilisant le bouton de
-                  déconnexion ou de changement de compte.
-                </p>
-              </section>
-
-              <section id="partage">
-                <h2>5. Destinataires et prestataires techniques</h2>
-                <p>Les données sont accessibles uniquement selon les besoins du service :</p>
-                <ul>
-                  <li>aux agents TTE autorisés, selon leurs fonctions et leurs rôles ;</li>
-                  <li>à la direction et aux services chargés du suivi des demandes ;</li>
-                  <li>à Discord pour l’authentification et la vérification du compte ;</li>
-                  <li>à Supabase pour l’hébergement et le traitement de la base de données ;</li>
-                  <li>à Vercel pour l’hébergement et l’exécution technique du site.</li>
-                </ul>
-                <p>
-                  TTE ne vend ni ne loue les données personnelles et ne les communique pas
-                  à des annonceurs. Une divulgation peut néanmoins intervenir lorsqu’elle
-                  est exigée par la loi, une décision de justice ou une demande officielle
-                  juridiquement valable.
+                  Le mot de passe Discord n’est jamais communiqué à Townsend Transit
+                  Express. Seules les informations de profil nécessaires à
+                  l’identification et au contrôle des accès sont utilisées par le portail.
                 </p>
               </section>
 
               <section id="conservation">
-                <h2>6. Durée de conservation</h2>
+                <h2>6. Conservation et archivage</h2>
+                <div className="privacy-retention">
+                  <div>
+                    <strong>Demandes voyageurs</strong>
+                    <span>Durée du traitement, puis archivage administratif.</span>
+                  </div>
+                  <div>
+                    <strong>Présence des agents</strong>
+                    <span>Mise à jour régulière pour refléter le service en cours.</span>
+                  </div>
+                  <div>
+                    <strong>Informations trafic</strong>
+                    <span>Conservées pour le suivi des événements du réseau.</span>
+                  </div>
+                  <div>
+                    <strong>Procès-verbaux</strong>
+                    <span>Archivés selon les besoins du contrôle et du recouvrement.</span>
+                  </div>
+                </div>
                 <p>
-                  Le cookie de session est configuré pour une durée maximale de 30 jours,
-                  sauf déconnexion ou suppression antérieure dans le navigateur.
-                </p>
-                <p>
-                  Les demandes, notes de suivi, enregistrements opérationnels et données
-                  de contrôle sont conservés pendant la durée nécessaire à leur traitement,
-                  à la continuité du service, à la sécurité, à la résolution des litiges et
-                  au respect des obligations applicables. Ils sont ensuite supprimés ou
-                  rendus anonymes lorsqu’ils ne sont plus nécessaires.
-                </p>
-                <p>
-                  Certaines informations peuvent être conservées plus longtemps lorsque la
-                  loi l’exige ou lorsqu’elles sont nécessaires à la constatation, à
-                  l’exercice ou à la défense de droits.
-                </p>
-              </section>
-
-              <section id="cookies">
-                <h2>7. Cookies et stockage dans le navigateur</h2>
-                <p>
-                  Le site utilise un cookie strictement nécessaire nommé
-                  <code>tte_session</code>. Il maintient la connexion, sécurise le parcours
-                  OAuth et conserve la session de l’utilisateur. Il est protégé contre la
-                  lecture par JavaScript, transmis uniquement par connexion sécurisée et
-                  configuré avec une protection contre certains envois entre sites.
-                </p>
-                <p>
-                  Le navigateur peut également conserver localement certains réglages ou
-                  états nécessaires aux fonctions opérationnelles. Ces éléments restent
-                  sur l’appareil jusqu’à leur remplacement ou leur suppression.
-                </p>
-                <p>
-                  Aucun cookie publicitaire ou outil de mesure d’audience n’est actuellement
-                  installé par TTE. Si cela change, cette politique sera mise à jour et les
-                  choix appropriés seront proposés.
+                  Lorsqu’un dossier n’a plus d’utilité opérationnelle ou administrative,
+                  il est supprimé ou placé dans les archives sécurisées de TTE.
                 </p>
               </section>
 
               <section id="securite">
-                <h2>8. Sécurité</h2>
+                <h2>7. Sécurité des informations</h2>
                 <p>
-                  TTE met en œuvre des mesures techniques et organisationnelles destinées
-                  à limiter l’accès non autorisé, la modification, la divulgation ou la
-                  perte de données. Les accès internes reposent notamment sur
-                  l’authentification, les rôles Discord et des contrôles côté serveur.
+                  Les espaces internes sont protégés par une connexion individuelle et
+                  des rôles d’autorisation. Les accès peuvent être suspendus lors d’un
+                  changement d’affectation, d’un départ de l’entreprise ou d’un incident
+                  de sécurité.
                 </p>
                 <p>
-                  Aucun système ne peut toutefois garantir une sécurité absolue. En cas de
-                  suspicion concernant votre compte ou vos données, contactez-nous sans
-                  délai.
+                  Il est interdit aux agents de partager leur accès, de copier un dossier
+                  sur un espace personnel ou de publier une information confidentielle
+                  dans un salon non autorisé.
+                </p>
+                <p>
+                  Toute perte de document, connexion suspecte ou divulgation accidentelle
+                  doit être signalée sans délai à la Direction de la Sûreté et des Systèmes
+                  d’Information.
                 </p>
               </section>
 
               <section id="droits">
-                <h2>9. Vos choix et vos droits</h2>
+                <h2>8. Demande d’accès, de correction ou de suppression</h2>
                 <p>
-                  Sous réserve des conditions et exceptions prévues par la législation
-                  applicable, vous pouvez demander :
+                  Un voyageur peut demander à connaître les informations associées à son
+                  dossier, signaler une erreur ou solliciter la suppression d’un dossier
+                  qui n’a plus de raison d’être.
                 </p>
-                <ul>
-                  <li>la confirmation que TTE traite ou non vos données ;</li>
-                  <li>l’accès aux données personnelles vous concernant ;</li>
-                  <li>la correction de données inexactes ;</li>
-                  <li>la suppression de certaines données ;</li>
-                  <li>une copie portable des données que vous avez fournies ;</li>
-                  <li>des informations complémentaires sur l’utilisation de vos données ;</li>
-                  <li>le réexamen d’un refus opposé à votre demande.</li>
-                </ul>
                 <p>
-                  Pour protéger vos informations, TTE peut demander une vérification
-                  raisonnable de votre identité. Une demande peut être refusée ou limitée
-                  lorsqu’une exception légale s’applique, notamment pour la sécurité, la
-                  prévention de la fraude, les archives obligatoires ou la défense de
-                  droits.
+                  TTE vérifie l’identité du demandeur avant de communiquer ou de modifier
+                  une information. Certaines archives peuvent être maintenues lorsqu’un
+                  dossier est encore nécessaire au traitement d’une réclamation, d’un
+                  procès-verbal ou d’un incident de sûreté.
                 </p>
-                <a className="btn btn-primary privacy-action" href="mailto:contact@townsendtransitexpress.com?subject=Demande%20relative%20à%20mes%20données">
-                  Exercer mes droits
+                <a
+                  className="btn btn-primary privacy-action"
+                  href="/contact#info"
+                >
+                  Faire une demande
                 </a>
               </section>
 
-              <section id="mineurs">
-                <h2>10. Protection des mineurs</h2>
+              <section id="personnel">
+                <h2>9. Obligations du personnel TTE</h2>
+                <ul>
+                  <li>consulter uniquement les informations utiles à la mission confiée ;</li>
+                  <li>verrouiller sa session en quittant son poste ;</li>
+                  <li>ne jamais transmettre un dossier dans un canal public ;</li>
+                  <li>vérifier le destinataire avant tout transfert interne ;</li>
+                  <li>signaler immédiatement une erreur ou une fuite d’information ;</li>
+                  <li>respecter les instructions de la Direction et du service de Sûreté.</li>
+                </ul>
                 <p>
-                  Le site n’est pas conçu pour collecter sciemment des données personnelles
-                  d’enfants de moins de 13 ans. Si vous pensez qu’un enfant nous a transmis
-                  des informations personnelles, contactez-nous afin que nous puissions
-                  examiner la situation et prendre les mesures appropriées.
-                </p>
-              </section>
-
-              <section id="modifications">
-                <h2>11. Modification de la politique</h2>
-                <p>
-                  Cette politique peut être modifiée pour refléter une évolution du site,
-                  des services ou des obligations applicables. La date et la version
-                  affichées en haut de cette page permettent d’identifier la politique en
-                  vigueur.
+                  Le non-respect de ces règles peut entraîner la suspension des accès, une
+                  enquête interne et les mesures prévues par le règlement du personnel.
                 </p>
               </section>
 
               <section id="contact">
-                <h2>12. Nous contacter</h2>
+                <h2>10. Contact confidentialité</h2>
                 <p>
-                  Pour toute question, réclamation ou demande relative à vos données :
+                  Les questions relatives à un dossier ou à la confidentialité peuvent
+                  être adressées au Service Clientèle. Les incidents internes doivent être
+                  transmis directement à la hiérarchie ou à la Direction de la Sûreté.
                 </p>
                 <div className="privacy-contact">
                   <strong>Townsend Transit Express</strong>
-                  <span>Gare centrale de Townsend, Townsend, Tennessee, USA</span>
+                  <span>Direction de la Sûreté et des Systèmes d’Information</span>
+                  <span>Gare centrale de Townsend, Tennessee</span>
                   <a href="mailto:contact@townsendtransitexpress.com">
                     contact@townsendtransitexpress.com
                   </a>
-                  <a href="/contact">Formulaire de contact</a>
+                  <a href="/contact">Contacter TTE</a>
                 </div>
               </section>
             </article>

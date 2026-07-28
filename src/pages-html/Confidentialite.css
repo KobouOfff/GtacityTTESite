@@ -74,6 +74,33 @@
   margin-top: 12px;
 }
 
+.privacy-retention {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.privacy-retention div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 18px;
+  border: 1px solid #dce5f1;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.privacy-retention strong {
+  color: #0a326a;
+}
+
+.privacy-retention span {
+  color: #52627a;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
 .privacy-contact {
   display: flex;
   flex-direction: column;
@@ -97,7 +124,8 @@
 }
 
 @media (max-width: 620px) {
-  .privacy-data-grid {
+  .privacy-data-grid,
+  .privacy-retention {
     grid-template-columns: 1fr;
   }
 }
