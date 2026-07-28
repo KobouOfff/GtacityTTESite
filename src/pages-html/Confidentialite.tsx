@@ -304,8 +304,8 @@ export default function ConfidentialitePage() {
                   <strong>Townsend Transit Express</strong>
                   <span>Direction de la Sûreté et des Systèmes d’Information</span>
                   <span>Gare centrale de Townsend, Tennessee</span>
-                  <a href="mailto:contact@townsendtransitexpress.com">
-                    contact@townsendtransitexpress.com
+                  <a href="mailto:support@townsendtransitexpress.com">
+                    support@townsendtransitexpress.com
                   </a>
                   <a href="/contact">Contacter TTE</a>
                 </div>

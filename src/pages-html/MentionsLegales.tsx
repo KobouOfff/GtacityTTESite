@@ -148,8 +148,8 @@ export default function MentionsLegalesPage() {
                   <div>
                     <dt>Courriel</dt>
                     <dd>
-                      <a href="mailto:contact@townsendtransitexpress.com">
-                        contact@townsendtransitexpress.com
+                      <a href="mailto:support@townsendtransitexpress.com">
+                        support@townsendtransitexpress.com
                       </a>
                     </dd>
                   </div>
