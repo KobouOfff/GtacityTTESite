@@ -97,22 +97,32 @@ function applyTownsendSinglePlatform(
   sourceUpdates: Map<string, UpdateRow>,
 ) {
   const effective = new Map(sourceUpdates);
-  const townsendDepartures = services
-    .filter((service) => {
+  const townsendMovements = services
+    .map((service) => {
       const stops = Array.isArray(service.stops) ? service.stops : [];
-      return stops[0]?.slug === "townsend";
+      const townsendStop = stops.find((stop) => stop.slug === "townsend");
+      return townsendStop
+        ? { service, scheduled: minutesFromTime(service.departure_time) + townsendStop.offset }
+        : null;
     })
-    .sort((a, b) => minutesFromTime(a.departure_time) - minutesFromTime(b.departure_time));
+    .filter((movement): movement is { service: ServiceRow; scheduled: number } => movement !== null)
+    .sort((a, b) => a.scheduled - b.scheduled);
 
   let previousDeparture: number | null = null;
-  for (const service of townsendDepartures) {
-    const scheduled = minutesFromTime(service.departure_time);
+  let cascadeActive = false;
+  for (const movement of townsendMovements) {
+    const { service, scheduled } = movement;
     const update = sourceUpdates.get(service.id);
     if (update?.status === "cancelled") continue;
     const manualDelay = update?.status === "delayed" ? update.delay_minutes : 0;
-    const requiredDelay = previousDeparture === null
-      ? manualDelay
-      : Math.max(manualDelay, previousDeparture + 5 - scheduled);
+    let requiredDelay = manualDelay;
+
+    if (manualDelay > 0) {
+      cascadeActive = true;
+    } else if (cascadeActive && previousDeparture !== null) {
+      requiredDelay = Math.max(0, previousDeparture + 5 - scheduled);
+      if (requiredDelay === 0) cascadeActive = false;
+    }
 
     if (requiredDelay > manualDelay) {
       effective.set(service.id, {
@@ -201,7 +211,7 @@ async function listDepartures(request: Request) {
         to = stops[stops.length - 1];
       }
       return [{ ...publicRecord(service, byService.get(service.id), date, from, to), movement: "departure" }];
-    }).slice(0, limit);
+    }).sort((a, b) => a.departure.localeCompare(b.departure)).slice(0, limit);
 
     return noStore({ ok: true, date, records });
   } catch (error) {
