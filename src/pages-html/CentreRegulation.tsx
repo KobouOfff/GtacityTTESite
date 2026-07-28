@@ -3,6 +3,7 @@ import "./CentreRegulation.css";
 import { script } from "./CentreRegulation.script";
 import { trafficSharedScript } from "./CentreRegulationTrafficShared.script";
 import { lostFoundSharedScript } from "./CentreRegulationLostFoundShared.script";
+import BlacklistPanel from "@/components/BlacklistPanel";
 import WeatherPanel from "@/components/WeatherPanel";
 import FleetPanel from "@/components/FleetPanel";
 import EffectifsPanel from "@/components/EffectifsPanel";
@@ -15,6 +16,7 @@ import {
   canManageTSR,
   canWriteNetworkAssets,
   canManageTrainings,
+  canManageBlacklist,
 } from "@/lib/discord-roles";
 
 export default function CentreRegulationPage() {
@@ -25,6 +27,7 @@ export default function CentreRegulationPage() {
   const permTsr = canManageTSR(u);
   const permNet = canWriteNetworkAssets(u);
   const permTrainings = canManageTrainings(u);
+  const permBlacklist = canManageBlacklist(u);
 
   useEffect(() => {
     // Injecte l'identité Discord courante avant le script legacy
@@ -100,6 +103,9 @@ export default function CentreRegulationPage() {
       <a data-view="e911"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2Z" /></svg> 911 Emergency dispatch</a>
       <a data-view="fraude"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M3 10h18M7 15h4" /></svg> Fraudeurs / PV</a>
       <a data-view="lost"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 7h12l-1 13H7L6 7Z" /><path d="M9 7V5a3 3 0 0 1 6 0v2" /></svg> Objets trouvés</a>
+      {permBlacklist && (
+        <a data-view="blk"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M5.6 5.6 18.4 18.4" /></svg> Blacklist</a>
+      )}
       <div className="grp">Réseau & matériel</div>
       <a data-view="tsr"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 8v4l3 2" /><path d="M4 4l16 16" /></svg> Slow orders (TSR)</a>
       <a data-view="fleet"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="6" width="18" height="10" rx="2" /><circle cx="8" cy="18" r="2" /><circle cx="16" cy="18" r="2" /><path d="M3 12h18" /></svg> Flotte / matériel roulant</a>
@@ -409,6 +415,9 @@ export default function CentreRegulationPage() {
           <div style={{overflowX: "auto"}}><table className="tbl"><thead><tr><th>Date</th><th>Catégorie</th><th>Description</th><th>Trouvé dans</th><th>Casier</th><th>Statut</th><th></th></tr></thead><tbody id="lstBody"></tbody></table></div>
         </div>
       </section>
+
+      {/* ===== BLACKLIST ===== */}
+      {permBlacklist && <BlacklistPanel />}
 
       {/* ===== FORMATIONS ===== */}
       <section className="view" id="v-form">
