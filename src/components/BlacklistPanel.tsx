@@ -319,6 +319,15 @@ export default function BlacklistPanel() {
       setDraft(emptyDraft());
       generatePdf(r.row);
       refresh();
+      if (r.discordDelivery === "failed") {
+        alert(
+          "La blacklist est bien enregistrée et le PDF a été généré, mais l’envoi dans le salon Discord a échoué. Vérifiez le salon et les permissions du bot.",
+        );
+      } else if (r.discordDelivery === "skipped") {
+        alert(
+          "La blacklist est bien enregistrée. L’envoi Discord n’est pas encore configuré : ajoutez DISCORD_BLACKLIST_CHANNEL_ID dans Vercel.",
+        );
+      }
     } else {
       alert("Erreur : " + r.reason);
     }
