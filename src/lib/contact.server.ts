@@ -233,16 +233,25 @@ async function insertMessage(
 ) {
   const supabase = client();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from("contact_request_messages" as any) as any)
-    .insert({
-      contact_request_id: requestId,
-      visibility,
-      author_type: authorType,
-      author_discord_id: actor.discordId,
-      author_name: actor.displayName || actor.username,
-      message: message.trim(),
+  const { error } = await (supabase.rpc as any)(
+    "insert_contact_request_message",
+    {
+      p_contact_request_id: requestId,
+      p_visibility: visibility,
+      p_author_type: authorType,
+      p_author_discord_id: actor.discordId,
+      p_author_name: actor.displayName || actor.username,
+      p_message: message.trim(),
+    },
+  );
+  if (error) {
+    console.error("[insertContactRequestMessage]", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
     });
-  if (error) throw error;
+    throw error;
+  }
 }
 
 export async function addClientReply(
