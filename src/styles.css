@@ -481,3 +481,48 @@ html.dark body .tbl th {
 html.dark body :where(.tbl td, .t-pair, .f-dep .tm) {
   color: #dbe4f0;
 }
+
+/*
+ * Page Contact : certains composants historiques appliquent var(--navy)
+ * après les règles générales. Ces couleurs explicites garantissent un
+ * contraste lisible sur les cartes sombres.
+ */
+html.dark body :where(
+  .cat b,
+  .form-top b,
+  .steam-gate .lead b,
+  .steam-profile .meta .nm,
+  .ref .val,
+  .sum li b,
+  .card h3,
+  .contact-line b
+) {
+  color: #f2f5fa !important;
+}
+
+html.dark body :where(
+  .cat span,
+  .form-top span,
+  .fld label,
+  .check,
+  .steam-gate .lead .tx > span,
+  .steam-profile .meta .sid,
+  .ref .lbl,
+  .sum li,
+  .success .note,
+  .contact-line,
+  .contact-line span,
+  .delays li
+) {
+  color: #aebbd0 !important;
+}
+
+html.dark body :where(.cond-wrap, .form-top, .steam-gate, .success .note) {
+  background: #0d1624 !important;
+  border-color: #344155 !important;
+}
+
+html.dark body .cond-wrap .ttl,
+html.dark body .delays .d {
+  color: #82b9f0 !important;
+}
