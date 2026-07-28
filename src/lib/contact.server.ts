@@ -1,39 +1,5 @@
-import { createHash } from "crypto";
-import { createClient } from "@supabase/supabase-js";
 import type { DiscordSessionUser } from "./discord-roles";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-
-const PRESENCE_PROOF_SALT = "20a54c73055d610b3e3f336779ccb9d1";
-
-function getProof() {
-  const s = process.env.SESSION_SECRET;
-  if (!s) throw new Error("SESSION_SECRET manquant");
-  return createHash("sha256").update(s + PRESENCE_PROOF_SALT).digest("hex");
-}
-
-function client() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) throw new Error("Configuration backend incomplète");
-  const proof = getProof();
-  return createClient(url, key, {
-    global: {
-      fetch: (input, init) => {
-        const headers = new Headers(
-          typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
-        );
-        if (init?.headers) new Headers(init.headers).forEach((v, k) => headers.set(k, v));
-        if (key.startsWith("sb_publishable_") && headers.get("Authorization") === `Bearer ${key}`) {
-          headers.delete("Authorization");
-        }
-        headers.set("apikey", key);
-        headers.set("x-tte-presence-proof", proof);
-        return fetch(input, { ...init, headers });
-      },
-    },
-    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-  });
-}
 
 export type ContactNote = {
   author: string;
@@ -87,7 +53,7 @@ export async function createContactRequest(
   user: DiscordSessionUser,
   payload: { category: string; subject: string; message: string; extra: Record<string, unknown> },
 ): Promise<{ id: string; ref: string }> {
-  const supabase = client();
+  const supabase = supabaseAdmin;
   let lastErr: unknown = null;
   for (let i = 0; i < 4; i++) {
     const ref = makeRef();
@@ -116,7 +82,7 @@ export async function createContactRequest(
 }
 
 export async function listRequestsByDiscordId(discordId: string): Promise<ContactRequestRow[]> {
-  const supabase = client();
+  const supabase = supabaseAdmin;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from("contact_requests" as any) as any)
     .select("*")
@@ -131,7 +97,7 @@ export async function listAllRequests(filter?: {
   status?: string;
   branch?: string;
 }): Promise<ContactRequestRow[]> {
-  const supabase = client();
+  const supabase = supabaseAdmin;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let q: any = (supabase.from("contact_requests" as any) as any)
     .select("*")
@@ -145,7 +111,7 @@ export async function listAllRequests(filter?: {
 }
 
 export async function getRequestById(id: string): Promise<ContactRequestRow | null> {
-  const supabase = client();
+  const supabase = supabaseAdmin;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from("contact_requests" as any) as any)
     .select("*")
@@ -166,7 +132,7 @@ export async function updateRequest(
     client_message?: string;
   },
 ): Promise<void> {
-  const supabase = client();
+  const supabase = supabaseAdmin;
 
   const patchObj: Record<string, unknown> = {};
   if (patch.status) patchObj.status = patch.status;
@@ -203,7 +169,7 @@ async function attachMessages(
   visibility?: "public" | "internal",
 ): Promise<ContactRequestRow[]> {
   if (!rows.length) return rows;
-  const supabase = client();
+  const supabase = supabaseAdmin;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query: any = (supabase.from("contact_request_messages" as any) as any)
     .select("*")
@@ -233,17 +199,17 @@ async function insertMessage(
   authorType: "client" | "staff",
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabaseAdmin.rpc as any)(
-    "insert_contact_request_message",
-    {
-      p_contact_request_id: requestId,
-      p_visibility: visibility,
-      p_author_type: authorType,
-      p_author_discord_id: actor.discordId,
-      p_author_name: actor.displayName || actor.username,
-      p_message: message.trim(),
-    },
-  );
+  const { data, error } = await (supabaseAdmin.from("contact_request_messages" as any) as any)
+    .insert({
+      contact_request_id: requestId,
+      visibility,
+      author_type: authorType,
+      author_discord_id: actor.discordId,
+      author_name: actor.displayName || actor.username,
+      message: message.trim(),
+    })
+    .select("id, contact_request_id, visibility, author_type, author_discord_id, author_name, message, created_at")
+    .single();
   if (error) {
     console.error("[insertContactRequestMessage]", {
       code: error.code,
@@ -252,6 +218,10 @@ async function insertMessage(
     });
     throw error;
   }
+  if (!data?.id) {
+    throw new Error("message_not_persisted");
+  }
+  return data as ContactMessage;
 }
 
 export async function addClientReply(
@@ -267,7 +237,7 @@ export async function addClientReply(
 
   await insertMessage(requestId, actor, message, "public", "client");
 
-  const supabase = client();
+  const supabase = supabaseAdmin;
   // Une réponse du client rouvre une demande résolue et la replace en traitement.
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (request.status === "resolu") patch.status = "en_cours";
