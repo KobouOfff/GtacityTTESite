@@ -14,6 +14,7 @@ export const Route = createFileRoute("/centre-regulation")({
   head: () => ({
     meta: [
       { title: "Centre de R\u00e9gulation \u2014 Townsend Transit Express" },
+      { name: "robots", content: "noindex, nofollow" },
       { name: "description", content: "Centre de R\u00e9gulation du trafic \u2014 poste de commandement op\u00e9rationnel TTE." },
       { property: "og:title", content: "Centre de R\u00e9gulation \u2014 Townsend Transit Express" },
       { property: "og:description", content: "Centre de R\u00e9gulation du trafic \u2014 poste de commandement op\u00e9rationnel TTE." },

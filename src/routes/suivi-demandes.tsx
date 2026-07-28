@@ -448,6 +448,7 @@ export const Route = createFileRoute("/suivi-demandes")({
   head: () => ({
     meta: [
       { title: "Suivi des demandes — TTE" },
+      { name: "robots", content: "noindex, nofollow" },
       { name: "description", content: "Espace de gestion des demandes clients — Direction TTE." },
     ],
   }),

@@ -275,6 +275,7 @@ export const Route = createFileRoute("/mes-demandes")({
   head: () => ({
     meta: [
       { title: "Mes demandes — Townsend Transit Express" },
+      { name: "robots", content: "noindex, nofollow" },
       { name: "description", content: "Suivi de vos demandes envoyées au service clientèle Townsend Transit Express." },
     ],
   }),

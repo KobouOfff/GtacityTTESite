@@ -14,6 +14,7 @@ export const Route = createFileRoute("/espace-employes")({
   head: () => ({
     meta: [
       { title: "Espace employ\u00e9s \u2014 Townsend Transit Express" },
+      { name: "robots", content: "noindex, nofollow" },
       { name: "description", content: "Portail interne r\u00e9serv\u00e9 au personnel de Townsend Transit Express." },
       { property: "og:title", content: "Espace employ\u00e9s \u2014 Townsend Transit Express" },
       { property: "og:description", content: "Portail interne r\u00e9serv\u00e9 au personnel de Townsend Transit Express." },

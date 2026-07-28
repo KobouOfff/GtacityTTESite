@@ -8,7 +8,7 @@ export const Route = createFileRoute("/confidentialite")({
       {
         name: "description",
         content:
-          "Découvrez comment Townsend Transit Express collecte, utilise et protège les données personnelles.",
+          "Consultez la charte de confidentialité de Townsend Transit Express pour les voyageurs et le personnel TTE.",
       },
       {
         property: "og:title",
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/confidentialite")({
       {
         property: "og:description",
         content:
-          "Données collectées, finalités, cookies, prestataires et droits des utilisateurs du site TTE.",
+          "Engagements de confidentialité, accès internes et protection des informations des voyageurs et agents TTE.",
       },
       { property: "og:type", content: "website" },
       {
