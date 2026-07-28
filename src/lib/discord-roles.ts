@@ -156,6 +156,11 @@ export function canManageTrainings(user: DiscordSessionUser | null): boolean {
   return hasAny(user, DIRECTION_ROLES) || hasAny(user, BRANCH_MANAGER_IDS);
 }
 
+// Blacklist : réservée à la Direction (Gérant, Superviseur, Superviseur assistant).
+export function canManageBlacklist(user: DiscordSessionUser | null): boolean {
+  if (!user) return false;
+  return hasAny(user, DIRECTION_ROLES);
+}
 
 export function getPrimaryRole(roleIds: string[]): { name: string; color: string } | null {
   let best: { name: string; color: string; level: number } | null = null;
@@ -240,4 +245,3 @@ export const CONTACT_CATEGORIES: Record<string, string> = {
   suggestion: "Suggestion",
   autre: "Autre demande",
 };
-
