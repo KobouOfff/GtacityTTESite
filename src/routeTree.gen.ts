@@ -18,6 +18,7 @@ import { Route as HistoireRouteImport } from './routes/histoire'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as MesDemandesRouteImport } from './routes/mes-demandes'
 import { Route as SuiviDemandesRouteImport } from './routes/suivi-demandes'
+import { Route as ApiDeparturesRouteImport } from './routes/api/departures'
 import { Route as ApiLostFoundRouteImport } from './routes/api/lost-found'
 import { Route as ApiPvRouteImport } from './routes/api/pv'
 import { Route as ApiTrafficRouteImport } from './routes/api/traffic'
@@ -71,6 +72,11 @@ const SuiviDemandesRoute = SuiviDemandesRouteImport.update({
   path: '/suivi-demandes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDeparturesRoute = ApiDeparturesRouteImport.update({
+  id: '/api/departures',
+  path: '/api/departures',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLostFoundRoute = ApiLostFoundRouteImport.update({
   id: '/api/lost-found',
   path: '/api/lost-found',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
+  '/api/departures': typeof ApiDeparturesRoute
   '/api/lost-found': typeof ApiLostFoundRoute
   '/api/pv': typeof ApiPvRoute
   '/api/traffic': typeof ApiTrafficRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
+  '/api/departures': typeof ApiDeparturesRoute
   '/api/lost-found': typeof ApiLostFoundRoute
   '/api/pv': typeof ApiPvRoute
   '/api/traffic': typeof ApiTrafficRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mes-demandes': typeof MesDemandesRoute
   '/suivi-demandes': typeof SuiviDemandesRoute
+  '/api/departures': typeof ApiDeparturesRoute
   '/api/lost-found': typeof ApiLostFoundRoute
   '/api/pv': typeof ApiPvRoute
   '/api/traffic': typeof ApiTrafficRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
+    | '/api/departures'
     | '/api/lost-found'
     | '/api/pv'
     | '/api/traffic'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
+    | '/api/departures'
     | '/api/lost-found'
     | '/api/pv'
     | '/api/traffic'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mes-demandes'
     | '/suivi-demandes'
+    | '/api/departures'
     | '/api/lost-found'
     | '/api/pv'
     | '/api/traffic'
@@ -230,6 +242,7 @@ export interface RootRouteChildren {
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MesDemandesRoute: typeof MesDemandesRoute
   SuiviDemandesRoute: typeof SuiviDemandesRoute
+  ApiDeparturesRoute: typeof ApiDeparturesRoute
   ApiLostFoundRoute: typeof ApiLostFoundRoute
   ApiPvRoute: typeof ApiPvRoute
   ApiTrafficRoute: typeof ApiTrafficRoute
@@ -304,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuiviDemandesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/departures': {
+      id: '/api/departures'
+      path: '/api/departures'
+      fullPath: '/api/departures'
+      preLoaderRoute: typeof ApiDeparturesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/lost-found': {
       id: '/api/lost-found'
       path: '/api/lost-found'
@@ -366,6 +386,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentionsLegalesRoute: MentionsLegalesRoute,
   MesDemandesRoute: MesDemandesRoute,
   SuiviDemandesRoute: SuiviDemandesRoute,
+  ApiDeparturesRoute: ApiDeparturesRoute,
   ApiLostFoundRoute: ApiLostFoundRoute,
   ApiPvRoute: ApiPvRoute,
   ApiTrafficRoute: ApiTrafficRoute,
