@@ -66,7 +66,9 @@ export const createBlacklistEntry = createServerFn({ method: "POST" })
     try {
       const { createBlacklist } = await import("./blacklist.server");
       const row = await createBlacklist(user, data);
-      return { ok: true as const, row };
+      const { sendBlacklistToDiscord } = await import("./blacklist-discord.server");
+      const discordDelivery = await sendBlacklistToDiscord(row);
+      return { ok: true as const, row, discordDelivery };
     } catch (error) {
       console.error("[createBlacklistEntry]", error);
       return { ok: false as const, reason: "insert_failed" as const };
