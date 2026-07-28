@@ -140,6 +140,13 @@ export default function CentreRegulationPage() {
     <div className="topbar">
       <div className="crumb">Centre de Régulation · <b id="bcrumb">Tableau de bord</b></div>
       <div className="right">
+        <a className="home-link" href="/" title="Revenir à la page d’accueil du site">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <path d="m3 11 9-8 9 8" />
+            <path d="M5 10v10h14V10M9 20v-6h6v6" />
+          </svg>
+          <span>Accueil du site</span>
+        </a>
         <span className="status-pill"><span className="dot"></span> PCC en service</span>
         <span className="clock" id="clk">--:--:--</span>
       </div>
