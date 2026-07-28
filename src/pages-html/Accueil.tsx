@@ -193,11 +193,11 @@ export default function AccueilPage() {
 </section>
 
 {/* ===== DEPARTURE BOARD ===== */}
-<aside className="depboard" aria-label="Prochains départs et arrivées en gare centrale de Townsend">
+<aside className="depboard" aria-label="Prochains d\u00e9parts en gare centrale de Townsend">
   <div className="depboard-in">
     <div className="dep-head">
       <div className="dt">
-        <b><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg> Prochains départs et arrivées · Townsend</b>
+        <b><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg> Prochains départs · Gare centrale de Townsend</b>
         <small>Mis à jour en direct · les horaires défilent en temps réel</small>
       </div>
       <div className="clock" id="depClock" aria-live="off">--:--</div>
@@ -634,8 +634,8 @@ export default function AccueilPage() {
         <div className="ni" style={{background: "var(--l-t)"}}></div>
         <div className="nb">
           <div className="meta"><span className="tag" style={{background: "rgba(154,107,22,.14)", color: "#7A540F"}}>Histoire</span><span className="date">18 juin 2026</span></div>
-          <h3>La Ligne T, là où tout a commencé pour TTE</h3>
-          <p>Retour sur la première ligne historique de la société : le train urbain de Townsend, d'où est né l'ensemble du réseau régional et InterCité d'aujourd'hui.</p>
+          <h3>Townsend Transit Express, une histoire familiale depuis 1983</h3>
+          <p>Découvrez la création de TTE par Robert Turner, la reprise familiale par Turner Enterprise Management et la modernisation menée par James Wyatt.</p>
           <a className="more" href="/histoire">Lire la suite →</a>
         </div>
       </article>

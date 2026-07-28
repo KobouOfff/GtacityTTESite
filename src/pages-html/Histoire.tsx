@@ -4,66 +4,31 @@ import "./Histoire.css";
 import { DiscordAuthButton } from "@/components/DiscordAuth";
 import { TTELogo } from "@/components/TTELogo";
 
-const timeline = [
-  {
-    year: "1921",
-    line: "Ligne T",
-    title: "La première ligne, à Townsend",
-    text: "Le premier train urbain relie la gare centrale à l’hôpital TMC et au quartier résidentiel. Cette ligne fondatrice circule encore aujourd’hui.",
-  },
-  {
-    year: "1948",
-    line: "R1 / R2",
-    title: "Les Smokies et Knoxville",
-    text: "TTE ouvre ses premières lignes régionales vers Sevierville, puis vers Maryville, Alcoa et Knoxville.",
-  },
-  {
-    year: "1973",
-    line: "R3 / R4",
-    title: "Le corridor est-sud du Tennessee",
-    text: "Les liaisons Knoxville–Greeneville et Knoxville–Chattanooga donnent au réseau une véritable dimension régionale.",
-  },
-  {
-    year: "1996",
-    line: "IC1",
-    title: "Premier InterCité vers Nashville",
-    text: "Une liaison directe vers la capitale de l’État fait de TTE un opérateur interrégional.",
-  },
-  {
-    year: "2019",
-    line: "IC2",
-    title: "Naissance du Smoky Express",
-    text: "Townsend et Nashville sont reliées en 3 h 20, avec un arrêt rapide à Knoxville.",
-  },
-  {
-    year: "2026",
-    line: "Aujourd’hui",
-    title: "Bus local et modernisation",
-    text: "Le bus de Townsend complète la desserte locale pendant que le matériel, les gares et l’information voyageurs poursuivent leur modernisation.",
-  },
+const modernization = [
+  "Modernisation des infrastructures",
+  "Rénovation complète de la gare centrale",
+  "Création d’un véritable service de maintenance",
+  "Développement d’un service de sûreté ferroviaire",
+  "Professionnalisation de l’exploitation quotidienne",
 ];
 
-const commitments = [
-  {
-    value: "−74 %",
-    title: "Moins de CO₂",
-    text: "par rapport à un trajet équivalent réalisé seul en voiture.",
-  },
-  {
-    value: "96,3 %",
-    title: "Ponctualité",
-    text: "des trains à l’heure ou avec moins de cinq minutes de retard.",
-  },
-  {
-    value: "82 %",
-    title: "Électricité bas-carbone",
-    text: "de la traction alimentée par une électricité à faibles émissions.",
-  },
-  {
-    value: "0,02 %",
-    title: "Sécurité",
-    text: "d’incidents signalés à bord pour 100 000 trajets.",
-  },
+const investments = [
+  "La rénovation complète de la gare centrale",
+  "L’amélioration des quais",
+  "La modernisation de la signalisation",
+  "La création d’ateliers de maintenance",
+  "Le renouvellement des équipements de sécurité",
+  "La formation du personnel",
+];
+
+const mission = ["Sûr", "Fiable", "Accessible", "Moderne"];
+
+const values = [
+  { title: "Sécurité", text: "La protection des voyageurs et du personnel est notre priorité absolue." },
+  { title: "Fiabilité", text: "Nous mettons tout en œuvre pour assurer un service ponctuel et performant." },
+  { title: "Innovation", text: "Nous investissons continuellement dans la modernisation de nos infrastructures et de notre matériel." },
+  { title: "Responsabilité", text: "Nous agissons dans l’intérêt de nos voyageurs, de nos collaborateurs et des collectivités que nous desservons." },
+  { title: "Engagement local", text: "Profondément ancrée à Townsend, TTE participe activement au développement économique et social du Tennessee." },
 ];
 
 export default function HistoirePage() {
@@ -135,12 +100,12 @@ export default function HistoirePage() {
               <span>›</span>
               <span>Notre histoire</span>
             </div>
-            <span className="eyebrow">Depuis 1921</span>
-            <h1>D’une ligne urbaine à un réseau régional</h1>
+            <span className="eyebrow">Depuis 1983</span>
+            <h1>Une entreprise ferroviaire familiale tournée vers l’avenir</h1>
             <p>
-              Townsend Transit Express est né de la Ligne T, créée pour relier la gare,
-              le quartier résidentiel et l’hôpital. Plus d’un siècle après, le réseau
-              dessert l’est du Tennessee jusqu’à Nashville et Chattanooga.
+              Fondée à Townsend par Robert Turner, Townsend Transit Express s’est
+              développée autour d’une même ambition : proposer un transport régional
+              sûr, fiable, accessible et moderne.
             </p>
           </div>
         </section>
@@ -148,34 +113,97 @@ export default function HistoirePage() {
         <section className="history-intro">
           <div className="wrap history-intro-grid">
             <div>
-              <span className="eyebrow">L’origine du réseau</span>
-              <h2>Townsend, là où tout a commencé</h2>
+              <span className="eyebrow">Les origines · 1983</span>
+              <h2>Une société née des besoins de Townsend</h2>
             </div>
-            <p>
-              Le développement de TTE s’est toujours appuyé sur une idée simple :
-              connecter les habitants aux emplois, aux soins et aux grandes villes,
-              tout en conservant un service de proximité au cœur de Townsend.
-            </p>
+            <div className="history-prose">
+              <p>
+                Townsend Transit Express (TTE) trouve son origine en 1983, lorsque
+                Robert Turner, entrepreneur originaire de Townsend (Tennessee), fonde
+                une petite société ferroviaire privée destinée à répondre aux besoins
+                croissants de mobilité entre Townsend et les communes voisines.
+              </p>
+              <p>
+                À cette époque, le réseau est limité à quelques kilomètres de voies et
+                un unique dépôt. L’entreprise assure essentiellement des liaisons
+                locales et le transport de travailleurs, devenant rapidement un acteur
+                essentiel du développement économique de la région.
+              </p>
+              <p>
+                Grâce à une gestion rigoureuse et à des investissements réguliers dans
+                ses infrastructures, TTE acquiert une solide réputation de fiabilité.
+              </p>
+            </div>
           </div>
         </section>
 
-        <section className="history-timeline-section">
-          <div className="wrap">
-            <div className="history-heading">
-              <span className="eyebrow">Chronologie</span>
-              <h2>Les grandes étapes de TTE</h2>
+        <section className="history-content-section">
+          <div className="wrap history-story-grid">
+            <article className="history-story">
+              <span className="eyebrow">Gouvernance</span>
+              <h2>Une entreprise familiale</h2>
+              <p>
+                Pendant plusieurs décennies, la société reste une entreprise familiale
+                dirigée par la famille Turner.
+              </p>
+              <p>
+                Après le décès de son fondateur, son fils Richard Turner, diplômé en
+                Business Management de l’Université Vanderbilt, poursuit sa carrière
+                dans le secteur des investissements et fonde Turner Enterprise
+                Management (TEM).
+              </p>
+              <p>
+                Au fil des années, TEM acquiert progressivement une participation
+                majoritaire dans Townsend Transit Express afin de préserver l’héritage
+                familial et d’assurer la pérennité de l’entreprise.
+              </p>
+              <p className="history-highlight">
+                Aujourd’hui, Turner Enterprise Management détient <strong>85 % du
+                capital</strong> de Townsend Transit Express, les 15 % restants étant
+                répartis entre plusieurs investisseurs privés.
+              </p>
+            </article>
+
+            <article className="history-story">
+              <span className="eyebrow">Direction</span>
+              <h2>Une nouvelle impulsion</h2>
+              <p>
+                Afin d’accompagner la modernisation de l’entreprise, Richard Turner
+                décide de confier la direction opérationnelle à James Wyatt, nommé
+                Chief Executive Officer (CEO).
+              </p>
+              <p>Sous son impulsion, TTE connaît une profonde transformation :</p>
+              <ul className="history-list">
+                {modernization.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+              <p>
+                Richard Turner demeure Président du Conseil d’administration et
+                supervise les orientations stratégiques ainsi que les investissements
+                majeurs de l’entreprise.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section className="history-investments">
+          <div className="wrap history-investment-card">
+            <div>
+              <span className="eyebrow">Développement du réseau</span>
+              <h2>Les investissements</h2>
+              <p>
+                Depuis sa reprise, Townsend Transit Express a investi plusieurs
+                centaines de milliers de dollars dans le développement de son réseau.
+              </p>
             </div>
-            <div className="history-timeline">
-              {timeline.map((item) => (
-                <article className="history-event" key={item.year}>
-                  <div className="history-year">{item.year}</div>
-                  <div className="history-event-body">
-                    <span>{item.line}</span>
-                    <h3>{item.title}</h3>
-                    <p>{item.text}</p>
-                  </div>
-                </article>
-              ))}
+            <div>
+              <p>Parmi les principaux investissements figurent :</p>
+              <ul className="history-list two-columns">
+                {investments.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+              <p>
+                Ces investissements ont permis d’améliorer la qualité du service tout
+                en garantissant un haut niveau de sécurité.
+              </p>
             </div>
           </div>
         </section>
@@ -183,17 +211,40 @@ export default function HistoirePage() {
         <section className="history-commitments">
           <div className="wrap">
             <div className="history-heading light">
-              <span className="eyebrow">Nos engagements</span>
-              <h2>Faire circuler le Tennessee durablement</h2>
+              <span className="eyebrow">Notre mission</span>
+              <h2>Plus de quarante ans au service des voyageurs</h2>
               <p>
-                Ponctualité, sécurité, accessibilité et réduction des émissions guident
-                chaque évolution du réseau.
+                Depuis plus de quarante ans, Townsend Transit Express s’engage à offrir
+                un transport ferroviaire sûr, fiable, accessible et moderne.
               </p>
             </div>
             <div className="history-stats">
-              {commitments.map((item) => (
+              {mission.map((item, index) => (
+                <article key={item}>
+                  <strong>{String(index + 1).padStart(2, "0")}</strong>
+                  <h3>{item}</h3>
+                </article>
+              ))}
+            </div>
+            <p className="history-mission-copy">
+              Notre priorité demeure la sécurité de nos voyageurs, de nos
+              collaborateurs et de nos infrastructures. Chaque jour, nos équipes
+              assurent l’exploitation du réseau, la maintenance du matériel roulant et
+              l’accueil des voyageurs afin de garantir un service répondant aux plus
+              hauts standards de qualité.
+            </p>
+          </div>
+        </section>
+
+        <section className="history-values">
+          <div className="wrap">
+            <div className="history-heading">
+              <span className="eyebrow">Notre culture</span>
+              <h2>Les valeurs qui nous guident</h2>
+            </div>
+            <div className="history-values-grid">
+              {values.map((item) => (
                 <article key={item.title}>
-                  <strong>{item.value}</strong>
                   <h3>{item.title}</h3>
                   <p>{item.text}</p>
                 </article>
@@ -205,12 +256,15 @@ export default function HistoirePage() {
         <section className="history-future">
           <div className="wrap history-future-card">
             <div>
-              <span className="eyebrow">La suite de l’histoire</span>
-              <h2>Un réseau à construire ensemble</h2>
+              <span className="eyebrow">Aujourd’hui</span>
+              <h2>Une référence régionale en construction</h2>
               <p>
-                TTE poursuit la modernisation de ses trains, de ses gares et de
-                l’information voyageurs, avec un objectif constant : rendre chaque
-                déplacement plus simple et plus fiable.
+                Townsend Transit Express poursuit son développement avec l’ambition de
+                devenir une référence du transport ferroviaire régional américain.
+                Forte de son héritage familial, de l’expérience de ses collaborateurs
+                et d’une gouvernance tournée vers l’avenir, l’entreprise continue
+                d’investir dans des solutions de mobilité sûres, performantes et
+                durables au service des habitants du Tennessee.
               </p>
             </div>
             <a href="/contact#suggestion" className="btn btn-primary">

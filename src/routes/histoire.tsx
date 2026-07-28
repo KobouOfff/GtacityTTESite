@@ -8,13 +8,13 @@ export const Route = createFileRoute("/histoire")({
       {
         name: "description",
         content:
-          "Découvrez l’histoire de Townsend Transit Express, de la Ligne T créée à Townsend en 1921 au réseau ferroviaire régional actuel.",
+          "Découvrez l’histoire de Townsend Transit Express, société ferroviaire familiale fondée par Robert Turner à Townsend en 1983.",
       },
       { property: "og:title", content: "Notre histoire — Townsend Transit Express" },
       {
         property: "og:description",
         content:
-          "De la première ligne urbaine de Townsend au réseau régional TTE : plus d’un siècle d’histoire ferroviaire.",
+          "Depuis 1983, TTE développe un réseau ferroviaire régional sûr, fiable et moderne au service du Tennessee.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
