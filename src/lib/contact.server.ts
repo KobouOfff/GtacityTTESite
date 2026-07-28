@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import type { DiscordSessionUser } from "./discord-roles";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const PRESENCE_PROOF_SALT = "20a54c73055d610b3e3f336779ccb9d1";
 
@@ -231,9 +232,8 @@ async function insertMessage(
   visibility: "public" | "internal",
   authorType: "client" | "staff",
 ) {
-  const supabase = client();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.rpc as any)(
+  const { error } = await (supabaseAdmin.rpc as any)(
     "insert_contact_request_message",
     {
       p_contact_request_id: requestId,
