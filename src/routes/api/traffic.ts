@@ -131,6 +131,15 @@ export const Route = createFileRoute("/api/traffic")({
             .single();
 
           if (error) throw error;
+          const { error: logError } = await supabaseAdmin
+            .from("employee_audit_logs" as never)
+            .insert({
+              agent_discord_id: user.discordId,
+              agent_name: user.displayName || user.username,
+              action_text: `A diffusé une info trafic${line ? ` sur la ligne ${line}` : ""} : « ${title} ».`,
+              source: "info_trafic",
+            } as never);
+          if (logError) console.error("[traffic/audit-create]", logError);
           return noStore({
             ok: true,
             record: toClientShape(data as unknown as TrafficRow),
@@ -170,6 +179,15 @@ export const Route = createFileRoute("/api/traffic")({
             .eq("id", id);
 
           if (error) throw error;
+          const { error: logError } = await supabaseAdmin
+            .from("employee_audit_logs" as never)
+            .insert({
+              agent_discord_id: user.discordId,
+              agent_name: user.displayName || user.username,
+              action_text: "A prolongé une publication info trafic d’une heure.",
+              source: "info_trafic",
+            } as never);
+          if (logError) console.error("[traffic/audit-update]", logError);
           return noStore({ ok: true });
         } catch (error) {
           console.error("[traffic/update]", error);
@@ -188,12 +206,29 @@ export const Route = createFileRoute("/api/traffic")({
 
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data: record, error: readError } = await supabaseAdmin
+            .from("traffic_publications" as never)
+            .select("title, line")
+            .eq("id", id)
+            .maybeSingle();
+          if (readError) throw readError;
+
           const { error } = await supabaseAdmin
             .from("traffic_publications" as never)
             .delete()
             .eq("id", id);
 
           if (error) throw error;
+          const details = record as unknown as { title?: string; line?: string | null } | null;
+          const { error: logError } = await supabaseAdmin
+            .from("employee_audit_logs" as never)
+            .insert({
+              agent_discord_id: user.discordId,
+              agent_name: user.displayName || user.username,
+              action_text: `A retiré la publication info trafic « ${details?.title || id} ».`,
+              source: "info_trafic",
+            } as never);
+          if (logError) console.error("[traffic/audit-delete]", logError);
           return noStore({ ok: true });
         } catch (error) {
           console.error("[traffic/delete]", error);

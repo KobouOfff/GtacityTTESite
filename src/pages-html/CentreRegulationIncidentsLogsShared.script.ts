@@ -55,6 +55,7 @@ export const incidentsLogsSharedScript = String.raw`
 
   var incidents = [];
   var auditLogs = [];
+  var auditEmployees = [];
   var incidentsLoading = false;
   var logsLoading = false;
   var canViewLogs = window.__tteCanViewAuditLogs === true;
@@ -221,6 +222,11 @@ export const incidentsLogsSharedScript = String.raw`
     if(!select) return;
     var selected = select.value;
     var employees = {};
+    auditEmployees.forEach(function(employee){
+      if(employee && employee.id && employee.name){
+        employees[employee.id] = employee.name;
+      }
+    });
     auditLogs.forEach(function(item){
       employees[item.agentId || item.who] = item.who;
     });
@@ -275,6 +281,7 @@ export const incidentsLogsSharedScript = String.raw`
     try {
       var json = await api("/api/audit-logs");
       auditLogs = Array.isArray(json.records) ? json.records : [];
+      auditEmployees = Array.isArray(json.employees) ? json.employees : [];
       populateEmployeeFilter();
     } catch(error) {
       console.error("[audit-logs/list]", error);

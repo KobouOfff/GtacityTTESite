@@ -138,6 +138,15 @@ export const Route = createFileRoute("/api/lost-found")({
             .single();
 
           if (error) throw error;
+          const { error: logError } = await supabaseAdmin
+            .from("employee_audit_logs" as never)
+            .insert({
+              agent_discord_id: user.discordId,
+              agent_name: user.displayName || user.username,
+              action_text: `A enregistré un objet trouvé : ${category} (${location}).`,
+              source: "lost_found",
+            } as never);
+          if (logError) console.error("[lost-found/audit-create]", logError);
           return noStore({
             ok: true,
             record: toClientShape(data as unknown as LostFoundRow),
@@ -178,6 +187,15 @@ export const Route = createFileRoute("/api/lost-found")({
             .eq("id", id);
 
           if (error) throw error;
+          const { error: logError } = await supabaseAdmin
+            .from("employee_audit_logs" as never)
+            .insert({
+              agent_discord_id: user.discordId,
+              agent_name: user.displayName || user.username,
+              action_text: `A modifié le statut d’un objet trouvé : « ${status} ».`,
+              source: "lost_found",
+            } as never);
+          if (logError) console.error("[lost-found/audit-update]", logError);
           return noStore({ ok: true });
         } catch (error) {
           console.error("[lost-found/update]", error);
@@ -196,12 +214,34 @@ export const Route = createFileRoute("/api/lost-found")({
 
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data: record, error: readError } = await supabaseAdmin
+            .from("lost_found_items" as never)
+            .select("category, found_location")
+            .eq("id", id)
+            .maybeSingle();
+          if (readError) throw readError;
+
           const { error } = await supabaseAdmin
             .from("lost_found_items" as never)
             .delete()
             .eq("id", id);
 
           if (error) throw error;
+          const details = record as unknown as {
+            category?: string;
+            found_location?: string;
+          } | null;
+          const { error: logError } = await supabaseAdmin
+            .from("employee_audit_logs" as never)
+            .insert({
+              agent_discord_id: user.discordId,
+              agent_name: user.displayName || user.username,
+              action_text: `A supprimé un objet trouvé : ${details?.category || id}${
+                details?.found_location ? ` (${details.found_location})` : ""
+              }.`,
+              source: "lost_found",
+            } as never);
+          if (logError) console.error("[lost-found/audit-delete]", logError);
           return noStore({ ok: true });
         } catch (error) {
           console.error("[lost-found/delete]", error);

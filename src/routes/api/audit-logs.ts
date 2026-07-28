@@ -15,6 +15,12 @@ type AuditRow = {
   created_at: string;
 };
 
+type EmployeeRow = {
+  discord_id: string;
+  username: string;
+  display_name: string | null;
+};
+
 async function currentUser(): Promise<DiscordSessionUser | null> {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const session = await useSession<SessionData>(sessionConfig);
@@ -67,9 +73,22 @@ export const Route = createFileRoute("/api/audit-logs")({
             .limit(1000);
           if (error) throw error;
 
+          const { data: employeeData, error: employeeError } = await supabaseAdmin
+            .from("discord_users" as never)
+            .select("discord_id, username, display_name")
+            .order("display_name", { ascending: true })
+            .limit(1000);
+          if (employeeError) {
+            console.error("[audit-logs/employees]", employeeError);
+          }
+
           return noStore({
             ok: true,
             records: ((data ?? []) as unknown as AuditRow[]).map(toClientShape),
+            employees: ((employeeData ?? []) as unknown as EmployeeRow[]).map((employee) => ({
+              id: employee.discord_id,
+              name: employee.display_name || employee.username,
+            })),
           });
         } catch (error) {
           console.error("[audit-logs/list]", error);

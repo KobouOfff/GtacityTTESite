@@ -111,6 +111,15 @@ export const Route = createFileRoute("/api/departures")({
             .select("*")
             .single();
           if (error) throw error;
+          const { error: logError } = await supabaseAdmin
+            .from("employee_audit_logs" as never)
+            .insert({
+              agent_discord_id: user.discordId,
+              agent_name: user.displayName || user.username,
+              action_text: `A mis à jour le départ ${departureKey} : « ${status} ».`,
+              source: "departures",
+            } as never);
+          if (logError) console.error("[departures/audit]", logError);
           return noStore({ ok: true, record: toClient(data as unknown as DepartureRow) });
         } catch (error) {
           console.error("[departures/update]", error);
