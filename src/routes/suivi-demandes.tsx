@@ -133,18 +133,29 @@ function RequestCard({ row, onChange }: { row: ContactRequestRow; onChange: () =
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState(row.status);
   const [branch, setBranch] = useState<string>(row.assigned_branch ?? "");
-  const [note, setNote] = useState("");
+  const [internalMessage, setInternalMessage] = useState("");
+  const [clientMessage, setClientMessage] = useState("");
 
   const mutate = useMutation({
-    mutationFn: (payload: { id: string; status?: string; assigned_branch?: string | null; note?: string }) =>
+    mutationFn: (payload: {
+      id: string;
+      status?: string;
+      assigned_branch?: string | null;
+      internal_message?: string;
+      client_message?: string;
+    }) =>
       updateContactRequest({ data: payload }),
     onSuccess: (res) => {
       if (res?.ok) {
-        setNote("");
-        setOpen(false);
+        setInternalMessage("");
+        setClientMessage("");
         onChange();
       } else {
-        alert("Échec de la mise à jour : " + (res?.reason ?? "inconnue"));
+        alert(
+          res?.reason === "internal_message_required"
+            ? "Ajoutez une consigne interne pour expliquer le transfert au service concerné."
+            : "Échec de la mise à jour : " + (res?.reason ?? "inconnue"),
+        );
       }
     },
     onError: (e) => alert("Erreur : " + String(e)),
@@ -152,6 +163,9 @@ function RequestCard({ row, onChange }: { row: ContactRequestRow; onChange: () =
 
   const st = CONTACT_STATUSES[row.status] ?? { label: row.status, color: "#64748b" };
   const bc = getBranchColor(row.assigned_branch);
+  const publicMessages = row.messages?.filter((message) => message.visibility === "public") ?? [];
+  const internalMessages = row.messages?.filter((message) => message.visibility === "internal") ?? [];
+  const branchChanged = (branch || null) !== (row.assigned_branch ?? null);
 
   return (
     <article style={card}>
@@ -185,10 +199,26 @@ function RequestCard({ row, onChange }: { row: ContactRequestRow; onChange: () =
 
       {open && (
         <div style={{ marginTop: 14, display: "grid", gap: 14 }}>
-          <div>
-            <div style={{ ...muted, fontSize: 12, marginBottom: 4 }}>Message du client</div>
-            <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "10px 12px", whiteSpace: "pre-wrap" }}>
-              {row.message}
+          <div style={{ border: "1px solid rgba(34,197,94,0.22)", borderRadius: 10, padding: 12 }}>
+            <div style={{ color: "#4ade80", fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
+              MESSAGERIE AVEC LE CLIENT
+            </div>
+            <div style={{ display: "grid", gap: 7 }}>
+              <MessageBubble
+                author={row.requester_display_name || row.requester_username}
+                at={row.created_at}
+                message={row.message}
+                client
+              />
+              {publicMessages.map((message) => (
+                <MessageBubble
+                  key={message.id}
+                  author={message.author_name}
+                  at={message.created_at}
+                  message={message.message}
+                  client={message.author_type === "client"}
+                />
+              ))}
             </div>
           </div>
 
@@ -203,11 +233,21 @@ function RequestCard({ row, onChange }: { row: ContactRequestRow; onChange: () =
             </div>
           )}
 
-          {row.notes && row.notes.length > 0 && (
-            <div>
-              <div style={{ ...muted, fontSize: 12, marginBottom: 4 }}>Historique interne</div>
+          {(internalMessages.length > 0 || (row.notes?.length ?? 0) > 0) && (
+            <div style={{ border: "1px solid rgba(245,158,11,0.24)", borderRadius: 10, padding: 12 }}>
+              <div style={{ color: "#fbbf24", fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
+                FIL INTERNE — INVISIBLE DU CLIENT
+              </div>
               <div style={{ display: "grid", gap: 6 }}>
-                {row.notes.map((n, i) => (
+                {internalMessages.map((message) => (
+                  <div key={message.id} style={{ background: "rgba(245,158,11,0.08)", borderRadius: 8, padding: "8px 10px", fontSize: 13 }}>
+                    <div style={{ fontSize: 12, color: "#94a3b8" }}>
+                      <b style={{ color: "#fde68a" }}>{message.author_name}</b> · {new Date(message.created_at).toLocaleString("fr-FR")}
+                    </div>
+                    <div style={{ marginTop: 4, whiteSpace: "pre-wrap" }}>{message.message}</div>
+                  </div>
+                ))}
+                {internalMessages.length === 0 && row.notes?.map((n, i) => (
                   <div key={i} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "8px 10px", fontSize: 13 }}>
                     <div style={{ fontSize: 12, color: "#94a3b8" }}>
                       <b style={{ color: "#e2e8f0" }}>{n.author}</b> · {new Date(n.at).toLocaleString("fr-FR")}
@@ -236,27 +276,57 @@ function RequestCard({ row, onChange }: { row: ContactRequestRow; onChange: () =
               </label>
             </div>
             <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, ...muted }}>
-              Note / réponse (visible du client si ajoutée)
+              <span>
+                Message interne / consigne au service
+                {branchChanged && branch && <b style={{ color: "#fbbf24" }}> — obligatoire pour transférer</b>}
+              </span>
               <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
+                value={internalMessage}
+                onChange={(e) => setInternalMessage(e.target.value)}
                 rows={3}
-                placeholder="Ex. Transmis au Gérant Train, il te répondra sous 48 h."
-                style={{ ...selectStyle, resize: "vertical", fontFamily: "inherit" }}
+                maxLength={5000}
+                placeholder="Ex. Merci de vérifier les caméras de la gare et de reprendre ce dossier."
+                style={{ ...selectStyle, resize: "vertical", fontFamily: "inherit", borderColor: "rgba(245,158,11,0.45)" }}
               />
+              <small style={{ color: "#fbbf24" }}>Ce message est réservé aux employés. Le client ne le verra jamais.</small>
+            </label>
+            <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, ...muted }}>
+              Message au client — facultatif
+              <textarea
+                value={clientMessage}
+                onChange={(e) => setClientMessage(e.target.value)}
+                rows={3}
+                maxLength={5000}
+                placeholder="Ex. Votre demande vient d’être transmise au service Train. Nous revenons vers vous prochainement."
+                style={{ ...selectStyle, resize: "vertical", fontFamily: "inherit", borderColor: "rgba(34,197,94,0.4)" }}
+              />
+              <small style={{ color: "#4ade80" }}>Ce message apparaîtra dans « Mes demandes » et le client pourra répondre.</small>
             </label>
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
               <button
                 onClick={() =>
-                  mutate.mutate({
-                    id: row.id,
-                    status: status !== row.status ? status : undefined,
-                    assigned_branch: (branch || null) !== (row.assigned_branch ?? null) ? (branch || null) : undefined,
-                    note: note.trim() ? note : undefined,
-                  })
+                  branchChanged && branch && !internalMessage.trim()
+                    ? alert("Écrivez une consigne interne avant de transférer la demande.")
+                    : mutate.mutate({
+                        id: row.id,
+                        status: status !== row.status ? status : undefined,
+                        assigned_branch: branchChanged ? (branch || null) : undefined,
+                        internal_message: internalMessage.trim() || undefined,
+                        client_message: clientMessage.trim() || undefined,
+                      })
                 }
-                disabled={mutate.isPending}
-                style={btnPrimary}
+                disabled={
+                  mutate.isPending ||
+                  (status === row.status && !branchChanged && !internalMessage.trim() && !clientMessage.trim())
+                }
+                style={{
+                  ...btnPrimary,
+                  opacity:
+                    mutate.isPending ||
+                    (status === row.status && !branchChanged && !internalMessage.trim() && !clientMessage.trim())
+                      ? 0.55
+                      : 1,
+                }}
               >
                 {mutate.isPending ? "Enregistrement…" : "Enregistrer"}
               </button>
@@ -265,6 +335,38 @@ function RequestCard({ row, onChange }: { row: ContactRequestRow; onChange: () =
         </div>
       )}
     </article>
+  );
+}
+
+function MessageBubble({
+  author,
+  at,
+  message,
+  client,
+}: {
+  author: string;
+  at: string;
+  message: string;
+  client: boolean;
+}) {
+  return (
+    <div
+      style={{
+        background: client ? "rgba(88,101,242,0.13)" : "rgba(34,197,94,0.1)",
+        border: `1px solid ${client ? "rgba(88,101,242,0.26)" : "rgba(34,197,94,0.22)"}`,
+        borderRadius: 8,
+        padding: "8px 10px",
+        fontSize: 13,
+        marginLeft: client ? 28 : 0,
+        marginRight: client ? 0 : 28,
+      }}
+    >
+      <div style={{ fontSize: 12, color: "#94a3b8" }}>
+        <b style={{ color: client ? "#c7d2fe" : "#bbf7d0" }}>{author}</b> ·{" "}
+        {new Date(at).toLocaleString("fr-FR")}
+      </div>
+      <div style={{ marginTop: 4, whiteSpace: "pre-wrap" }}>{message}</div>
+    </div>
   );
 }
 
