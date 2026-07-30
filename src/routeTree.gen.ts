@@ -24,7 +24,6 @@ import { Route as ApiDeparturesRouteImport } from './routes/api/departures'
 import { Route as ApiIncidentsRouteImport } from './routes/api/incidents'
 import { Route as ApiLostFoundRouteImport } from './routes/api/lost-found'
 import { Route as ApiPvRouteImport } from './routes/api/pv'
-import { Route as ApiTownsendLineRouteImport } from './routes/api/townsend-line'
 import { Route as ApiTrafficRouteImport } from './routes/api/traffic'
 import { Route as GaresStationRouteImport } from './routes/gares/$station'
 import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact/submit'
@@ -107,11 +106,6 @@ const ApiPvRoute = ApiPvRouteImport.update({
   path: '/api/pv',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTownsendLineRoute = ApiTownsendLineRouteImport.update({
-  id: '/api/townsend-line',
-  path: '/api/townsend-line',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiTrafficRoute = ApiTrafficRouteImport.update({
   id: '/api/traffic',
   path: '/api/traffic',
@@ -160,7 +154,6 @@ export interface FileRoutesByFullPath {
   '/api/incidents': typeof ApiIncidentsRoute
   '/api/lost-found': typeof ApiLostFoundRoute
   '/api/pv': typeof ApiPvRoute
-  '/api/townsend-line': typeof ApiTownsendLineRoute
   '/api/traffic': typeof ApiTrafficRoute
   '/gares/$station': typeof GaresStationRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
@@ -184,7 +177,6 @@ export interface FileRoutesByTo {
   '/api/incidents': typeof ApiIncidentsRoute
   '/api/lost-found': typeof ApiLostFoundRoute
   '/api/pv': typeof ApiPvRoute
-  '/api/townsend-line': typeof ApiTownsendLineRoute
   '/api/traffic': typeof ApiTrafficRoute
   '/gares/$station': typeof GaresStationRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
@@ -209,7 +201,6 @@ export interface FileRoutesById {
   '/api/incidents': typeof ApiIncidentsRoute
   '/api/lost-found': typeof ApiLostFoundRoute
   '/api/pv': typeof ApiPvRoute
-  '/api/townsend-line': typeof ApiTownsendLineRoute
   '/api/traffic': typeof ApiTrafficRoute
   '/gares/$station': typeof GaresStationRoute
   '/api/public/contact/submit': typeof ApiPublicContactSubmitRoute
@@ -235,7 +226,6 @@ export interface FileRouteTypes {
     | '/api/incidents'
     | '/api/lost-found'
     | '/api/pv'
-    | '/api/townsend-line'
     | '/api/traffic'
     | '/gares/$station'
     | '/api/public/contact/submit'
@@ -259,7 +249,6 @@ export interface FileRouteTypes {
     | '/api/incidents'
     | '/api/lost-found'
     | '/api/pv'
-    | '/api/townsend-line'
     | '/api/traffic'
     | '/gares/$station'
     | '/api/public/contact/submit'
@@ -283,7 +272,6 @@ export interface FileRouteTypes {
     | '/api/incidents'
     | '/api/lost-found'
     | '/api/pv'
-    | '/api/townsend-line'
     | '/api/traffic'
     | '/gares/$station'
     | '/api/public/contact/submit'
@@ -308,7 +296,6 @@ export interface RootRouteChildren {
   ApiIncidentsRoute: typeof ApiIncidentsRoute
   ApiLostFoundRoute: typeof ApiLostFoundRoute
   ApiPvRoute: typeof ApiPvRoute
-  ApiTownsendLineRoute: typeof ApiTownsendLineRoute
   ApiTrafficRoute: typeof ApiTrafficRoute
   GaresStationRoute: typeof GaresStationRoute
   ApiPublicContactSubmitRoute: typeof ApiPublicContactSubmitRoute
@@ -424,13 +411,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPvRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/townsend-line': {
-      id: '/api/townsend-line'
-      path: '/api/townsend-line'
-      fullPath: '/api/townsend-line'
-      preLoaderRoute: typeof ApiTownsendLineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/traffic': {
       id: '/api/traffic'
       path: '/api/traffic'
@@ -492,7 +472,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiIncidentsRoute: ApiIncidentsRoute,
   ApiLostFoundRoute: ApiLostFoundRoute,
   ApiPvRoute: ApiPvRoute,
-  ApiTownsendLineRoute: ApiTownsendLineRoute,
   ApiTrafficRoute: ApiTrafficRoute,
   GaresStationRoute: GaresStationRoute,
   ApiPublicContactSubmitRoute: ApiPublicContactSubmitRoute,
