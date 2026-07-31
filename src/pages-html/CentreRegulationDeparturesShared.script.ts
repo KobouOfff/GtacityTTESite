@@ -42,10 +42,11 @@ export const departuresSharedScript = String.raw`
       return '<option value="'+value+'"'+(selected===value?" selected":"")+'>'+statusLabels[value]+'</option>';
     }).join("");
   }
-  function render(records){
+  function render(records,pastHidden){
     var body=document.getElementById("depBody"); if(!body) return;
     if(!records.length){
-      body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--muted)">Aucun service programmé ce jour.</td></tr>';
+      body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--muted)">'+
+        (pastHidden?"Tous les trains d’aujourd’hui sont déjà partis.":"Aucun service programmé ce jour.")+'</td></tr>';
       return;
     }
     body.innerHTML=records.map(function(record){
@@ -74,7 +75,19 @@ export const departuresSharedScript = String.raw`
     var line=(lineInput&&lineInput.value)||"";
     try{
       var json=await api("/api/departures?date="+encodeURIComponent(date)+"&limit=200"+(line?"&line="+encodeURIComponent(line):""));
-      render(json.records||[]);
+      var records=json.records||[];
+      var pastHidden=false;
+      if(date===today()){
+        var now=new Date(), current=now.getHours()*60+now.getMinutes();
+        var totalBefore=records.length;
+        records=records.filter(function(record){
+          var reference=record.departure||record.scheduledDeparture;
+          var parts=reference.split(":");
+          return Number(parts[0])*60+Number(parts[1])>=current;
+        });
+        pastHidden=totalBefore>0&&records.length===0;
+      }
+      render(records,pastHidden);
     }catch(error){
       console.error("[departures/list]",error);
       notify("Impossible de charger l'horaire partagé. Vérifiez la migration Supabase.","err");

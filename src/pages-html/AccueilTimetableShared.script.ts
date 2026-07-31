@@ -36,12 +36,12 @@ export const timetablePublicScript = String.raw`
   async function refreshBoard(){
     var body=document.getElementById("depBody"); if(!body) return;
     try{
-      var records=await api("date="+today()+"&station=townsend&limit=8");
+      var records=await api("date="+today()+"&station=townsend&limit=100");
       var now=new Date(), current=now.getHours()*60+now.getMinutes();
       var future=records.filter(function(record){
         var parts=record.departure.split(":"); return Number(parts[0])*60+Number(parts[1])>=current-5;
       });
-      body.innerHTML=(future.length?future:records).slice(0,6).map(row).join("")||
+      body.innerHTML=future.slice(0,6).map(row).join("")||
         '<tr><td colspan="5" style="text-align:center">Aucun autre départ aujourd’hui.</td></tr>';
     }catch(error){
       console.error("[timetable/public-board]",error);
