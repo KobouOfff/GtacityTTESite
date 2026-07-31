@@ -74,7 +74,7 @@ export const departuresSharedScript = String.raw`
     var date=(dateInput&&dateInput.value)||today();
     var line=(lineInput&&lineInput.value)||"";
     try{
-      var json=await api("/api/departures?date="+encodeURIComponent(date)+"&limit=200"+(line?"&line="+encodeURIComponent(line):""));
+      var json=await api("/api/departures?date="+encodeURIComponent(date)+"&station=townsend&limit=200"+(line?"&line="+encodeURIComponent(line):""));
       var records=json.records||[];
       var pastHidden=false;
       if(date===today()){
