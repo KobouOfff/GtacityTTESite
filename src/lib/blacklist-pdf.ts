@@ -158,18 +158,6 @@ export function createBlacklistPdf(row: BlacklistRow) {
     doc.text(`Date de naissance : ${fmtDate(row.date_of_birth)}`, margin, y);
     y += 14;
   }
-  if (row.discord_username || row.discord_id) {
-    doc.text(
-      `Discord : ${row.discord_username ?? ""}${row.discord_id ? ` (ID ${row.discord_id})` : ""}`,
-      margin,
-      y,
-    );
-    y += 14;
-  }
-  if (row.steam_id) {
-    doc.text(`Steam ID : ${row.steam_id}`, margin, y);
-    y += 14;
-  }
   if (row.physical_description) {
     doc.text("Signalement :", margin, y);
     y += 14;
