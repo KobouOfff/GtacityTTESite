@@ -7,4 +7,4 @@ Disallow: /espace-employes
 Disallow: /mes-demandes
 Disallow: /suivi-demandes
 
-Sitemap: https://townsendtransitexpress.com/sitemap.xml
+Sitemap: https://www.townsendtransitexpress.com/sitemap.xml
