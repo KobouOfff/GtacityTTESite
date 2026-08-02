@@ -143,7 +143,19 @@
   }
 }
 
-.tte-theme-toggle {
+/* Bilingual content: show only the language matching <html data-lang="…">.
+   Both versions are always rendered in the DOM (server and client alike),
+   so switching is instant and there is never a flash of the wrong language. */
+html[data-lang="en"] .i18n-fr {
+  display: none;
+}
+
+html:not([data-lang="en"]) .i18n-en {
+  display: none;
+}
+
+.tte-theme-toggle,
+.tte-lang-toggle {
   position: fixed;
   right: 18px;
   bottom: 18px;
@@ -163,7 +175,12 @@
   transition: transform 0.16s ease, background 0.16s ease;
 }
 
-.tte-theme-toggle:hover {
+.tte-lang-toggle {
+  bottom: 68px;
+}
+
+.tte-theme-toggle:hover,
+.tte-lang-toggle:hover {
   transform: translateY(-2px);
   background: #153a70;
 }
@@ -176,7 +193,8 @@
   bottom: 74px !important;
 }
 
-.tte-theme-toggle svg {
+.tte-theme-toggle svg,
+.tte-lang-toggle svg {
   width: 19px;
   height: 19px;
   fill: none;
@@ -297,25 +315,33 @@ html.dark .hdr.open .mainnav {
   background: #111827;
 }
 
-html.dark .tte-theme-toggle {
+html.dark .tte-theme-toggle,
+html.dark .tte-lang-toggle {
   background: #f3f6fb;
   color: #08111f;
   border-color: #d7deea;
 }
 
-html.dark .tte-theme-toggle:hover {
+html.dark .tte-theme-toggle:hover,
+html.dark .tte-lang-toggle:hover {
   background: #dce8f8;
 }
 
 @media (max-width: 600px) {
-  .tte-theme-toggle {
+  .tte-theme-toggle,
+  .tte-lang-toggle {
     right: 12px;
     bottom: 12px;
     width: 42px;
     padding: 10px;
   }
 
-  .tte-theme-toggle span {
+  .tte-lang-toggle {
+    bottom: 60px;
+  }
+
+  .tte-theme-toggle span,
+  .tte-lang-toggle span {
     display: none;
   }
 

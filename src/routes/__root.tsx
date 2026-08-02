@@ -14,6 +14,8 @@ import { Analytics } from "@vercel/analytics/react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { LanguageToggle } from "../components/LanguageToggle";
+import { LanguageProvider } from "../lib/i18n/LanguageContext";
 import { PublicTrafficBanner } from "../components/PublicTrafficBanner";
 
 const themeBootScript = `
@@ -23,6 +25,14 @@ const themeBootScript = `
     var dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.documentElement.classList.toggle("dark", dark);
     document.documentElement.style.colorScheme = dark ? "dark" : "light";
+  } catch (_) {}
+  try {
+    var savedLang = localStorage.getItem("tte-lang");
+    var lang = savedLang === "en" || savedLang === "fr"
+      ? savedLang
+      : (((navigator.language || navigator.userLanguage || "fr").toLowerCase().indexOf("en") === 0) ? "en" : "fr");
+    document.documentElement.setAttribute("data-lang", lang);
+    document.documentElement.lang = lang;
   } catch (_) {}
 })();
 `;
@@ -143,16 +153,22 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+const STAFF_ONLY_PREFIXES = ["/centre-regulation", "/espace-employes"];
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const isStaffArea = STAFF_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PublicTrafficBanner pathname={pathname} />
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-      <ThemeToggle />
+      <LanguageProvider>
+        <PublicTrafficBanner pathname={pathname} />
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+        {!isStaffArea && <LanguageToggle />}
+        <ThemeToggle />
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }
