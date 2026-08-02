@@ -399,6 +399,20 @@ export default function CentreRegulationPage() {
                 <option value="reduit">Tarif réduit injustifié</option>
                 <option value="refus">Refus de présenter</option>
                 <option value="contrefacon">Titre contrefait</option>
+                <option value="securite">Non-respect des règles de sécurité</option>
+                <option value="incivilite">Incivilité envers un agent</option>
+                <option value="agression">Agression / voies de fait</option>
+                <option value="degradation">Dégradation de matériel</option>
+                <option value="fumee">Usage de tabac / vapotage interdit</option>
+                <option value="alcool">Consommation d'alcool interdite</option>
+                <option value="animal">Animal non autorisé / non muni</option>
+                <option value="bagage">Bagage abandonné / encombrant non conforme</option>
+                <option value="intrusion">Intrusion en zone interdite</option>
+                <option value="quai">Franchissement de la ligne de sécurité quai</option>
+                <option value="portes">Obstruction des portes / freins d'urgence abusif</option>
+                <option value="tapage">Tapage / nuisance sonore</option>
+                <option value="vente">Vente ou démarchage non autorisé</option>
+                <option value="autre">Autre infraction</option>
               </select>
             </div>
             <div className="fg col-3"><label>Ligne / Train</label>
