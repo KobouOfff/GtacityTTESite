@@ -845,6 +845,120 @@ export default function AccueilPage() {
   </div>
 </section>
 
+{/* ===== TÉMOIGNAGES ===== */}
+<section className="section" id="temoignages">
+  <div className="wrap">
+    <div className="shead">
+      <span className="eyebrow"><T fr="Ils voyagent avec TTE" en="They travel with TTE" /></span>
+      <h2 className="stitle"><T fr="Ce que disent nos voyageurs" en="What our travellers say" /></h2>
+    </div>
+
+    <div className="testi-grid">
+      <div className="testi">
+        <div className="testi-stars" aria-hidden="true">★★★★★</div>
+        <p className="testi-txt">
+          <T
+            fr="La ligne IC1 jusqu'à Nashville était à l'heure malgré la neige. Personnel très professionnel en gare de Townsend."
+            en="The IC1 line to Nashville was on time despite the snow. Very professional staff at Townsend station."
+          />
+        </p>
+        <div className="testi-who">
+          <span className="testi-av">EM</span>
+          <div>
+            <b><T fr="Ethan M." en="Ethan M." /></b>
+            <small><T fr="Trajet Townsend → Nashville" en="Townsend → Nashville journey" /></small>
+          </div>
+        </div>
+      </div>
+
+      <div className="testi">
+        <div className="testi-stars" aria-hidden="true">★★★★☆</div>
+        <p className="testi-txt">
+          <T
+            fr="Wi-Fi correct à bord et sièges confortables. Un peu d'attente au guichet le matin, sinon rien à dire."
+            en="Decent Wi-Fi on board and comfortable seats. A bit of a wait at the ticket office in the morning, otherwise no complaints."
+          />
+        </p>
+        <div className="testi-who">
+          <span className="testi-av">SC</span>
+          <div>
+            <b><T fr="Sarah C." en="Sarah C." /></b>
+            <small><T fr="Ligne R2, abonnée mensuelle" en="R2 line, monthly pass holder" /></small>
+          </div>
+        </div>
+      </div>
+
+      <div className="testi">
+        <div className="testi-stars" aria-hidden="true">★★★★★</div>
+        <p className="testi-txt">
+          <T
+            fr="Accès PMR simple à la gare de Maryville, agent au top pour l'embarquement. Je recommande."
+            en="Easy wheelchair access at Maryville station, great staff support for boarding. Highly recommend."
+          />
+        </p>
+        <div className="testi-who">
+          <span className="testi-av">RD</span>
+          <div>
+            <b><T fr="Robert D." en="Robert D." /></b>
+            <small><T fr="Gare de Maryville" en="Maryville station" /></small>
+          </div>
+        </div>
+      </div>
+
+      <div className="testi">
+        <div className="testi-stars" aria-hidden="true">★★★★☆</div>
+        <p className="testi-txt">
+          <T
+            fr="Le pass semaine change la vie pour les trajets domicile-travail. Toujours une place assise sur la R1."
+            en="The weekly pass is a game changer for the commute. Always a seat available on the R1."
+          />
+        </p>
+        <div className="testi-who">
+          <span className="testi-av">JL</span>
+          <div>
+            <b><T fr="Julie L." en="Julie L." /></b>
+            <small><T fr="Ligne R1, navetteuse quotidienne" en="R1 line, daily commuter" /></small>
+          </div>
+        </div>
+      </div>
+
+      <div className="testi">
+        <div className="testi-stars" aria-hidden="true">★★★★★</div>
+        <p className="testi-txt">
+          <T
+            fr="Objet oublié à bord retrouvé en moins de 24 h grâce au service objets trouvés. Réactivité impeccable."
+            en="Left an item on board and got it back within 24 hours thanks to lost & found. Impeccable responsiveness."
+          />
+        </p>
+        <div className="testi-who">
+          <span className="testi-av">MK</span>
+          <div>
+            <b><T fr="Marc K." en="Marc K." /></b>
+            <small><T fr="Ligne IC2" en="IC2 line" /></small>
+          </div>
+        </div>
+      </div>
+
+      <div className="testi">
+        <div className="testi-stars" aria-hidden="true">★★★★☆</div>
+        <p className="testi-txt">
+          <T
+            fr="Belle vue sur les Smoky Mountains depuis la ligne T. Un trajet aussi agréable qu'utile."
+            en="Great views of the Smoky Mountains from the T line. A journey that's as enjoyable as it is useful."
+          />
+        </p>
+        <div className="testi-who">
+          <span className="testi-av">AP</span>
+          <div>
+            <b><T fr="Amelia P." en="Amelia P." /></b>
+            <small><T fr="Ligne T" en="T line" /></small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 {/* ===== ESPACE EMPLOYÉS ===== */}
 <section className="section staff-sec" id="employes">
   <div className="wrap">
