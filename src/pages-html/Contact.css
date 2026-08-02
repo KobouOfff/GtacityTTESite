@@ -196,3 +196,16 @@ textarea.ctl{min-height:130px;resize:vertical;line-height:1.55}
   .hdr.open .mainnav a{padding:13px}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/*
+ * Corrections mode sombre : le texte des encarts d'erreur/urgence gardait
+ * un rouge sombre pensé pour un fond clair, illisible une fois le fond
+ * assombri par --alert-bg. Idem pour les bordures/pastilles Steam.
+ */
+html.dark .form-err{color:#ffc4bf;border-color:#71302f}
+html.dark .urg{border-color:#71302f}
+html.dark .urg b,
+html.dark .urg p{color:#ffc4bf}
+html.dark .steam-profile{border-color:#2f6b45}
+html.dark .steam-profile .meta .nm .ok{background:#0d1624;color:#7ae6a4;border-color:#2f6b45}
+html.dark .steam-profile .av{border-color:#0d1624}

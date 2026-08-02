@@ -488,3 +488,17 @@ td{padding:14px 16px;font-size:13.5px;vertical-align:middle}
   .f-row3{grid-template-columns:1fr 1fr;gap:8px}
   .f-row3 select{grid-column:1/-1}
 }
+
+/*
+ * Corrections mode sombre : badges de type de ligne, statuts et
+ * carte témoignage qui gardaient des couleurs pensées pour un fond clair.
+ */
+html.dark .testi{background:#111827;border-color:var(--line)}
+html.dark .testi-who b{color:var(--ink)}
+html.dark .tt-reg{background:rgba(122,230,164,.16);color:#7ae6a4}
+html.dark .tt-ic{background:rgba(157,203,255,.16);color:#9dcbff}
+html.dark .tt-urb{background:rgba(126,224,194,.18);color:#7ee0c2}
+html.dark .tt-bus{background:rgba(246,217,147,.2);color:#f6d993}
+html.dark .st-ok{color:#7ae6a4}
+html.dark .st-warn{color:#f6d993}
+html.dark .imp.warn .ic{background:#302510;color:#f6d993}

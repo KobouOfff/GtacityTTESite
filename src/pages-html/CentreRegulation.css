@@ -178,3 +178,14 @@ h1.vt{font-family:var(--ff-head);font-weight:800;font-size:1.55rem;color:var(--n
   .home-link span,.status-pill{display:none}
   .fg.col-6{grid-column:span 12}
 }
+
+/*
+ * Corrections mode sombre : pastilles de statut (à l'heure/retard/alerte)
+ * et sélecteurs qui gardaient un texte sombre illisible sur fond assombri.
+ */
+html.dark .status-pill{color:#7ae6a4}
+html.dark .kpi .badge{color:#7ae6a4}
+html.dark .kpi.warn .badge{color:#f6d993}
+html.dark .kpi.alert .badge{color:#ffc4bf}
+html.dark .st-sel.warn{color:#f6d993}
+html.dark .st-sel.alert{color:#ffc4bf}

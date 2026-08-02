@@ -129,3 +129,41 @@
     grid-template-columns: 1fr;
   }
 }
+
+/*
+ * Correction mode sombre : encarts d'information qui restaient sur un
+ * fond bleu très clair figé, détonnant sur le reste de la page assombrie.
+ */
+html.dark .privacy-data-grid div,
+html.dark .privacy-retention div {
+  background: #132034;
+  border-color: #344155;
+}
+
+html.dark .privacy-data-grid h3,
+html.dark .privacy-retention strong {
+  color: #f2f5fa;
+}
+
+html.dark .privacy-retention span {
+  color: #aab6c7;
+}
+
+html.dark .privacy-page code {
+  background: #0d1624;
+  color: #9dcbff;
+}
+
+html.dark .privacy-contact {
+  background: #132034;
+  color: #c9d8ef;
+  border-left-color: #4b92dd;
+}
+
+html.dark .privacy-contact strong {
+  color: #f2f5fa;
+}
+
+html.dark .privacy-contact a {
+  color: #9dcbff;
+}

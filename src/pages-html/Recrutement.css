@@ -1,4 +1,4 @@
-.jobs-page{background:#fff;color:var(--ink)}
+.jobs-page{background:var(--bg);color:var(--ink)}
 .mainnav a.active{background:var(--blue-50);color:var(--blue-700)}
 
 .jobs-hero{background:linear-gradient(135deg,#0a2148 0%,#143f8c 68%,#1a50b0 100%);color:#fff;padding:5.5rem 0 5rem;position:relative;overflow:hidden}

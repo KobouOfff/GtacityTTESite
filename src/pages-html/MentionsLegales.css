@@ -252,3 +252,30 @@
     gap: 4px;
   }
 }
+
+/*
+ * Correction mode sombre : encart société et libellés de la fiche
+ * d'identification restaient en texte/fond sombre pensés pour un fond
+ * clair, illisibles une fois la page assombrie.
+ */
+html.dark .legal-company {
+  background: #132034;
+  color: #c9d8ef;
+  border-left-color: #4b92dd;
+}
+
+html.dark .legal-company strong {
+  color: #f2f5fa;
+}
+
+html.dark .legal-details div {
+  border-top-color: #344155;
+}
+
+html.dark .legal-details dt {
+  color: #f2f5fa;
+}
+
+html.dark .legal-details a {
+  color: #9dcbff;
+}

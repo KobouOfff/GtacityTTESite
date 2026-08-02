@@ -103,3 +103,15 @@ footer a{color:#C9D8EF}
 .tool-btn:hover{border-color:var(--blue-300);background:var(--blue-50)}
 .discord-tip{font-size:11.5px;color:var(--muted);margin-top:1rem;display:flex;gap:7px;align-items:flex-start;line-height:1.5}
 .discord-tip svg{flex-shrink:0;margin-top:1px;color:var(--blue)}
+
+/*
+ * Corrections mode sombre : bandeau "accès restreint", message d'erreur
+ * et carte de session Discord gardaient des couleurs pensées pour un
+ * fond clair, illisibles une fois --alert-bg/--ok-bg assombris.
+ */
+html.dark .restricted{color:#ffc4bf;border-bottom-color:#71302f}
+html.dark .msg.err{color:#ffc4bf;border-color:#71302f}
+html.dark .discord-prof{border-color:#2f6b45}
+html.dark .discord-prof .meta .nm{color:var(--ink)}
+html.dark .discord-prof .meta .st{color:#7ae6a4}
+html.dark .discord-prof .av{border-color:#0d1624}
