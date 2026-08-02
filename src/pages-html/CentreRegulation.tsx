@@ -8,6 +8,7 @@ import {
   auditLogBridgePrelude,
   incidentsLogsSharedScript,
 } from "./CentreRegulationIncidentsLogsShared.script";
+import { createPvPdf, pvPdfFilename, type PvRecordLike } from "@/lib/pv-pdf";
 import BlacklistPanel from "@/components/BlacklistPanel";
 import WeatherPanel from "@/components/WeatherPanel";
 import FleetPanel from "@/components/FleetPanel";
@@ -61,6 +62,20 @@ export default function CentreRegulationPage() {
     document.body.appendChild(el);
     return () => { el.remove(); };
   }, [user, permTrainings, permNet, permAuditLogs, permDep]);
+
+  useEffect(() => {
+    function onPvPdf(e: Event) {
+      const detail = (e as CustomEvent).detail as PvRecordLike | undefined;
+      if (!detail) return;
+      try {
+        createPvPdf(detail).save(pvPdfFilename(detail));
+      } catch (err) {
+        console.error("[pv-pdf]", err);
+      }
+    }
+    window.addEventListener("tte:pv-pdf", onPvPdf);
+    return () => window.removeEventListener("tte:pv-pdf", onPvPdf);
+  }, []);
 
 
 
@@ -389,7 +404,7 @@ export default function CentreRegulationPage() {
         <div className="card">
           <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M3 10h18" /></svg> Nouveau PV</h2>
           <form id="frForm" className="form-grid">
-            <div className="fg col-4"><label>Nom du contrevenant</label><input name="nom" placeholder="Nom Pr\u00e9nom" /></div>
+            <div className="fg col-4"><label>Nom du contrevenant</label><input name="nom" placeholder="Nom Pr\u00e9nom" autoComplete="off" /><span id="frRecidHint" style={{display: "none", marginTop: "4px", fontSize: "11.5px", fontWeight: 700, color: "var(--alert)"}}></span></div>
             <div className="fg col-4"><label>Pièce d'identité</label><input name="pid" placeholder="N\u00b0 pi\u00e8ce ou \u00ab refus\u00e9e \u00bb" /></div>
             <div className="fg col-4"><label>Date de naissance</label><input name="dob" type="date" /></div>
             <div className="fg col-3"><label>Motif</label>
