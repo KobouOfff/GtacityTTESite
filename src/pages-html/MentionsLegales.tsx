@@ -321,6 +321,7 @@ export default function MentionsLegalesPage() {
             <div className="fcol">
               <h4><T fr="Entreprise" en="Company" /></h4>
               <a href="/histoire"><T fr="Notre histoire" en="Our history" /></a>
+              <a href="/recrutement"><T fr="Recrutement" en="Careers" /></a>
               <a href="/contact"><T fr="Nous contacter" en="Contact us" /></a>
               <a href="/mentions-legales"><T fr="Mentions légales" en="Legal notice" /></a>
             </div>

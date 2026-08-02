@@ -409,7 +409,7 @@ export default function ContactPage() {
         <h4><T fr="Entreprise" en="Company" /></h4>
         <a href="#"><T fr="À propos de TTE" en="About TTE" /></a>
         <a href="/contact#presse"><T fr="Presse & médias" en="Press & media" /></a>
-        <a href="/#rejoindre"><T fr="Recrutement" en="Careers" /></a>
+        <a href="/recrutement"><T fr="Recrutement" en="Careers" /></a>
         <a href="/espace-employes"><T fr="Espace employés" en="Staff area" /></a>
         <a href="/contact"><T fr="Nous contacter" en="Contact us" /></a>
       </div>
