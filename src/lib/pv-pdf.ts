@@ -232,9 +232,7 @@ function paintContent(doc: jsPDF, row: PvRecordLike, ox: number, oy: number): nu
   doc.setFont("courier", "normal");
   doc.setFontSize(7);
   doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-  doc.text("Articles L. 2241-1 et L. 2241-2", (cx0 + cx1) / 2, y, { align: "center" });
-  y += 9;
-  doc.text("du code des transports", (cx0 + cx1) / 2, y, { align: "center" });
+  doc.text("Art. 330-10 du code pénal", (cx0 + cx1) / 2, y, { align: "center" });
   y += 16;
 
   dashedLine(doc, cx0, cx1, y);
