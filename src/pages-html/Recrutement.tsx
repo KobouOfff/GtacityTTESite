@@ -225,7 +225,7 @@ export default function RecrutementPage() {
                 <h3><T fr="Candidature à déposer à la Mairie de Townsend" en="Apply in person at Townsend City Hall" /></h3>
                 <p>
                   <T
-                    fr="Les candidatures se déposent uniquement sur place, en jeu, au guichet de la Mairie. Aucune candidature n'est traitée via ce site ni par e-mail."
+                    fr="Les candidatures se déposent uniquement sur place,au guichet de la Mairie. Aucune candidature n'est traitée via ce site ni par e-mail."
                     en="Applications are accepted in person only, in-game, at the City Hall front desk. Applications cannot be submitted through this website or by e-mail."
                   />
                 </p>
