@@ -23,13 +23,13 @@ export const Route = createFileRoute("/confidentialite")({
         { property: "og:type", content: "website" },
         {
           property: "og:url",
-          content: "https://www.townsendtransitexpress.com/confidentialite",
+          content: "https://townsendtransitexpress.com/confidentialite",
         },
       ],
       links: [
         {
           rel: "canonical",
-          href: "https://www.townsendtransitexpress.com/confidentialite",
+          href: "https://townsendtransitexpress.com/confidentialite",
         },
       ],
     };

@@ -18,7 +18,7 @@ export const Route = createFileRoute("/trafic")({
         { property: "og:description", content: description },
         { property: "og:type", content: "website" },
       ],
-      links: [{ rel: "canonical", href: "https://www.townsendtransitexpress.com/trafic" }],
+      links: [{ rel: "canonical", href: "https://townsendtransitexpress.com/trafic" }],
     };
   },
   component: TraficPage,

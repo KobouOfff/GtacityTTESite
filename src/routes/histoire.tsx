@@ -24,7 +24,7 @@ export const Route = createFileRoute("/histoire")({
         { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [
-        { rel: "canonical", href: "https://www.townsendtransitexpress.com/histoire" },
+        { rel: "canonical", href: "https://townsendtransitexpress.com/histoire" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
         {
