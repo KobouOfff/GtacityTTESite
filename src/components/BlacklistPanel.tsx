@@ -103,6 +103,34 @@ export default function BlacklistPanel() {
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  useEffect(() => {
+    function onPvToBlacklist(e: Event) {
+      const detail = (e as CustomEvent).detail as
+        | { nom?: string; pid?: string; dob?: string; motif?: string; num?: string; ligne?: string; priorCount?: number }
+        | undefined;
+      if (!detail) return;
+      const fullName = (detail.nom || "").trim();
+      const parts = fullName.split(/\s+/).filter(Boolean);
+      const first_name = parts.length > 1 ? parts[0] : "";
+      const last_name = parts.length > 1 ? parts.slice(1).join(" ") : fullName;
+      const recidNote =
+        detail.priorCount && detail.priorCount > 1
+          ? ` Récidive constatée : ${detail.priorCount} PV enregistrés à ce nom.`
+          : "";
+      setDraft((d) => ({
+        ...d,
+        first_name,
+        last_name,
+        date_of_birth: detail.dob || "",
+        reason: `Suite au PV ${detail.num || "—"} (${detail.motif || "infraction"}, ligne ${detail.ligne || "—"}).${recidNote}`,
+        infractions: detail.motif || "",
+      }));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    window.addEventListener("tte:pv-to-blacklist", onPvToBlacklist);
+    return () => window.removeEventListener("tte:pv-to-blacklist", onPvToBlacklist);
+  }, []);
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!draft.first_name.trim() || !draft.last_name.trim() || !draft.reason.trim()) return;
