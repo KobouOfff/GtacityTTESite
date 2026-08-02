@@ -845,6 +845,61 @@ export default function AccueilPage() {
   </div>
 </section>
 
+{/* ===== RECRUTEMENT ===== */}
+<section className="section alt" id="rejoindre">
+  <div className="wrap">
+    <div className="hire">
+      <div className="hire-l">
+        <span className="eyebrow"><T fr="Rejoignez-nous" en="Join us" /></span>
+        <h3><T fr="TTE recrute dans toute la région" en="TTE is hiring across the region" /></h3>
+        <p>
+          <T
+            fr="Townsend Transit Express recrute en permanence pour renforcer ses équipes en gare, à bord, en atelier et au centre de régulation. Salaire compétitif, assurance santé, plan de retraite et formation payée dès l'embauche, quel que soit votre niveau d'expérience."
+            en="Townsend Transit Express is always hiring to strengthen its station, on-board, workshop and control centre teams. Competitive pay, health benefits, retirement plan, and paid training from day one — no matter your experience level."
+          />
+        </p>
+        <div className="hire-cta" style={{cursor:"default"}}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+          <T fr="Candidature à déposer à la Mairie de Townsend" en="Apply in person at Townsend City Hall" />
+        </div>
+        <div className="hint" style={{marginTop:"10px",color:"#D6EFEC"}}>
+          <T fr="Candidatures uniquement sur place, en jeu, au guichet de la Mairie. Aucune candidature n'est traitée via ce site." en="Applications in-game only, at the City Hall front desk. Applications cannot be submitted through this website." />
+        </div>
+      </div>
+      <div className="jobs">
+        <div className="job">
+          <div><b><T fr="Agent de maintenance" en="Maintenance Technician" /></b><span><T fr="Ateliers Townsend · Temps plein" en="Townsend Rail Yard · Full-Time" /></span></div>
+          <span className="pill"><T fr="Temps plein" en="Full-Time" /></span>
+        </div>
+        <div className="job">
+          <div><b><T fr="Agent de sûreté ferroviaire" en="Transit Safety & Security Officer" /></b><span><T fr="Réseau TTE · Temps plein" en="TTE Network · Full-Time" /></span></div>
+          <span className="pill"><T fr="Temps plein" en="Full-Time" /></span>
+        </div>
+        <div className="job">
+          <div><b><T fr="Contrôleur" en="Conductor" /></b><span><T fr="À bord & en gare · Temps plein" en="Onboard & Stations · Full-Time" /></span></div>
+          <span className="pill"><T fr="Temps plein" en="Full-Time" /></span>
+        </div>
+        <div className="job">
+          <div><b><T fr="Conducteur de train" en="Train Operator" /></b><span><T fr="Lignes R & IC · Temps plein" en="R & IC Lines · Full-Time" /></span></div>
+          <span className="pill"><T fr="Temps plein" en="Full-Time" /></span>
+        </div>
+        <div className="job">
+          <div><b><T fr="Conducteur de bus" en="Bus Operator" /></b><span><T fr="Réseau bus TTE · Temps plein" en="TTE Bus Network · Full-Time" /></span></div>
+          <span className="pill"><T fr="Temps plein" en="Full-Time" /></span>
+        </div>
+        <div className="job">
+          <div><b><T fr="Régulateur" en="Central Control Dispatcher" /></b><span><T fr="Centre de régulation · Temps plein" en="Control Center · Full-Time" /></span></div>
+          <span className="pill"><T fr="Temps plein" en="Full-Time" /></span>
+        </div>
+        <div className="job">
+          <div><b><T fr="Secrétaire" en="Administrative Assistant" /></b><span><T fr="Siège administratif · Temps plein" en="Head Office · Full-Time" /></span></div>
+          <span className="pill"><T fr="Temps plein" en="Full-Time" /></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 {/* ===== TÉMOIGNAGES ===== */}
 <section className="section" id="temoignages">
   <div className="wrap">
