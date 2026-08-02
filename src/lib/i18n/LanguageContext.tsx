@@ -43,6 +43,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore (private browsing, storage disabled, etc.)
     }
+    try {
+      // Also persist as a cookie: unlike localStorage, this is readable by
+      // the server on the next request, so SSR'd <title>/<meta description>
+      // (what Google shows in search results) stays in the chosen language.
+      document.cookie = `${STORAGE_KEY}=${next}; path=/; max-age=31536000; samesite=lax`;
+    } catch {
+      // ignore
+    }
   }
 
   function toggleLang() {
