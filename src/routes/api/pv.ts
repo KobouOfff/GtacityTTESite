@@ -3,7 +3,12 @@ import { useSession } from "@tanstack/react-start/server";
 import { sessionConfig, type SessionData } from "@/lib/session.server";
 import type { DiscordSessionUser } from "@/lib/discord-roles";
 
-const REASONS = new Set(["sans", "invalide", "reduit", "refus", "contrefacon"]);
+const REASONS = new Set([
+  "sans", "invalide", "reduit", "refus", "contrefacon",
+  "securite", "incivilite", "agression", "degradation", "fumee",
+  "alcool", "animal", "bagage", "intrusion", "quai", "portes",
+  "tapage", "vente", "autre",
+]);
 const LINES = new Set(["R1", "R2", "R3", "R4", "IC1", "IC2", "T", "Bus"]);
 const AMOUNTS = new Set([500, 750, 1000, 1500]);
 const PAYMENT_STATUSES = new Set([
