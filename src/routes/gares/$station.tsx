@@ -10,7 +10,7 @@ export const Route = createFileRoute("/gares/$station")({
     const description = `${station.description} Consultez les horaires du jour, les lignes, services, retards et suppressions.`;
     return {
       meta: [{ title }, { name: "description", content: description }, { property: "og:title", content: title }, { property: "og:type", content: "website" }],
-      links: [{ rel: "canonical", href: `https://www.townsendtransitexpress.com/gares/${station.slug}` }],
+      links: [{ rel: "canonical", href: `https://townsendtransitexpress.com/gares/${station.slug}` }],
     };
   },
   component: StationRoute,
