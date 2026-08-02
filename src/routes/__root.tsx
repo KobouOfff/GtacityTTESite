@@ -17,6 +17,7 @@ import { ThemeToggle } from "../components/ThemeToggle";
 import { LanguageToggle } from "../components/LanguageToggle";
 import { LanguageProvider } from "../lib/i18n/LanguageContext";
 import { PublicTrafficBanner } from "../components/PublicTrafficBanner";
+import { detectLang } from "../lib/i18n/detect-lang.server";
 
 const themeBootScript = `
 (function () {
@@ -98,39 +99,53 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Townsend Transit Express" },
-      { name: "description", content: "Site officiel de Townsend Transit Express : horaires, gares et information trafic." },
-      { name: "author", content: "Townsend Transit Express" },
-      { property: "og:title", content: "Townsend Transit Express" },
-      { property: "og:description", content: "Horaires, gares et information trafic du réseau TTE." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      {
-        rel: "icon",
-        href: "/tte-logo-officiel.png?v=3",
-        type: "image/png",
-      },
-      {
-        rel: "shortcut icon",
-        href: "/tte-logo-officiel.png?v=3",
-        type: "image/png",
-      },
-      {
-        rel: "apple-touch-icon",
-        href: "/tte-logo-officiel.png?v=3",
-      },
-    ],
-  }),
+  loader: () => detectLang(),
+  head: (ctx) => {
+    const lang = ctx.loaderData === "en" ? "en" : "fr";
+    const title = "Townsend Transit Express";
+    const description =
+      lang === "en"
+        ? "Official website of Townsend Transit Express: schedules, stations and traffic information."
+        : "Site officiel de Townsend Transit Express : horaires, gares et information trafic.";
+    const ogDescription =
+      lang === "en"
+        ? "Schedules, stations and traffic information for the TTE network."
+        : "Horaires, gares et information trafic du réseau TTE.";
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title },
+        { name: "description", content: description },
+        { name: "author", content: "Townsend Transit Express" },
+        { property: "og:title", content: title },
+        { property: "og:description", content: ogDescription },
+        { property: "og:type", content: "website" },
+        { property: "og:locale", content: lang === "en" ? "en_US" : "fr_FR" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [
+        {
+          rel: "stylesheet",
+          href: appCss,
+        },
+        {
+          rel: "icon",
+          href: "/tte-logo-officiel.png?v=3",
+          type: "image/png",
+        },
+        {
+          rel: "shortcut icon",
+          href: "/tte-logo-officiel.png?v=3",
+          type: "image/png",
+        },
+        {
+          rel: "apple-touch-icon",
+          href: "/tte-logo-officiel.png?v=3",
+        },
+      ],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
