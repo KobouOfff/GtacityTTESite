@@ -43,6 +43,20 @@ export function blacklistPdfFilename(row: BlacklistRow) {
   return `Blacklist_${row.ref}_${row.last_name}_${row.first_name}.pdf`;
 }
 
+/**
+ * Deterministic 4-digit "matricule" (badge number) derived from the issuing
+ * agent's Discord ID, purely cosmetic/roleplay flavor — it's stable for a
+ * given agent across every document they issue, without needing a real
+ * badge-number field in the database.
+ */
+function agentBadgeNumber(discordId: string) {
+  let hash = 0;
+  for (let i = 0; i < discordId.length; i++) {
+    hash = (hash * 31 + discordId.charCodeAt(i)) >>> 0;
+  }
+  return String(1000 + (hash % 9000));
+}
+
 function fontBase64(dataUrl: string) {
   const comma = dataUrl.indexOf(",");
   return comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
@@ -55,8 +69,22 @@ export function createBlacklistPdf(row: BlacklistRow) {
   doc.addFileToVFS("LiberationSans-Bold.ttf", fontBase64(liberationSansBold));
   doc.addFont("LiberationSans-Bold.ttf", "LiberationSans", "bold");
   const width = doc.internal.pageSize.getWidth();
+  const height = doc.internal.pageSize.getHeight();
   const margin = 50;
   let y = margin;
+
+  // Faint diagonal "CONFIDENTIEL" watermark behind all content, for an
+  // in-universe official-archive feel.
+  doc.saveGraphicsState();
+  doc.setGState(new (doc as unknown as { GState: new (opts: { opacity: number }) => never }).GState({ opacity: 0.06 }));
+  doc.setTextColor(30, 58, 138);
+  doc.setFont("LiberationSans", "bold");
+  doc.setFontSize(72);
+  doc.text("CONFIDENTIEL — TTE", width / 2, height / 2, {
+    align: "center",
+    angle: 35,
+  });
+  doc.restoreGraphicsState();
 
   doc.setFillColor(30, 58, 138);
   doc.rect(0, 0, width, 90, "F");
@@ -66,9 +94,33 @@ export function createBlacklistPdf(row: BlacklistRow) {
   doc.text("TOWNSEND TRANSIT EXPRESS", margin, 40);
   doc.setFontSize(11);
   doc.setFont("LiberationSans", "normal");
-  doc.text("Direction de la Sûreté & Supervision — Département juridique", margin, 60);
+  doc.text("Direction de la Sûreté & Supervision — Brigade Ferroviaire", margin, 60);
   doc.setFontSize(9);
   doc.text(`Document officiel n° ${row.pdf_document_number ?? row.ref}`, margin, 78);
+
+  // Case-file stamp box, top-right of the header band.
+  doc.setDrawColor(255, 255, 255);
+  doc.setLineWidth(0.7);
+  doc.rect(width - margin - 130, 14, 130, 62);
+  doc.setFont("LiberationSans", "bold");
+  doc.setFontSize(8);
+  doc.text("DOSSIER SÛRETÉ", width - margin - 65, 28, { align: "center" });
+  doc.setFont("LiberationSans", "normal");
+  doc.setFontSize(9);
+  doc.text(row.ref, width - margin - 65, 42, { align: "center" });
+  doc.setFontSize(7.5);
+  doc.text(
+    `Statut : ${row.status === "revoked" ? "LEVÉE" : "ACTIVE"}`,
+    width - margin - 65,
+    55,
+    { align: "center" },
+  );
+  doc.text(
+    row.is_permanent ? "Portée : PERMANENTE" : "Portée : TEMPORAIRE",
+    width - margin - 65,
+    66,
+    { align: "center" },
+  );
 
   y = 130;
   doc.setTextColor(20, 20, 20);
@@ -219,8 +271,14 @@ export function createBlacklistPdf(row: BlacklistRow) {
   y += 12;
   doc.setFont("LiberationSans", "normal");
   doc.setFontSize(10);
-  doc.text(row.created_by_username, margin, y);
+  doc.text(`Agent de Sûreté ${row.created_by_username}`, margin, y);
   y += 12;
+  doc.setFontSize(9);
+  doc.setTextColor(90, 90, 90);
+  doc.text(`Matricule n° ${agentBadgeNumber(row.created_by_discord_id)}`, margin, y);
+  doc.setTextColor(20, 20, 20);
+  y += 14;
+  doc.setFontSize(10);
   doc.text(`Émis le ${fmtDateTime(row.created_at)}`, margin, y);
 
   const footerY = doc.internal.pageSize.getHeight() - 30;
