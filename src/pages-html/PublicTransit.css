@@ -15,5 +15,11 @@
 .station-meta{display:grid;grid-template-columns:1.4fr .8fr;gap:18px}.station-lines{display:flex;gap:7px;flex-wrap:wrap}.station-services{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.station-services span{background:var(--bg-alt,#eef3f9);border-radius:99px;padding:6px 10px;font-size:13px}
 .station-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.station-links a{background:var(--surface,#fff);border:1px solid var(--line,#d9e1ec);border-radius:9px;padding:12px;color:var(--navy,#0c2a60);font-weight:700;text-decoration:none}.station-links a:hover{border-color:#368ad4}
 .transit-empty{padding:24px;text-align:center;color:var(--muted,#66758c)}
+.affluence-card{padding:20px 22px}
+.affluence-row{display:flex;align-items:center;gap:14px}
+.affluence-bar{flex:1;height:10px;border-radius:99px;background:var(--bg-alt,#eef3f9);overflow:hidden}
+.affluence-fill{height:100%;border-radius:99px;transition:width .5s ease}
+.affluence-tag{font-weight:800;font-size:13px;white-space:nowrap}
+.affluence-note{margin:10px 0 0;font-size:12.5px;color:var(--muted,#66758c)}
 html.dark .transit-page{--bg:#090f19;--surface:#111b2d;--line:#34445e;--ink:#f3f7ff;--ink-2:#c9d8ec;--muted:#9db2cf;--bg-alt:#18263c}html.dark .transit-card,html.dark .traffic-line-card,html.dark .public-table-wrap,html.dark .station-links a{box-shadow:none}
 @media(max-width:720px){.transit-header-in{align-items:flex-start;flex-wrap:wrap}.transit-nav{width:100%;margin-left:0;overflow-x:auto}.station-meta{grid-template-columns:1fr}.transit-hero{padding-top:38px}}

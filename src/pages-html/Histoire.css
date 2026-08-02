@@ -53,6 +53,8 @@
 .history-values-grid h3{font-family:var(--ff-head);font-size:1rem;color:var(--navy);margin-bottom:.65rem}
 .history-values-grid p{font-size:13.5px;line-height:1.6;color:var(--muted)}
 .history-future{padding:5rem 0}
+.history-future+.history-future{padding-top:0}
+.report-card .btn-outline{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
 .history-future-card{border:1px solid var(--line);border-radius:18px;background:linear-gradient(120deg,#f4f8fc,#eaf1fb);padding:2.4rem 2.6rem;display:flex;align-items:center;justify-content:space-between;gap:2rem}
 .history-future-card>div{max-width:750px}
 .history-future p{color:var(--muted);font-size:1rem;line-height:1.65;margin-top:1rem}

@@ -1046,6 +1046,7 @@ export default function AccueilPage() {
       <div className="links">
         <a href="/mentions-legales"><T fr="Mentions légales" en="Legal notice" /></a>
         <a href="/conditions-generales-transport-tte-v1.pdf" target="_blank" rel="noreferrer"><T fr="Conditions de transport" en="Terms of carriage" /></a>
+        <a href="/rapport-annuel-tte-2025.pdf" target="_blank" rel="noreferrer"><T fr="Rapport annuel 2025" en="2025 Annual report" /></a>
         <a href="/confidentialite"><T fr="Confidentialité" en="Privacy" /></a>
         <a href="#"><T fr="Plan du site" en="Site map" /></a>
       </div>
