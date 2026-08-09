@@ -706,6 +706,21 @@ export default function AccueilPage() {
       </article>
 
       <article className="na">
+        <div className="ni" style={{background: "var(--blue)"}}></div>
+        <div className="nb">
+          <div className="meta"><span className="tag" style={{background: "var(--blue-50)", color: "var(--blue-700)"}}><T fr="Service" en="Service" /></span><span className="date">{t("9 août 2026", "August 9, 2026")}</span></div>
+          <h3><T fr="Bornes automatiques nouvelle génération dans toutes les gares" en="Next-generation ticket machines in every station" /></h3>
+          <p>
+            <T
+              fr="Nos bornes de vente ont été modernisées : nouvel écran tactile plus rapide, paiement sans contact (carte et mobile), interface simplifiée en plusieurs langues et affichage des tarifs actualisés en temps réel."
+              en="Our ticket machines have been modernised: a faster new touchscreen, contactless payment (card and mobile), a simplified multi-language interface, and real-time updated fares."
+            />
+          </p>
+          <span className="more"><T fr="Lire la suite →" en="Read more →" /></span>
+        </div>
+      </article>
+
+      <article className="na">
         <div className="ni" style={{background: "var(--l-t)"}}></div>
         <div className="nb">
           <div className="meta"><span className="tag" style={{background: "rgba(154,107,22,.14)", color: "#7A540F"}}><T fr="Histoire" en="History" /></span><span className="date">{t("18 juin 2026", "June 18, 2026")}</span></div>
