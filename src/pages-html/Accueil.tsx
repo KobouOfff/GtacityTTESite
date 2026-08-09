@@ -691,6 +691,21 @@ export default function AccueilPage() {
 
     <div className="news">
       <article className="na">
+        <div className="ni" style={{background: "var(--l-r1)"}}></div>
+        <div className="nb">
+          <div className="meta"><span className="tag" style={{background: "rgba(31,158,85,.14)", color: "#146B39"}}><T fr="Tarifs" en="Fares" /></span><span className="date">{t("9 août 2026", "August 9, 2026")}</span></div>
+          <h3><T fr="Baisse des tarifs sur tout le réseau TTE" en="Fares cut across the whole TTE network" /></h3>
+          <p>
+            <T
+              fr={<>Bonne nouvelle pour tous les voyageurs : nos tarifs baissent. Le billet unité passe à <b>5 $</b>, le carnet de 5 à <b>20 $</b>, le carnet de 10 à <b>25 $</b>, le pass journée à <b>10 $</b>, le pass semaine à <b>75 $</b> et le pass mois à <b>275 $</b>.</>}
+              en={<>Good news for all our riders: our fares are going down. The single ticket drops to <b>$5</b>, the book of 5 to <b>$20</b>, the book of 10 to <b>$25</b>, the day pass to <b>$10</b>, the weekly pass to <b>$75</b> and the monthly pass to <b>$275</b>.</>}
+            />
+          </p>
+          <a className="more" href="#tarifs"><T fr="Voir tous les tarifs →" en="See all fares →" /></a>
+        </div>
+      </article>
+
+      <article className="na">
         <div className="ni" style={{background: "var(--l-t)"}}></div>
         <div className="nb">
           <div className="meta"><span className="tag" style={{background: "rgba(154,107,22,.14)", color: "#7A540F"}}><T fr="Histoire" en="History" /></span><span className="date">{t("18 juin 2026", "June 18, 2026")}</span></div>
@@ -759,38 +774,38 @@ export default function AccueilPage() {
     <div className="fares">
       <div className="fare">
         <div className="fare-nm"><T fr="Billet unité" en="Single ticket" /></div>
-        <div className="fare-pr">$50</div>
+        <div className="fare-pr">$5</div>
         <div className="fare-d"><T fr="Un trajet sur n'importe quelle ligne du réseau, correspondances comprises." en="One journey on any line of the network, connections included." /></div>
         <span className="fare-where"><T fr="En vente en gare" en="Sold at stations" /></span>
       </div>
       <div className="fare">
         <div className="fare-nm"><T fr="Carnet de 5" en="Book of 5" /></div>
-        <div className="fare-pr">$200</div>
+        <div className="fare-pr">$20</div>
         <div className="fare-d"><T fr="Cinq trajets au prix de quatre. Idéal pour les déplacements occasionnels." en="Five journeys for the price of four. Ideal for occasional travel." /></div>
         <span className="fare-where"><T fr="En vente en gare" en="Sold at stations" /></span>
       </div>
       <div className="fare">
         <div className="fare-nm"><T fr="Carnet de 10" en="Book of 10" /></div>
-        <div className="fare-pr">$350</div>
+        <div className="fare-pr">$25</div>
         <div className="fare-d"><T fr="Dix trajets à tarif réduit, le meilleur rapport au voyage." en="Ten journeys at a reduced rate, the best value per trip." /></div>
         <span className="fare-where"><T fr="En vente en gare" en="Sold at stations" /></span>
       </div>
       <div className="fare">
         <div className="fare-nm"><T fr="Pass journée" en="Day pass" /></div>
-        <div className="fare-pr">$150</div>
+        <div className="fare-pr">$10</div>
         <div className="fare-d"><T fr="Trajets illimités pendant une journée, sur toutes les lignes." en="Unlimited journeys for one day, on all lines." /></div>
         <span className="fare-where"><T fr="En vente en gare" en="Sold at stations" /></span>
       </div>
       <div className="fare feat">
         <span className="fare-tag"><T fr="Le plus choisi" en="Most popular" /></span>
         <div className="fare-nm"><T fr="Pass semaine" en="Weekly pass" /></div>
-        <div className="fare-pr">$800</div>
+        <div className="fare-pr">$75</div>
         <div className="fare-d"><T fr="Sept jours de trajets illimités sur l'ensemble du réseau." en="Seven days of unlimited journeys across the whole network." /></div>
         <span className="fare-where"><T fr="En vente en gare" en="Sold at stations" /></span>
       </div>
       <div className="fare">
         <div className="fare-nm"><T fr="Pass mois" en="Monthly pass" /></div>
-        <div className="fare-pr">$2,500</div>
+        <div className="fare-pr">$275</div>
         <div className="fare-d"><T fr="Trente jours de trajets illimités, pour les voyageurs réguliers." en="Thirty days of unlimited journeys, for regular travellers." /></div>
         <span className="fare-where"><T fr="En vente en gare" en="Sold at stations" /></span>
       </div>
