@@ -12,8 +12,8 @@ export const Route = createFileRoute("/bus")({
         : "Découvrez les deux nouvelles lignes de bus de TTE : la boucle Centre-Ville (Ligne 1) et la navette Secteur Rural (Ligne 2), en correspondance avec le réseau ferroviaire.";
     const ogDescription =
       lang === "en"
-        ? "New bus lines rolling out next month, connecting with Townsend Transit Express's existing train network."
-        : "Nouvelles lignes de bus en circulation dès le mois prochain, en correspondance avec le réseau ferroviaire de Townsend Transit Express.";
+        ? "New bus lines now running, connecting with Townsend Transit Express's existing train network."
+        : "Nouvelles lignes de bus désormais en service, en correspondance avec le réseau ferroviaire de Townsend Transit Express.";
     return {
       meta: [
         { title },
