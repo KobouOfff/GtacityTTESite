@@ -1,69 +1,37 @@
 .bus-page{background:#fff;color:var(--ink)}
 .mainnav a.active{background:var(--blue-50);color:var(--blue-700)}
 
-/* ===== Hero ===== */
-.bus-hero{background:linear-gradient(135deg,#0a2148 0%,#143f8c 68%,#1a50b0 100%);color:#fff;padding:4.5rem 0 3.5rem;position:relative;overflow:hidden}
-.bus-hero::after{content:"";position:absolute;width:420px;height:420px;border:70px solid rgba(255,255,255,.05);border-radius:50%;right:-100px;top:-150px}
-.bus-crumb{display:flex;gap:.55rem;align-items:center;color:#afc8f0;font-size:13px;margin-bottom:1.6rem}
-.bus-crumb a{color:#afc8f0}
-.bus-hero .eyebrow{color:#f6c453}
-.bus-hero h1{font-family:var(--ff-head);font-size:clamp(2rem,4.4vw,3.4rem);line-height:1.05;letter-spacing:-1.5px;margin-top:.7rem}
-.bus-hero h1 .accent{color:#f6c453}
-.bus-hero-sub{font-size:1.02rem;color:#c9dbf5;margin-top:.5rem}
-.bus-hero-lede{font-size:1.08rem;color:#d6e3f6;line-height:1.7;max-width:720px;margin-top:1.3rem}
-.bus-launch-banner{display:inline-flex;align-items:center;margin-top:1.8rem;background:var(--alert);color:#fff;font-family:var(--ff-head);font-weight:800;letter-spacing:.4px;font-size:15px;padding:.85rem 1.4rem;border-radius:10px;box-shadow:0 10px 24px rgba(197,54,43,.35)}
+/* ===== Feature card color variants (based on .feature/.fx-l/.fx-r) ===== */
+.bus-feature.bus1 .fx-l{background:linear-gradient(135deg,#8A5E12,#C68A1C)}
+.bus-feature.bus1 .fx-l .eyebrow2{color:#FBE6BE}
+.bus-feature.bus1 .fx-l .rt{color:#FBE6BE}
+.bus-feature.bus1 .fx-l p{color:#FBEFDA}
+.bus-feature.bus2 .fx-l{background:linear-gradient(135deg,#274F1B,#3E7D2C)}
+.bus-feature.bus2 .fx-l .eyebrow2{color:#DDEFD1}
+.bus-feature.bus2 .fx-l .rt{color:#DDEFD1}
+.bus-feature.bus2 .fx-l p{color:#E9F5E1}
 
-/* ===== Legend ===== */
-.bus-legend-section{border-bottom:1px solid var(--line);background:var(--bg-alt)}
-.bus-legend-row{display:flex;flex-wrap:wrap;gap:1.6rem;padding:1.1rem 0;font-size:13.5px;color:var(--ink-2)}
-.bus-legend-item{display:flex;align-items:center;gap:.5rem;font-weight:600}
-.bus-legend-swatch{width:16px;height:16px;border-radius:5px;flex-shrink:0}
-.bus-legend-swatch.train{background:none;border-radius:0;height:4px;width:22px;background:var(--blue);align-self:center}
+/* ===== Route timeline (mirrors .history-timeline pattern) ===== */
+.bus-timeline{position:relative;margin-left:3rem;margin-top:2.6rem}
+.bus-timeline::before{content:"";position:absolute;left:-42px;top:14px;bottom:14px;width:2px;background:var(--line-color);opacity:.35}
+.bus-tl-row{display:grid;grid-template-columns:0 1fr;position:relative;padding-bottom:1.3rem}
+.bus-tl-row:last-child{padding-bottom:0}
+.bus-tl-num{position:absolute;left:-49px;top:0;width:28px;height:28px;border-radius:50%;background:var(--line-color);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-weight:800;font-size:12px;box-shadow:0 0 0 4px #fff}
+.bus-tl-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.85rem 1.1rem;box-shadow:var(--shadow)}
+.bus-tl-card>span{display:block;font-size:10.5px;font-family:var(--ff-head);font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--line-color)}
+.bus-tl-card h3{font-family:var(--ff-head);font-size:1rem;color:var(--navy);margin-top:.2rem}
 
-/* ===== Line sections ===== */
-.bus-line-section{padding:4rem 0}
-.bus-line-section.alt{background:var(--bg-alt)}
-.bus-line-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:2.2rem 2.4rem;box-shadow:var(--shadow);border-top:5px solid var(--card-color)}
-.bus-line-head{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
-.bus-line-badge{background:var(--card-color)!important;min-width:52px;height:38px;font-size:16px;border-radius:10px}
-.bus-line-head .eyebrow2{color:var(--card-color)}
-.bus-line-head h2{font-family:var(--ff-head);font-size:clamp(1.6rem,2.6vw,2.2rem);color:var(--navy);letter-spacing:-.5px;margin-top:.2rem}
-.bus-line-desc{color:var(--ink-2);font-size:15px;line-height:1.75;max-width:760px;margin-bottom:2rem}
+/* ===== CTA row ===== */
+.bus-cta-row{display:flex;flex-wrap:wrap;gap:1rem;margin-top:2.6rem}
 
-/* ===== Route stops (stepper) ===== */
-.bus-route{display:flex;flex-wrap:wrap;align-items:flex-start;row-gap:1.6rem;padding:.5rem 0 1.8rem}
-.bus-route-item{display:flex;align-items:flex-start}
-.bus-route-arrow{color:var(--line-color);font-weight:800;font-size:18px;padding:0 .5rem;margin-top:11px;flex-shrink:0}
-.bus-stop{display:flex;flex-direction:column;align-items:center;gap:.5rem;min-width:96px;text-align:center}
-.bus-stop .dot{width:38px;height:38px;border-radius:50%;background:#fff;border:3px solid var(--line-color);display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-weight:800;font-size:14px;color:var(--line-color)}
-.bus-stop.depot .dot{background:var(--line-color);color:#fff}
-.bus-stop.repeat .dot{opacity:.55}
-.bus-stop.repeat .lbl{opacity:.55}
-.bus-stop .lbl{font-size:12.5px;font-weight:700;color:var(--navy);line-height:1.25;max-width:104px}
-
-/* ===== Facts row ===== */
-.bus-line-facts{display:flex;flex-wrap:wrap;gap:2rem;padding-top:1.6rem;border-top:1px solid var(--line)}
-.bus-fact{display:flex;flex-direction:column;gap:.15rem}
-.bus-fact b{font-family:var(--ff-head);font-size:1.15rem;color:var(--navy)}
-.bus-fact span{font-size:12.5px;color:var(--muted)}
-
-/* ===== Info section ===== */
-.bus-info-section{padding:4.5rem 0}
-.bus-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2.4rem}
-.bus-info-card{background:var(--bg-alt);border:1px solid var(--line);border-radius:14px;padding:1.6rem}
-.bus-info-card h3{font-family:var(--ff-head);color:var(--navy);font-size:1.02rem;margin-bottom:.6rem}
-.bus-info-card p{font-size:13.5px;color:var(--ink-2);line-height:1.65}
-.bus-cta-row{display:flex;flex-wrap:wrap;gap:1rem}
-
-@media (max-width:860px){
-  .bus-info-grid{grid-template-columns:1fr}
-  .bus-line-card{padding:1.6rem}
+@media (max-width:640px){
+  .bus-timeline{margin-left:2.4rem}
+  .bus-timeline::before{left:-34px}
+  .bus-tl-num{left:-41px;width:24px;height:24px;font-size:11px}
 }
 
 /* ===== Dark mode ===== */
 html.dark .bus-page{background:var(--ink);color:#e6ecf5}
-html.dark .bus-legend-section{background:#0f1620}
-html.dark .bus-line-section.alt{background:#0f1620}
-html.dark .bus-line-card{background:#111827;border-color:#22314a}
-html.dark .bus-info-card{background:#111827;border-color:#22314a}
-html.dark .bus-stop .lbl{color:#e6ecf5}
+html.dark .bus-tl-card{background:#111827;border-color:#22314a}
+html.dark .bus-tl-card h3{color:#e6ecf5}
+html.dark .bus-timeline::before{background:var(--line-color);opacity:.5}

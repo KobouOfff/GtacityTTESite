@@ -258,7 +258,7 @@ export default function AccueilPage() {
     </a>
     <a className="tile" href="/bus">
       <span className="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="6" width="18" height="12" rx="3" /><path d="M3 13h18M7 18v1.5M17 18v1.5" /><circle cx="7.5" cy="15.5" r="1" fill="currentColor" stroke="none" /><circle cx="16.5" cy="15.5" r="1" fill="currentColor" stroke="none" /></svg></span>
-      <h3><T fr="Nouvelles lignes de bus" en="New bus lines" /> <span className="hist-tag">{"★ " }<T fr="Bientôt" en="Coming soon" /></span></h3>
+      <h3><T fr="Nouvelles lignes de bus" en="New bus lines" /> <span className="hist-tag">{"★ " }<T fr="Nouveau" en="New" /></span></h3>
       <p><T fr="Ligne 1 Centre-Ville et Ligne 2 Secteur Rural, en correspondance avec le train." en="Downtown Line 1 and Rural Line 2, connecting with the train." /></p>
     </a>
   </div>
@@ -511,7 +511,7 @@ export default function AccueilPage() {
               <td><div className="t-pair">{t("Circuit Centre-Ville", "Downtown loop")} <span className="hist-tag">{t("★ Nouvelle ligne", "★ New line")}</span></div><div className="t-via">{t("Dépôt Bus → Motel/Prison → Zone Indus. → Hôpital → Concession → Arlington → Gare/Diner → Mairie → Dépôt Bus", "Bus Depot → Motel/Prison → Industrial Zone → Hospital → Concession → Arlington → Station/Diner → City Hall → Bus Depot")}</div></td>
               <td><span className="t-time">{t("toutes les 20 min", "every 20 min")}</span><span className="t-time">06:00–22:00</span></td>
               <td><span className="t-dur">~40 {t("min", "min")} <T fr="(boucle)" en="(loop)" /></span></td>
-              <td><span className="st st-soon">{t("Dès le mois prochain", "Starting next month")}</span></td>
+              <td><span className="st st-ok">{t("En service", "In service")}</span></td>
             </tr>
             <tr data-type="bus" data-search="bus 2 ligne 2 secteur rural depot ferme fire dept camp voyage station service aller-retour">
               <td><span className="bullet" style={{background: "var(--l-bus2)"}}>B2</span></td>
@@ -519,7 +519,7 @@ export default function AccueilPage() {
               <td><div className="t-pair">{t("Secteur Rural", "Rural sector")} <span className="hist-tag">{t("★ Nouvelle ligne", "★ New line")}</span></div><div className="t-via">{t("Dépôt Bus → Ferme → Fire Dept. → Camp Voyage → Station Service (aller-retour)", "Bus Depot → Farm → Fire Dept. → Camp Voyage → Gas Station (round trip)")}</div></td>
               <td><span className="t-time">{t("toutes les 40 min", "every 40 min")}</span><span className="t-time">06:00–20:00</span></td>
               <td><span className="t-dur">~25 {t("min", "min")}</span></td>
-              <td><span className="st st-soon">{t("Dès le mois prochain", "Starting next month")}</span></td>
+              <td><span className="st st-ok">{t("En service", "In service")}</span></td>
             </tr>
           </tbody>
         </table>

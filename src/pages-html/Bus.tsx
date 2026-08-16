@@ -6,14 +6,7 @@ import { TTELogo } from "@/components/TTELogo";
 import { T } from "@/components/T";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-type Stop = {
-  code: string;
-  fr: string;
-  en: string;
-  subFr?: string;
-  subEn?: string;
-  depot?: boolean;
-};
+type Stop = { code: string; fr: string; en: string; depot?: boolean };
 
 const LINE1_STOPS: Stop[] = [
   { code: "D", fr: "Dépôt Bus", en: "Bus Depot", depot: true },
@@ -34,17 +27,17 @@ const LINE2_STOPS: Stop[] = [
   { code: "4", fr: "Station Service", en: "Gas Station" },
 ];
 
-function RouteStops({ stops, colorVar, loop }: { stops: Stop[]; colorVar: string; loop?: boolean }) {
+function StopsTimeline({ stops, colorVar, loop }: { stops: Stop[]; colorVar: string; loop?: boolean }) {
   const { lang } = useLanguage();
-  const items = loop ? [...stops, stops[0]] : stops;
+  const items = loop ? [...stops, { ...stops[0], code: "D" }] : stops;
   return (
-    <div className="bus-route" style={{ ["--line-color" as any]: `var(${colorVar})` }}>
+    <div className="bus-timeline" style={{ ["--line-color" as any]: `var(${colorVar})` }}>
       {items.map((s, i) => (
-        <div className="bus-route-item" key={i}>
-          {i > 0 && <span className="bus-route-arrow" aria-hidden="true">→</span>}
-          <div className={`bus-stop${s.depot ? " depot" : ""}${loop && i === items.length - 1 ? " repeat" : ""}`}>
-            <span className="dot">{s.code}</span>
-            <span className="lbl">{lang === "en" ? s.en : s.fr}</span>
+        <div className="bus-tl-row" key={i}>
+          <div className="bus-tl-num">{s.code}</div>
+          <div className="bus-tl-card">
+            <span>{s.depot ? (lang === "en" ? "Departure" : "Départ") : `${lang === "en" ? "Stop" : "Arrêt"} ${s.code}`}</span>
+            <h3>{lang === "en" ? s.en : s.fr}{loop && i === items.length - 1 ? ` — ${lang === "en" ? "back to depot" : "retour au dépôt"}` : ""}</h3>
           </div>
         </div>
       ))}
@@ -121,130 +114,118 @@ export default function BusPage() {
       </header>
 
       <main className="bus-page">
-        <section className="bus-hero">
+        <section className="history-hero">
           <div className="wrap">
-            <div className="bus-crumb">
+            <div className="history-crumb">
               <a href="/"><T fr="Accueil" en="Home" /></a>
               <span>›</span>
               <span>Bus</span>
             </div>
-            <span className="eyebrow"><T fr="Nouveauté" en="What's new" /></span>
-            <h1><T fr="Townsend Transit Express" en="Townsend Transit Express" /> <span className="accent">EXPRESS</span></h1>
-            <p className="bus-hero-sub"><T fr="Réseau de bus — Ville de Townsend" en="Bus network — City of Townsend" /></p>
-            <p className="bus-hero-lede">
+            <span className="eyebrow"><T fr="Nouveau" en="New" /></span>
+            <h1><T fr="Nouvelles lignes de bus" en="New bus lines" /></h1>
+            <p>
               <T
-                fr="Deux nouvelles lignes de bus viennent compléter le réseau ferroviaire et desservir les quartiers non couverts par le train, en correspondance avec les gares existantes."
-                en="Two new bus lines complete the rail network and serve neighbourhoods not covered by the train, connecting with existing stations."
+                fr="Deux nouvelles lignes de bus complètent le réseau ferroviaire et desservent les quartiers non couverts par le train, en correspondance avec la gare centrale."
+                en="Two new bus lines complete the rail network and serve neighbourhoods not covered by the train, connecting with the central station."
               />
             </p>
-            <div className="bus-launch-banner">
-              <T fr="EN CIRCULATION DÈS LE MOIS PROCHAIN !" en="ROLLING OUT NEXT MONTH!" />
-            </div>
           </div>
         </section>
 
-        <section className="bus-legend-section">
-          <div className="wrap bus-legend-row">
-            <div className="bus-legend-item">
-              <span className="bus-legend-swatch" style={{ background: "var(--l-bus1)" }} />
-              <span><T fr="Ligne 1 · Centre-Ville — circuit fermé" en="Line 1 · Downtown — closed loop" /></span>
-            </div>
-            <div className="bus-legend-item">
-              <span className="bus-legend-swatch" style={{ background: "var(--l-bus2)" }} />
-              <span><T fr="Ligne 2 · Secteur Rural — aller-retour" en="Line 2 · Rural sector — round trip" /></span>
-            </div>
-            <div className="bus-legend-item">
-              <span className="bus-legend-swatch train" />
-              <span><T fr="Correspondance avec la ligne de train existante" en="Connects with the existing train line" /></span>
-            </div>
-          </div>
-        </section>
-
-        <section className="bus-line-section" id="ligne-1">
+        <section className="section alt">
           <div className="wrap">
-            <div className="bus-line-card" style={{ ["--card-color" as any]: "var(--l-bus1)" }}>
-              <div className="bus-line-head">
-                <span className="bullet bus-line-badge">B1</span>
-                <div>
-                  <span className="eyebrow2"><T fr="Ligne 1 · Circuit fermé" en="Line 1 · Closed loop" /></span>
-                  <h2><T fr="Centre-Ville" en="Downtown" /></h2>
-                </div>
+            <div className="shead">
+              <span className="eyebrow"><T fr="Ligne 1 · Circuit fermé" en="Line 1 · Closed loop" /></span>
+              <h2 className="stitle"><T fr="Centre-Ville" en="Downtown" /></h2>
+            </div>
+
+            <div className="feature bus-feature bus1">
+              <div className="fx-l">
+                <span className="eyebrow2">B1 · <T fr="En service" en="In service" /></span>
+                <h3><T fr="Boucle Centre-Ville" en="Downtown loop" /></h3>
+                <div className="rt"><T fr="Dépôt Bus ⟲ 8 arrêts" en="Bus Depot ⟲ 8 stops" /></div>
+                <p>
+                  <T
+                    fr="Une boucle qui dessert le cœur de Townsend, du dépôt de bus à la mairie, en passant par l'hôpital et la gare. Le bus revient à son point de départ après le dernier arrêt."
+                    en="A loop serving the heart of Townsend, from the bus depot to city hall, passing the hospital and the station. The bus returns to its starting point after the last stop."
+                  />
+                </p>
+                <div className="deps"><span className="t">06:00</span><span className="t">06:20</span><span className="t">06:40</span><span className="t">…</span></div>
               </div>
-              <p className="bus-line-desc">
-                <T
-                  fr="Une boucle qui dessert le cœur de Townsend, du dépôt de bus à la mairie, en passant par l'hôpital et la gare. Le bus revient à son point de départ après le dernier arrêt."
-                  en="A loop serving the heart of Townsend, from the bus depot to city hall, passing the hospital and the station. The bus returns to its starting point after the last stop."
-                />
-              </p>
-              <RouteStops stops={LINE1_STOPS} colorVar="--l-bus1" loop />
-              <div className="bus-line-facts">
-                <div className="bus-fact"><b>8</b><span><T fr="arrêts" en="stops" /></span></div>
-                <div className="bus-fact"><b>~40 <T fr="min" en="min" /></b><span><T fr="tour complet" en="full loop" /></span></div>
-                <div className="bus-fact"><b>{t("toutes les 20 min", "every 20 min")}</b><span>06:00–22:00</span></div>
+              <div className="fx-r">
+                <div className="fx-stat"><span className="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></span><div><b>~40 <T fr="min" en="min" /></b><span><T fr="tour complet" en="full loop" /></span></div></div>
+                <div className="fx-stat"><span className="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="3" width="16" height="14" rx="3" /><path d="M4 11h16M9 21l1.5-4M15 21l-1.5-4" /></svg></span><div><b>{t("toutes les 20 min", "every 20 min")}</b><span>06:00–22:00</span></div></div>
+                <div className="fx-stat"><span className="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="10" r="3" /><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8Z" /></svg></span><div><b>8 <T fr="arrêts" en="stops" /></b><span><T fr="Motel/Prison · Zone Indus. · Hôpital…" en="Motel/Prison · Industrial Zone · Hospital…" /></span></div></div>
               </div>
             </div>
+
+            <StopsTimeline stops={LINE1_STOPS} colorVar="--l-bus1" loop />
           </div>
         </section>
 
-        <section className="bus-line-section alt" id="ligne-2">
+        <section className="section">
           <div className="wrap">
-            <div className="bus-line-card" style={{ ["--card-color" as any]: "var(--l-bus2)" }}>
-              <div className="bus-line-head">
-                <span className="bullet bus-line-badge">B2</span>
-                <div>
-                  <span className="eyebrow2"><T fr="Ligne 2 · Aller-retour" en="Line 2 · Round trip" /></span>
-                  <h2><T fr="Secteur Rural" en="Rural sector" /></h2>
-                </div>
+            <div className="shead">
+              <span className="eyebrow"><T fr="Ligne 2 · Aller-retour" en="Line 2 · Round trip" /></span>
+              <h2 className="stitle"><T fr="Secteur Rural" en="Rural sector" /></h2>
+            </div>
+
+            <div className="feature bus-feature bus2">
+              <div className="fx-l">
+                <span className="eyebrow2">B2 · <T fr="En service" en="In service" /></span>
+                <h3><T fr="Navette Secteur Rural" en="Rural sector shuttle" /></h3>
+                <div className="rt"><T fr="Dépôt Bus ↔ Station Service · 5 arrêts" en="Bus Depot ↔ Gas Station · 5 stops" /></div>
+                <p>
+                  <T
+                    fr="Une navette linéaire vers les communes rurales autour de Townsend : ferme, caserne de pompiers, camp de vacances et station-service. Le bus fait l'aller-retour entre le dépôt et le terminus."
+                    en="A linear shuttle to the rural communities around Townsend: farm, fire department, holiday camp, and gas station. The bus runs back and forth between the depot and the terminus."
+                  />
+                </p>
+                <div className="deps"><span className="t">06:00</span><span className="t">06:40</span><span className="t">07:20</span><span className="t">…</span></div>
               </div>
-              <p className="bus-line-desc">
-                <T
-                  fr="Une navette linéaire vers les communes rurales autour de Townsend : ferme, caserne de pompiers, camp de vacances et station-service. Le bus fait l'aller-retour entre le dépôt et le terminus."
-                  en="A linear shuttle to the rural communities around Townsend: farm, fire department, holiday camp, and gas station. The bus runs back and forth between the depot and the terminus."
-                />
-              </p>
-              <RouteStops stops={LINE2_STOPS} colorVar="--l-bus2" />
-              <div className="bus-line-facts">
-                <div className="bus-fact"><b>5</b><span><T fr="arrêts" en="stops" /></span></div>
-                <div className="bus-fact"><b>~25 <T fr="min" en="min" /></b><span><T fr="par trajet" en="per trip" /></span></div>
-                <div className="bus-fact"><b>{t("toutes les 40 min", "every 40 min")}</b><span>06:00–20:00</span></div>
+              <div className="fx-r">
+                <div className="fx-stat"><span className="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></span><div><b>~25 <T fr="min" en="min" /></b><span><T fr="par trajet" en="per trip" /></span></div></div>
+                <div className="fx-stat"><span className="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="3" width="16" height="14" rx="3" /><path d="M4 11h16M9 21l1.5-4M15 21l-1.5-4" /></svg></span><div><b>{t("toutes les 40 min", "every 40 min")}</b><span>06:00–20:00</span></div></div>
+                <div className="fx-stat"><span className="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="10" r="3" /><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8Z" /></svg></span><div><b>5 <T fr="arrêts" en="stops" /></b><span><T fr="Ferme · Fire Dept. · Camp Voyage…" en="Farm · Fire Dept. · Camp Voyage…" /></span></div></div>
               </div>
             </div>
+
+            <StopsTimeline stops={LINE2_STOPS} colorVar="--l-bus2" />
           </div>
         </section>
 
-        <section className="bus-info-section">
-          <div className="wrap bus-info-grid">
-            <div className="bus-info-card">
-              <h3><T fr="Correspondance train" en="Train connection" /></h3>
-              <p>
-                <T
-                  fr="Les deux lignes partent du Dépôt Bus, à deux pas de la gare centrale, pour un changement rapide entre le train et le bus."
-                  en="Both lines start at the Bus Depot, right next to the central station, for a quick change between train and bus."
-                />
-              </p>
+        <section className="section alt">
+          <div className="wrap">
+            <div className="shead">
+              <span className="eyebrow"><T fr="Infos pratiques" en="Practical info" /></span>
+              <h2 className="stitle"><T fr="Ce qu'il faut savoir" en="What to know" /></h2>
             </div>
-            <div className="bus-info-card">
-              <h3><T fr="Tarifs" en="Fares" /></h3>
-              <p>
-                <T
-                  fr="Même tarif unique que le réseau ferroviaire. Billets en vente en gare, aux bornes automatiques."
-                  en="Same flat fare as the rail network. Tickets sold at stations, from ticket machines."
-                />
-              </p>
+            <div className="steps">
+              <div className="step">
+                <div className="n num">1</div>
+                <h4><T fr="Correspondance train" en="Train connection" /></h4>
+                <p><T fr="Les deux lignes partent du Dépôt Bus, à deux pas de la gare centrale, pour un changement rapide entre le train et le bus." en="Both lines start at the Bus Depot, right next to the central station, for a quick change between train and bus." /></p>
+              </div>
+              <div className="step">
+                <div className="n num">2</div>
+                <h4><T fr="Tarifs" en="Fares" /></h4>
+                <p><T fr="Même tarif unique que le réseau ferroviaire. Billets en vente en gare, aux bornes automatiques." en="Same flat fare as the rail network. Tickets sold at stations, from ticket machines." /></p>
+              </div>
+              <div className="step">
+                <div className="n num">3</div>
+                <h4><T fr="Accessibilité" en="Accessibility" /></h4>
+                <p><T fr="Bus à plancher bas et rampe d'accès, comme sur le reste du réseau TTE." en="Low-floor buses with access ramp, as on the rest of the TTE network." /></p>
+              </div>
+              <div className="step">
+                <div className="n num">4</div>
+                <h4><T fr="Horaires détaillés" en="Detailed timetables" /></h4>
+                <p><T fr="Consultez le tableau des lignes & horaires pour les prochains départs de chaque ligne." en="Check the lines & timetables table for the next departures on each line." /></p>
+              </div>
             </div>
-            <div className="bus-info-card">
-              <h3><T fr="Mise en service" en="Launch" /></h3>
-              <p>
-                <T
-                  fr="Les deux lignes entrent en circulation dès le mois prochain. Les horaires détaillés seront publiés sur cette page et affichés en gare."
-                  en="Both lines start running next month. Detailed timetables will be published on this page and posted at the station."
-                />
-              </p>
+            <div className="bus-cta-row">
+              <a href="/#lignes" className="btn btn-primary"><T fr="Voir toutes les lignes & horaires" en="See all lines & timetables" /></a>
+              <a href="/contact" className="btn btn-outline"><T fr="Une question ? Contactez-nous" en="A question? Contact us" /></a>
             </div>
-          </div>
-          <div className="wrap bus-cta-row">
-            <a href="/#lignes" className="btn btn-primary"><T fr="Voir toutes les lignes & horaires" en="See all lines & timetables" /></a>
-            <a href="/contact" className="btn btn-outline"><T fr="Une question ? Contactez-nous" en="A question? Contact us" /></a>
           </div>
         </section>
       </main>
