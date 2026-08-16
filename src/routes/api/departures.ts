@@ -228,7 +228,6 @@ export const Route = createFileRoute("/api/departures")({
       PATCH: async ({ request }) => {
         const user = await currentUser();
         if (!user) return noStore({ ok: false, reason: "not_logged_in" }, 401);
-        if (!canManageDepartures(user)) return noStore({ ok: false, reason: "forbidden" }, 403);
 
         let body: Record<string, unknown>;
         try {
@@ -258,6 +257,8 @@ export const Route = createFileRoute("/api/departures")({
             .maybeSingle();
           if (serviceError) throw serviceError;
           if (!service) return noStore({ ok: false, reason: "unknown_service" }, 404);
+          const serviceInfo = service as unknown as { line: string; service_name: string };
+          if (!canManageDepartures(user, serviceInfo.line)) return noStore({ ok: false, reason: "forbidden" }, 403);
 
           const { data, error } = await supabaseAdmin
             .from("timetable_service_updates" as never)
@@ -276,7 +277,6 @@ export const Route = createFileRoute("/api/departures")({
             .single();
           if (error) throw error;
 
-          const serviceInfo = service as unknown as { line: string; service_name: string };
           const statusText = status === "cancelled" ? "supprimé"
             : status === "delayed" ? `retardé de ${delayMinutes} min`
             : status === "boarding" ? "mis à l’embarquement"
@@ -301,13 +301,22 @@ export const Route = createFileRoute("/api/departures")({
       DELETE: async ({ request }) => {
         const user = await currentUser();
         if (!user) return noStore({ ok: false, reason: "not_logged_in" }, 401);
-        if (!canManageDepartures(user)) return noStore({ ok: false, reason: "forbidden" }, 403);
         const url = new URL(request.url);
         const serviceId = url.searchParams.get("serviceId") || "";
         const date = url.searchParams.get("date") || "";
         if (!serviceId || !DATE_PATTERN.test(date)) return noStore({ ok: false, reason: "invalid_fields" }, 400);
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data: service, error: serviceError } = await supabaseAdmin
+            .from("timetable_services" as never)
+            .select("line")
+            .eq("id", serviceId)
+            .maybeSingle();
+          if (serviceError) throw serviceError;
+          if (!service) return noStore({ ok: false, reason: "unknown_service" }, 404);
+          if (!canManageDepartures(user, (service as unknown as { line: string }).line)) {
+            return noStore({ ok: false, reason: "forbidden" }, 403);
+          }
           const { error } = await supabaseAdmin
             .from("timetable_service_updates" as never)
             .delete()

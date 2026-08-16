@@ -2,7 +2,10 @@ export const departuresSharedScript = String.raw`
 (function(){
   "use strict";
   var loading = false;
-  var canWrite = window.__tteCanManageDepartures === true;
+  var canWriteTrain = window.__tteCanManageTrainDepartures === true;
+  var canWriteBus = window.__tteCanManageBusDepartures === true;
+  function isBusLine(line){ return typeof line==="string" && line.charAt(0).toUpperCase()==="B"; }
+  function canWriteLine(line){ return isBusLine(line) ? canWriteBus : canWriteTrain; }
   var statusLabels = {
     on_time:"À l'heure",
     boarding:"Embarquement",
@@ -12,7 +15,8 @@ export const departuresSharedScript = String.raw`
   };
   var lineColors = {
     R1:"#2A9D5B",R2:"#2979C9",R3:"#7A51B5",R4:"#E25B37",
-    IC1:"#163D7A",IC2:"#B02A72",T:"#E6007E",BUS:"#E09A12"
+    IC1:"#163D7A",IC2:"#B02A72",T:"#E6007E",BUS:"#E09A12",
+    B1:"#C68A1C",B2:"#3E7D2C"
   };
 
   function esc(value){
@@ -51,7 +55,7 @@ export const departuresSharedScript = String.raw`
     }
     body.innerHTML=records.map(function(record){
       var statusClass=record.status==="cancelled"?"alert":(record.status==="delayed"||record.status==="platform_changed"?"warn":"");
-      return '<tr data-service="'+esc(record.id)+'">'+
+      return '<tr data-service="'+esc(record.id)+'" data-line="'+esc(record.line)+'">'+
         '<td><b style="font-family:var(--ff-mono)">'+esc(record.scheduledDeparture)+'</b></td>'+
         '<td><span class="ln-tag" style="background:'+(lineColors[record.line]||"#17458A")+'">'+esc(record.line)+'</span></td>'+
         '<td><b>'+esc(record.destination)+'</b><div style="font-size:11px;color:var(--muted)">'+esc(record.serviceName)+'</div>'+
@@ -63,9 +67,11 @@ export const departuresSharedScript = String.raw`
         '<div style="margin-top:6px;display:flex;gap:5px"><button class="btn sm" data-action="save">Enregistrer</button><button class="btn ghost sm" data-action="reset">Réinitialiser</button></div></td>'+
       '</tr>';
     }).join("");
-    if(!canWrite){
-      body.querySelectorAll("input,select,button").forEach(function(el){el.disabled=true;});
-    }
+    body.querySelectorAll("tr[data-service]").forEach(function(row){
+      if(!canWriteLine(row.dataset.line)){
+        row.querySelectorAll("input,select,button").forEach(function(el){el.disabled=true;});
+      }
+    });
   }
   async function load(){
     if(loading) return; loading=true;
@@ -123,8 +129,8 @@ export const departuresSharedScript = String.raw`
   var refresh=document.getElementById("depRefresh"); if(refresh) refresh.addEventListener("click",load);
   var body=document.getElementById("depBody");
   if(body) body.addEventListener("click",function(event){
-    var button=event.target.closest("button"); if(!button||!canWrite) return;
-    var row=button.closest("tr[data-service]"); if(!row) return;
+    var button=event.target.closest("button"); if(!button) return;
+    var row=button.closest("tr[data-service]"); if(!row||!canWriteLine(row.dataset.line)) return;
     if(button.dataset.action==="save") saveRow(row);
     if(button.dataset.action==="reset") resetRow(row);
   });

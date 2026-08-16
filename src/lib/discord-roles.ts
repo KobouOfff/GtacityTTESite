@@ -80,6 +80,7 @@ const FORMATEUR_IDS = new Set([
 ]);
 const REGULATEUR_ID = "1310226200718872606";
 const MAINTENANCE_ID = "1312803829368230028";
+const CHAUFFEUR_BUS_ID = "1313945489724669984"; // Chauffeur Bus
 
 function hasAny(user: DiscordSessionUser | null, ids: Iterable<string>): boolean {
   if (!user) return false;
@@ -100,8 +101,8 @@ export function canWriteNotes(user: DiscordSessionUser | null): boolean {
   );
 }
 
-// Régulation des départs : régulateur, maintenance, direction, gérants de branche.
-export function canManageDepartures(user: DiscordSessionUser | null): boolean {
+// Régulation des départs — trains : régulateur, maintenance, direction, gérants de branche.
+export function canManageTrainDepartures(user: DiscordSessionUser | null): boolean {
   if (!user) return false;
   return (
     hasAny(user, DIRECTION_ROLES) ||
@@ -111,15 +112,40 @@ export function canManageDepartures(user: DiscordSessionUser | null): boolean {
   );
 }
 
+// Régulation des départs — bus : chauffeurs de bus, direction, gérants de branche.
+export function canManageBusDepartures(user: DiscordSessionUser | null): boolean {
+  if (!user) return false;
+  return (
+    hasAny(user, DIRECTION_ROLES) ||
+    hasAny(user, BRANCH_MANAGER_IDS) ||
+    user.roleIds.includes(CHAUFFEUR_BUS_ID)
+  );
+}
+
+// Utilitaire pour reconnaître une ligne de bus (B1, B2, ou l'ancien code générique "BUS").
+export function isBusLine(line: string | null | undefined): boolean {
+  return typeof line === "string" && line.toUpperCase().startsWith("B");
+}
+
+// Régulation des départs : routeur selon la ligne. Sans ligne précisée, renvoie
+// l'accès global (train OU bus) — utilisé pour les bannières/permissions génériques.
+export function canManageDepartures(user: DiscordSessionUser | null, line?: string): boolean {
+  if (!user) return false;
+  if (typeof line === "string") {
+    return isBusLine(line) ? canManageBusDepartures(user) : canManageTrainDepartures(user);
+  }
+  return canManageTrainDepartures(user) || canManageBusDepartures(user);
+}
+
 // Slow orders (TSR) : maintenance, régulateur, direction, gérants de branche.
 export function canManageTSR(user: DiscordSessionUser | null): boolean {
-  return canManageDepartures(user);
+  return canManageTrainDepartures(user);
 }
 
 // Réseau & matériel (TSR, flotte, PA, météo, passages à niveau) — écriture :
 // Gérant, Supervision, Gérants de branche, Maintenance, Régulateur.
 export function canWriteNetworkAssets(user: DiscordSessionUser | null): boolean {
-  return canManageDepartures(user);
+  return canManageTrainDepartures(user);
 }
 
 export type DiscordSessionUser = {
