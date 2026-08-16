@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BusRouteImport } from './routes/bus'
 import { Route as CentreRegulationRouteImport } from './routes/centre-regulation'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -35,6 +36,11 @@ import { Route as ApiPublicDiscordLogoutRouteImport } from './routes/api/public/
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusRoute = BusRouteImport.update({
+  id: '/bus',
+  path: '/bus',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CentreRegulationRoute = CentreRegulationRouteImport.update({
@@ -146,6 +152,7 @@ const ApiPublicDiscordLogoutRoute = ApiPublicDiscordLogoutRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bus': typeof BusRoute
   '/centre-regulation': typeof CentreRegulationRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bus': typeof BusRoute
   '/centre-regulation': typeof CentreRegulationRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
@@ -195,6 +203,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bus': typeof BusRoute
   '/centre-regulation': typeof CentreRegulationRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bus'
     | '/centre-regulation'
     | '/confidentialite'
     | '/contact'
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/bus'
     | '/centre-regulation'
     | '/confidentialite'
     | '/contact'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/bus'
     | '/centre-regulation'
     | '/confidentialite'
     | '/contact'
@@ -294,6 +306,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BusRoute: typeof BusRoute
   CentreRegulationRoute: typeof CentreRegulationRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ContactRoute: typeof ContactRoute
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bus': {
+      id: '/bus'
+      path: '/bus'
+      fullPath: '/bus'
+      preLoaderRoute: typeof BusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/centre-regulation': {
@@ -478,6 +498,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BusRoute: BusRoute,
   CentreRegulationRoute: CentreRegulationRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   ContactRoute: ContactRoute,
