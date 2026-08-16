@@ -14,7 +14,7 @@
 /* ===== Route timeline (mirrors .history-timeline pattern) ===== */
 .bus-timeline{position:relative;margin-left:3rem;margin-top:2.6rem}
 .bus-timeline::before{content:"";position:absolute;left:-42px;top:14px;bottom:14px;width:2px;background:var(--line-color);opacity:.35}
-.bus-tl-row{display:grid;grid-template-columns:0 1fr;position:relative;padding-bottom:1.3rem}
+.bus-tl-row{position:relative;padding-bottom:1.3rem}
 .bus-tl-row:last-child{padding-bottom:0}
 .bus-tl-num{position:absolute;left:-49px;top:0;width:28px;height:28px;border-radius:50%;background:var(--line-color);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-weight:800;font-size:12px;box-shadow:0 0 0 4px #fff}
 .bus-tl-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.85rem 1.1rem;box-shadow:var(--shadow)}
