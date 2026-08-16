@@ -291,7 +291,8 @@ export default function AccueilPage() {
         <div className="sb-item"><span className="bullet" style={{background: "var(--l-ic1)"}}>IC1</span><span className="nm">Nashville</span><span className="sb-dot ok"></span></div>
         <div className="sb-item"><span className="bullet" style={{background: "var(--l-ic2)"}}>IC2</span><span className="nm">Smoky Express</span><span className="sb-dot ok"></span></div>
         <div className="sb-item"><span className="bullet" style={{background: "var(--l-t)"}}>T</span><span className="nm"><T fr="Train urbain" en="Urban train" /></span><span className="sb-dot ok"></span></div>
-        <div className="sb-item"><span className="bullet" style={{background: "var(--l-bus)"}}>BUS</span><span className="nm">Townsend</span><span className="sb-dot ok"></span></div>
+        <div className="sb-item"><span className="bullet" style={{background: "var(--l-bus1)"}}>B1</span><span className="nm"><T fr="Centre-Ville" en="Downtown" /></span><span className="sb-dot ok"></span></div>
+        <div className="sb-item"><span className="bullet" style={{background: "var(--l-bus2)"}}>B2</span><span className="nm"><T fr="Secteur Rural" en="Rural sector" /></span><span className="sb-dot ok"></span></div>
       </div>
     </div>
 

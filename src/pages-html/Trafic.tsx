@@ -6,8 +6,8 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 type TrafficRecord = { id: string; line: string; severity: string; title: string; message: string; until: string; author: string; createdAt: string };
 type DepartureRecord = { id: string; line: string; serviceName: string; departure: string; scheduledDeparture: string; destination: string; platform: string; status: string; delayMinutes: number; message: string };
-const lines = ["R1","R2","R3","R4","IC1","IC2","T"];
-const colors: Record<string,string> = {R1:"#2A9D5B",R2:"#2979C9",R3:"#7A51B5",R4:"#E25B37",IC1:"#163D7A",IC2:"#B02A72",T:"#E6007E"};
+const lines = ["R1","R2","R3","R4","IC1","IC2","T","B1","B2"];
+const colors: Record<string,string> = {R1:"#2A9D5B",R2:"#2979C9",R3:"#7A51B5",R4:"#E25B37",IC1:"#163D7A",IC2:"#B02A72",T:"#E6007E",B1:"#C68A1C",B2:"#3E7D2C"};
 const statusLabelsFr: Record<string,string> = {on_time:"À l’heure",boarding:"Embarquement",delayed:"Retard",platform_changed:"Quai modifié",cancelled:"Supprimé"};
 const statusLabelsEn: Record<string,string> = {on_time:"On time",boarding:"Boarding",delayed:"Delayed",platform_changed:"Platform changed",cancelled:"Cancelled"};
 
