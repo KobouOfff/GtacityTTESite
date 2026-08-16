@@ -69,6 +69,7 @@ export default function AccueilPage() {
       <a href="#gares"><T fr="Gares" en="Stations" /></a>
       <a href="#townsend">Townsend</a>
       <a href="#tarifs"><T fr="Tarifs" en="Fares" /></a>
+      <a href="/bus"><T fr="Bus" en="Bus" /></a>
       <a href="/histoire"><T fr="Histoire" en="History" /></a>
       <a href="#infos"><T fr="Infos voyageurs" en="Traveller info" /></a>
       <a href="/trafic"><T fr="Trafic" en="Service status" /></a>
@@ -254,6 +255,11 @@ export default function AccueilPage() {
       <span className="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg></span>
       <h3><T fr="Infos voyageurs" en="Traveller info" /></h3>
       <p><T fr="Achat, services à bord et accessibilité." en="Buying tickets, on-board services, and accessibility." /></p>
+    </a>
+    <a className="tile" href="/bus">
+      <span className="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="6" width="18" height="12" rx="3" /><path d="M3 13h18M7 18v1.5M17 18v1.5" /><circle cx="7.5" cy="15.5" r="1" fill="currentColor" stroke="none" /><circle cx="16.5" cy="15.5" r="1" fill="currentColor" stroke="none" /></svg></span>
+      <h3><T fr="Nouvelles lignes de bus" en="New bus lines" /> <span className="hist-tag">{"★ " }<T fr="Bientôt" en="Coming soon" /></span></h3>
+      <p><T fr="Ligne 1 Centre-Ville et Ligne 2 Secteur Rural, en correspondance avec le train." en="Downtown Line 1 and Rural Line 2, connecting with the train." /></p>
     </a>
   </div>
 </div>
@@ -499,19 +505,27 @@ export default function AccueilPage() {
               <td><span className="t-dur">~12 {t("min", "min")}</span></td>
               <td><span className="st st-ok">{t("En service", "In service")}</span></td>
             </tr>
-            <tr data-type="bus" data-search="bus townsend gare centrale hopital tmc quartier residentiel local partout">
-              <td><span className="bullet" style={{background: "var(--l-bus)"}}>BUS</span></td>
-              <td><span className="t-type tt-bus">{t("Bus local", "Local bus")}</span></td>
-              <td><div className="t-pair">{t("Gare centrale", "Central station")} → {t("Hôpital TMC", "TMC Hospital")}</div><div className="t-via">{t("dessert tout Townsend · arrêt principal gare centrale", "serves all of Townsend · main stop at central station")}</div></td>
+            <tr data-type="bus" data-search="bus 1 ligne 1 centre-ville depot motel prison zone industrielle hopital concession arlington gare diner mairie circuit">
+              <td><span className="bullet" style={{background: "var(--l-bus1)"}}>B1</span></td>
+              <td><span className="t-type tt-bus1">{t("Bus · Centre-ville", "Bus · Downtown")}</span></td>
+              <td><div className="t-pair">{t("Circuit Centre-Ville", "Downtown loop")} <span className="hist-tag">{t("★ Nouvelle ligne", "★ New line")}</span></div><div className="t-via">{t("Dépôt Bus → Motel/Prison → Zone Indus. → Hôpital → Concession → Arlington → Gare/Diner → Mairie → Dépôt Bus", "Bus Depot → Motel/Prison → Industrial Zone → Hospital → Concession → Arlington → Station/Diner → City Hall → Bus Depot")}</div></td>
               <td><span className="t-time">{t("toutes les 20 min", "every 20 min")}</span><span className="t-time">06:00–22:00</span></td>
-              <td><span className="t-dur">18 {t("min", "min")}</span></td>
-              <td><span className="st st-ok">{t("En service", "In service")}</span></td>
+              <td><span className="t-dur">~40 {t("min", "min")} <T fr="(boucle)" en="(loop)" /></span></td>
+              <td><span className="st st-soon">{t("Dès le mois prochain", "Starting next month")}</span></td>
+            </tr>
+            <tr data-type="bus" data-search="bus 2 ligne 2 secteur rural depot ferme fire dept camp voyage station service aller-retour">
+              <td><span className="bullet" style={{background: "var(--l-bus2)"}}>B2</span></td>
+              <td><span className="t-type tt-bus2">{t("Bus · Secteur rural", "Bus · Rural sector")}</span></td>
+              <td><div className="t-pair">{t("Secteur Rural", "Rural sector")} <span className="hist-tag">{t("★ Nouvelle ligne", "★ New line")}</span></div><div className="t-via">{t("Dépôt Bus → Ferme → Fire Dept. → Camp Voyage → Station Service (aller-retour)", "Bus Depot → Farm → Fire Dept. → Camp Voyage → Gas Station (round trip)")}</div></td>
+              <td><span className="t-time">{t("toutes les 40 min", "every 40 min")}</span><span className="t-time">06:00–20:00</span></td>
+              <td><span className="t-dur">~25 {t("min", "min")}</span></td>
+              <td><span className="st st-soon">{t("Dès le mois prochain", "Starting next month")}</span></td>
             </tr>
           </tbody>
         </table>
       </div>
       <div className="tfoot">
-        <span id="linCount">{t("8 lignes affichées · horaires donnés à titre indicatif", "8 lines shown · timetables given for guidance only")}</span>
+        <span id="linCount">{t("9 lignes affichées · horaires donnés à titre indicatif", "9 lines shown · timetables given for guidance only")}</span>
         <span><T fr="Billets en vente en gare, aux bornes automatiques" en="Tickets sold at stations, from ticket machines" /></span>
       </div>
     </div>
@@ -1049,12 +1063,15 @@ export default function AccueilPage() {
         <a href="#lignes"><span className="ll" style={{background: "var(--l-r1)"}}></span> R1 · Smokies</a>
         <a href="#lignes"><span className="ll" style={{background: "var(--l-r4)"}}></span> R4 · Chattanooga</a>
         <a href="#townsend"><span className="ll" style={{background: "var(--l-t)"}}></span> <T fr="Ligne T · Townsend" en="Line T · Townsend" /></a>
+        <a href="/bus"><span className="ll" style={{background: "var(--l-bus1)"}}></span> <T fr="B1 · Centre-Ville" en="B1 · Downtown" /></a>
+        <a href="/bus"><span className="ll" style={{background: "var(--l-bus2)"}}></span> <T fr="B2 · Secteur Rural" en="B2 · Rural sector" /></a>
         <a href="#reseau"><T fr="Plan du réseau" en="Network map" /></a>
       </div>
 
       <div className="fcol">
         <h4><T fr="Voyageurs" en="Travellers" /></h4>
         <a href="#lignes"><T fr="Lignes & horaires" en="Lines & timetables" /></a>
+        <a href="/bus"><T fr="Nouvelles lignes de bus" en="New bus lines" /></a>
         <a href="#tarifs"><T fr="Tarifs & titres" en="Fares & tickets" /></a>
         <a href="#infos"><T fr="Acheter un billet" en="Buy a ticket" /></a>
         <a href="/contact#accessibilite"><T fr="Accessibilité" en="Accessibility" /></a>
