@@ -367,8 +367,10 @@ export default function BlacklistPanel() {
             return (
               <div
                 key={row.id}
-                className="pub"
+                className="blacklist-entry"
                 style={{
+                  display: "flex",
+                  flexDirection: "column",
                   padding: "14px 16px",
                   borderRadius: 10,
                   border: "1px solid var(--line, #e5e7eb)",
