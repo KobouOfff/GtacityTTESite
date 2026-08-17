@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import "./CentreRegulation.css";
 import { script } from "./CentreRegulation.script";
 import { trafficSharedScript } from "./CentreRegulationTrafficShared.script";
@@ -40,8 +40,15 @@ export default function CentreRegulationPage() {
   const permBlacklist = canManageBlacklist(u);
   const permAuditLogs = canViewAuditLogs(u);
 
+  // Met à jour l'identité / les drapeaux de permission à chaque changement,
+  // SANS jamais réinjecter le script legacy (voir l'effet suivant). Réinjecter
+  // le script à chaque changement de permission attachait les écouteurs
+  // (boutons, onglets, setInterval de rafraîchissement) une deuxième fois sur
+  // les mêmes éléments DOM à chaque connexion, ce qui pouvait faire échouer
+  // ou "disparaître" l'ajout/l'historique des PV et des objets trouvés selon
+  // le timing de chargement de la session — un comportement erratique qui ne
+  // dépend pas réellement du rôle Discord de la personne.
   useEffect(() => {
-    // Injecte l'identité Discord courante avant le script legacy
     if (user) {
       const name = user.displayName || user.username;
       const primary = getPrimaryRole(user.roleIds);
@@ -56,6 +63,19 @@ export default function CentreRegulationPage() {
     (window as Window & { __tteCanManageDepartures?: boolean }).__tteCanManageDepartures = permDep;
     (window as Window & { __tteCanManageTrainDepartures?: boolean }).__tteCanManageTrainDepartures = permDepTrain;
     (window as Window & { __tteCanManageBusDepartures?: boolean }).__tteCanManageBusDepartures = permDepBus;
+  }, [user, permTrainings, permNet, permAuditLogs, permDep, permDepTrain, permDepBus]);
+
+  // Injecte le script legacy une seule fois par montage de la page. On attend
+  // que la session Discord soit résolue (user !== undefined, qu'elle soit
+  // null ou un objet) pour que l'agent affiché et les permissions initiales
+  // soient correctes dès le premier rendu du script, puis on ne le réinjecte
+  // plus jamais — les mises à jour de permissions passent par l'effet
+  // ci-dessus (localStorage / window), que le script legacy relit lui-même.
+  const scriptInjectedRef = useRef(false);
+  const isUserResolved = user !== undefined;
+  useEffect(() => {
+    if (scriptInjectedRef.current || !isUserResolved) return;
+    scriptInjectedRef.current = true;
     const el = document.createElement("script");
     el.textContent =
       auditLogBridgePrelude +
@@ -66,7 +86,7 @@ export default function CentreRegulationPage() {
       incidentsLogsSharedScript;
     document.body.appendChild(el);
     return () => { el.remove(); };
-  }, [user, permTrainings, permNet, permAuditLogs, permDep, permDepTrain, permDepBus]);
+  }, [isUserResolved]);
 
   useEffect(() => {
     function onPvPdf(e: Event) {
