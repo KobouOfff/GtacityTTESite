@@ -39,18 +39,17 @@ export const ADMIN_ROLES = new Set([
   "1366488410046464081", // Superviseur assistant
 ]);
 
+// Tout rôle TTE reconnu (grades, postes, formateurs, gérants, direction…) —
+// utilisé pour les pages ouvertes à "tout le personnel", recrues incluses.
+const ANY_STAFF_ROLE_IDS = Object.keys(DISCORD_ROLES);
+
 // Matrice d'accès par page
 export const PAGE_ACCESS: Record<string, string[]> = {
   // /centre-regulation : ouvert à tout employé connecté.
   // Les permissions fines (notes, départs, TSR, réseau & matériel)
   // sont gérées via les helpers can* ci-dessous.
-  "/contact": [
-    // Toute personne ayant le rôle "Employé TTE" (ou plus)
-    "1198611202142634115",
-  ],
-  "/espace-employes": [
-    "1198611202142634115",
-  ],
+  "/contact": ANY_STAFF_ROLE_IDS,
+  "/espace-employes": ANY_STAFF_ROLE_IDS,
 };
 
 // ===== Permissions internes au Centre de Régulation =====
