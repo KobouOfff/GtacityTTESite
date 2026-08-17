@@ -31,8 +31,31 @@ export const lostFoundSharedScript = String.raw`
       cache:"no-store"
     });
     var json = await response.json().catch(function(){ return {}; });
-    if(!response.ok || !json.ok) throw new Error(json.reason || "request_failed");
+    if(!response.ok || !json.ok){
+      var err = new Error(json.reason || "request_failed");
+      err.status = response.status;
+      err.reason = json.reason || "request_failed";
+      throw err;
+    }
     return json;
+  }
+
+  // Traduit une erreur API en message compréhensible pour l'agent, au lieu
+  // d'un message générique qui masque la vraie cause (ex. session expirée,
+  // champ invalide, erreur serveur…).
+  function apiErrorMessage(error, fallback){
+    var reason = error && error.reason;
+    var status = error && error.status;
+    if(status === 401 || reason === "not_logged_in"){
+      return "Session expirée — reconnecte-toi avec Discord puis réessaie.";
+    }
+    if(reason === "invalid_fields"){
+      return "Champs invalides — vérifie la catégorie, le lieu et la description.";
+    }
+    if(reason === "bad_json" || reason === "bad_id"){
+      return "Requête invalide — recharge la page et réessaie.";
+    }
+    return fallback + (reason ? " (" + reason + ")" : "");
   }
 
   function statusColors(status){
@@ -93,7 +116,7 @@ export const lostFoundSharedScript = String.raw`
           await loadRecords();
         } catch(error) {
           console.error("[lost-found/update]", error);
-          notifyShared("Impossible de modifier cet objet", "err");
+          notifyShared(apiErrorMessage(error, "Impossible de modifier cet objet"), "err");
           rest.disabled = false;
         }
       });
@@ -110,7 +133,7 @@ export const lostFoundSharedScript = String.raw`
           await loadRecords();
         } catch(error) {
           console.error("[lost-found/delete]", error);
-          notifyShared("Impossible de supprimer cet objet", "err");
+          notifyShared(apiErrorMessage(error, "Impossible de supprimer cet objet"), "err");
           remove.disabled = false;
         }
       });
@@ -130,7 +153,7 @@ export const lostFoundSharedScript = String.raw`
       } catch(e) {}
     } catch(error) {
       console.error("[lost-found/list]", error);
-      notifyShared("Impossible de charger les objets partagés", "err");
+      notifyShared(apiErrorMessage(error, "Impossible de charger les objets partagés"), "err");
     } finally {
       loading = false;
       render();
@@ -166,7 +189,7 @@ export const lostFoundSharedScript = String.raw`
       await loadRecords();
     } catch(error) {
       console.error("[lost-found/create]", error);
-      notifyShared("Impossible d’enregistrer cet objet", "err");
+      notifyShared(apiErrorMessage(error, "Impossible d’enregistrer cet objet"), "err");
     } finally {
       sharedSave.disabled = false;
     }
