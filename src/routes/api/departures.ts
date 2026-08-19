@@ -277,6 +277,22 @@ export const Route = createFileRoute("/api/departures")({
             .single();
           if (error) throw error;
 
+          // Journal d'historique append-only : jamais modifié ni supprimé par
+          // un futur "Réinitialiser", pour que le récap mensuel reste exact.
+          const { error: eventError } = await supabaseAdmin
+            .from("timetable_regulation_events" as never)
+            .insert({
+              service_id: serviceId,
+              line: serviceInfo.line,
+              service_date: date,
+              status,
+              delay_minutes: status === "delayed" ? delayMinutes : 0,
+              public_message: message || null,
+              created_by_discord_id: user.discordId,
+              created_by_name: user.displayName || user.username,
+            } as never);
+          if (eventError) console.error("[departures/event]", eventError);
+
           const statusText = status === "cancelled" ? "supprimé"
             : status === "delayed" ? `retardé de ${delayMinutes} min`
             : status === "boarding" ? "mis à l’embarquement"
