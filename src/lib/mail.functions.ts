@@ -41,6 +41,26 @@ export const getMyMailAddress = createServerFn({ method: "GET" }).handler(async 
   }
 });
 
+export type MailableEmployee = {
+  name: string | null;
+  email: string;
+};
+
+/** Annuaire des employés enregistrés (nom + email), pour choisir un destinataire dans la messagerie interne. */
+export const listMailableEmployees = createServerFn({ method: "GET" }).handler(async () => {
+  const user = await currentUser();
+  if (!user) return { ok: false as const, reason: "not_logged_in" as const };
+  try {
+    const { listAllEmployees } = await import("./employees.server");
+    const employees = await listAllEmployees();
+    const list: MailableEmployee[] = employees.map((e) => ({ name: e.name, email: e.email }));
+    return { ok: true as const, employees: list };
+  } catch (e) {
+    console.error("[listMailableEmployees]", e);
+    return { ok: false as const, reason: "read_failed" as const };
+  }
+});
+
 export type MailFolder = "inbox" | "sent" | "archive" | "spam" | "trash";
 const VALID_FOLDERS: readonly MailFolder[] = ["inbox", "sent", "archive", "spam", "trash"];
 

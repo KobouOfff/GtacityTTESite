@@ -30,3 +30,22 @@ export async function getEmployeeByDiscordId(discordId: string): Promise<Employe
     email: data.email.trim().toLowerCase(),
   };
 }
+
+/** Annuaire de tous les employés enregistrés (nom + adresse mail), pour la messagerie interne. */
+export async function listAllEmployees(): Promise<EmployeeRecord[]> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("employees")
+    .select("discord_id, name, email")
+    .not("email", "is", null)
+    .order("name", { ascending: true });
+
+  if (error) throw error;
+  return (data ?? [])
+    .filter((row) => row.email)
+    .map((row) => ({
+      discordId: row.discord_id,
+      name: row.name,
+      email: row.email.trim().toLowerCase(),
+    }));
+}
