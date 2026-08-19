@@ -26,6 +26,11 @@ const REASON_LABELS: Record<string, string> = {
   send_failed: "L'envoi a échoué. Réessaie dans un instant.",
   forbidden: "Ce mail n'est pas accessible depuis ton compte.",
   invalid: "Vérifie les champs du formulaire (destinataire, objet, message).",
+  // Codes détaillés remontés depuis deomail.server.ts, pour un diagnostic
+  // direct sans avoir à aller lire les logs serveur.
+  not_configured: "La messagerie n'est pas configurée sur le serveur (clé API DeoMail absente). Un administrateur doit définir DEOMAIL_API_KEY dans les variables d'environnement du site.",
+  auth_failed: "DeoMail a refusé la clé API du site (clé invalide ou expirée). Vérifie la valeur de DEOMAIL_API_KEY.",
+  network: "Le site n'arrive pas à contacter DeoMail (problème réseau ou service DeoMail indisponible). Réessaie dans un instant.",
 };
 
 export default function MailPanel({ onClose }: { onClose: () => void }) {
