@@ -28,6 +28,8 @@ export const DISCORD_ROLES: Record<string, { name: string; color: string; level:
   "1343672655751938098": { name: "Employé expérimenté", color: "#64748b", level: 30 },
   "1343672658662785156": { name: "Employé", color: "#64748b", level: 20 },
   "1343672661108064266": { name: "Recrue", color: "#94a3b8", level: 10 },
+  // Administratif
+  "1534948230100685002": { name: "Secrétaire / Agent d'accueil / RH", color: "#ec4899", level: 25 },
   // Rôle "membre de l'entreprise"
   "1198611202142634115": { name: "Employé TTE", color: "#64748b", level: 5 },
 };
@@ -224,19 +226,28 @@ const BRANCH_MANAGER_ROLES: Record<string, string> = {
   "1198611191858221126": "controleur",  // Gérant Contrôleur
   "1312824207545208862": "maintenance", // Gérant Maintenance
 };
-const CONTACT_ADMIN_ROLES = new Set<string>([
+// Rôles voyant TOUTES les demandes de contact et pouvant les transmettre à
+// n'importe quelle branche (Direction + Secrétariat/Accueil/RH, qui fait
+// office de standard central) — sans hériter des autres droits réservés à
+// la Direction (notes de service, régulation des départs, formations…).
+const CONTACT_FULL_ACCESS_ROLES = new Set<string>([
   ...CONTACT_DIRECTION_ROLES,
+  "1534948230100685002", // Secrétaire / Agent d'accueil / RH
+]);
+const CONTACT_ADMIN_ROLES = new Set<string>([
+  ...CONTACT_FULL_ACCESS_ROLES,
   ...Object.keys(BRANCH_MANAGER_ROLES),
 ]);
 export function canManageContactRequests(user: DiscordSessionUser | null): boolean {
   if (!user) return false;
   return user.roleIds.some((r) => CONTACT_ADMIN_ROLES.has(r));
 }
-// Direction : voit tout. Sinon renvoie la liste des clés de branche visibles.
+// Direction + Secrétariat/Accueil/RH : voient tout et peuvent transmettre à
+// n'importe quelle branche. Sinon renvoie la liste des clés de branche visibles.
 // null = accès complet, [] = aucun accès, [x,y] = filtré sur ces branches.
 export function contactVisibleBranches(user: DiscordSessionUser | null): string[] | null {
   if (!user) return [];
-  if (user.roleIds.some((r) => CONTACT_DIRECTION_ROLES.has(r))) return null;
+  if (user.roleIds.some((r) => CONTACT_FULL_ACCESS_ROLES.has(r))) return null;
   const branches = new Set<string>();
   for (const r of user.roleIds) {
     const b = BRANCH_MANAGER_ROLES[r];
