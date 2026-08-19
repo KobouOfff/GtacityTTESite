@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyMailAddress, listMyMail, getMyMail, sendMyMail, moveMyMail, type MailFolder, type MailAttachmentInput } from "@/lib/mail.functions";
+import { getMyMailAddress, listMyMail, getMyMail, sendMyMail, moveMyMail, listMailableEmployees, type MailFolder, type MailAttachmentInput } from "@/lib/mail.functions";
 import { MAIL_TEMPLATES, getMailTemplate, getTemplatePlaceholders, labelFor, fillTemplate } from "@/lib/mail-templates";
 import "./MailPanel.css";
 
@@ -242,6 +242,13 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
     staleTime: 5 * 60_000,
   });
 
+  const directoryQuery = useQuery({
+    queryKey: ["mail-directory"],
+    queryFn: () => listMailableEmployees(),
+    staleTime: 5 * 60_000,
+  });
+  const directory = directoryQuery.data?.ok ? directoryQuery.data.employees : [];
+
   const inboxQuery = useQuery({
     queryKey: ["mail-folder", folder],
     queryFn: () => listMyMail({ data: { folder } }),
@@ -418,6 +425,31 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
                   }}
                 >
                   <div className="mp-compose-head">Nouveau message</div>
+
+                  <label>
+                    Destinataire (annuaire employés)
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        if (e.target.value) setTo(e.target.value);
+                        e.target.value = "";
+                      }}
+                    >
+                      <option value="">
+                        {directoryQuery.isLoading
+                          ? "Chargement de l'annuaire…"
+                          : directory.length === 0
+                            ? "Aucun employé enregistré"
+                            : "— Choisir un employé —"}
+                      </option>
+                      {directory.map((emp) => (
+                        <option key={emp.email} value={emp.email}>
+                          {emp.name ? `${emp.name} — ${emp.email}` : emp.email}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
                   <label>
                     À
                     <input
@@ -426,7 +458,15 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
                       value={to}
                       onChange={(e) => setTo(e.target.value)}
                       placeholder="destinataire@domaine.com"
+                      list="mp-employee-directory"
                     />
+                    <datalist id="mp-employee-directory">
+                      {directory.map((emp) => (
+                        <option key={emp.email} value={emp.email}>
+                          {emp.name ? `${emp.name} (${emp.email})` : emp.email}
+                        </option>
+                      ))}
+                    </datalist>
                   </label>
 
                   <label>
