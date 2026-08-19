@@ -480,6 +480,128 @@
   gap: 8px;
 }
 
+.mp-compose select {
+  font-family: inherit;
+  font-size: 14px;
+  color: #e6ebf5;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.mp-compose select:focus {
+  outline: none;
+  border-color: var(--blue, #2f6fe0);
+}
+
+.mp-template-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px 12px;
+  background: rgba(47, 111, 224, 0.08);
+  border: 1px solid rgba(47, 111, 224, 0.2);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.mp-template-fields label {
+  gap: 4px;
+}
+
+/* ===== ATTACHMENTS ===== */
+.mp-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mp-attachments-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7C8CAE;
+}
+
+.mp-attach-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #C9D3E6;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.mp-attach-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.mp-attach-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mp-attach-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 5px 6px 5px 10px;
+  font-size: 12px;
+  color: #C9D3E6;
+  max-width: 220px;
+}
+
+.mp-attach-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 130px;
+}
+
+.mp-attach-size {
+  color: #7C8CAE;
+  flex-shrink: 0;
+}
+
+.mp-attach-chip button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #C9D3E6;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mp-attach-chip button:hover {
+  background: rgba(224, 79, 79, 0.3);
+  color: #fff;
+}
+
+.mp-attach-hint {
+  font-size: 11px;
+  color: #5A6989;
+}
+
 @media (max-width: 860px) {
   .mp-side {
     display: none;

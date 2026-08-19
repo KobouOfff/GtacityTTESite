@@ -1,7 +1,38 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyMailAddress, listMyMail, getMyMail, sendMyMail, type MailFolder } from "@/lib/mail.functions";
+import { getMyMailAddress, listMyMail, getMyMail, sendMyMail, type MailFolder, type MailAttachmentInput } from "@/lib/mail.functions";
+import { MAIL_TEMPLATES, getMailTemplate, getTemplatePlaceholders, labelFor, fillTemplate } from "@/lib/mail-templates";
 import "./MailPanel.css";
+
+const MAX_ATTACHMENTS = 5;
+const MAX_ATTACHMENTS_TOTAL_BYTES = 10 * 1024 * 1024;
+
+type PendingAttachment = {
+  filename: string;
+  size: number;
+  contentType: string;
+  content: string; // base64, sans préfixe data:...
+};
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+}
+
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // "data:<mime>;base64,<data>" -> on ne garde que la partie base64.
+      const idx = result.indexOf(",");
+      resolve(idx >= 0 ? result.slice(idx + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("Lecture du fichier impossible"));
+    reader.readAsDataURL(file);
+  });
+}
 
 function formatDate(iso: string | null): string {
   if (!iso) return "";
@@ -133,6 +164,68 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"all" | "unread">("all");
   const [folder, setFolder] = useState<MailFolder>("inbox");
+  const [templateId, setTemplateId] = useState<number>(0);
+  const [templateValues, setTemplateValues] = useState<Record<string, string>>({});
+  const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
+  const [attachmentError, setAttachmentError] = useState<string | null>(null);
+
+  const selectedTemplate = templateId ? getMailTemplate(templateId) : undefined;
+  const placeholders = useMemo(
+    () => (selectedTemplate ? getTemplatePlaceholders(selectedTemplate) : []),
+    [selectedTemplate],
+  );
+
+  // Recalcule l'objet/le corps à partir du modèle choisi à chaque fois que
+  // le modèle ou une valeur de champ change (comme l'aperçu de !mail sur Discord).
+  useEffect(() => {
+    if (!selectedTemplate) return;
+    const { subject: s, body: b } = fillTemplate(selectedTemplate, templateValues);
+    setSubject(s);
+    setBody(b);
+  }, [selectedTemplate, templateValues]);
+
+  function resetCompose() {
+    setTo("");
+    setSubject("");
+    setBody("");
+    setTemplateId(0);
+    setTemplateValues({});
+    setAttachments([]);
+    setAttachmentError(null);
+  }
+
+  async function handleFilesSelected(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setAttachmentError(null);
+    const incoming = Array.from(files);
+    if (attachments.length + incoming.length > MAX_ATTACHMENTS) {
+      setAttachmentError(`⚠️ ${MAX_ATTACHMENTS} fichiers maximum.`);
+      return;
+    }
+    const currentTotal = attachments.reduce((sum, a) => sum + a.size, 0);
+    const incomingTotal = incoming.reduce((sum, f) => sum + f.size, 0);
+    if (currentTotal + incomingTotal > MAX_ATTACHMENTS_TOTAL_BYTES) {
+      setAttachmentError("⚠️ 10 Mo maximum au total.");
+      return;
+    }
+    try {
+      const read = await Promise.all(
+        incoming.map(async (f) => ({
+          filename: f.name,
+          size: f.size,
+          contentType: f.type || "application/octet-stream",
+          content: await readFileAsBase64(f),
+        })),
+      );
+      setAttachments((prev) => [...prev, ...read]);
+    } catch {
+      setAttachmentError("⚠️ Impossible de lire un des fichiers, réessaie.");
+    }
+  }
+
+  function removeAttachment(filename: string) {
+    setAttachments((prev) => prev.filter((a) => a.filename !== filename));
+  }
 
   const addressQuery = useQuery({
     queryKey: ["mail-address"],
@@ -155,12 +248,15 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
   });
 
   const sendMutation = useMutation({
-    mutationFn: () => sendMyMail({ data: { to, subject, body } }),
+    mutationFn: () => {
+      const attachmentsPayload: MailAttachmentInput[] | undefined = attachments.length
+        ? attachments.map((a) => ({ filename: a.filename, content: a.content, contentType: a.contentType }))
+        : undefined;
+      return sendMyMail({ data: { to, subject, body, attachments: attachmentsPayload } });
+    },
     onSuccess: (res) => {
       if (res.ok) {
-        setTo("");
-        setSubject("");
-        setBody("");
+        resetCompose();
         setComposing(false);
         queryClient.invalidateQueries({ queryKey: ["mail-folder", "inbox"] });
         queryClient.invalidateQueries({ queryKey: ["mail-folder", "sent"] });
@@ -205,7 +301,7 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             className="mp-compose-btn"
-            onClick={() => { setComposing(true); setSelectedId(null); }}
+            onClick={() => { resetCompose(); setComposing(true); setSelectedId(null); }}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3"><path d="M12 5v14M5 12h14" /></svg>
             Nouveau message
@@ -311,6 +407,44 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
                       placeholder="destinataire@domaine.com"
                     />
                   </label>
+
+                  <label>
+                    Modèle prédéfini
+                    <select
+                      value={templateId}
+                      onChange={(e) => {
+                        const id = Number(e.target.value);
+                        setTemplateId(id);
+                        setTemplateValues({});
+                        if (id === 0) {
+                          setSubject("");
+                          setBody("");
+                        }
+                      }}
+                    >
+                      <option value={0}>Mail libre (rédiger moi-même)</option>
+                      {MAIL_TEMPLATES.map((t) => (
+                        <option key={t.id} value={t.id}>{t.title}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  {selectedTemplate && placeholders.length > 0 && (
+                    <div className="mp-template-fields">
+                      {placeholders.map((ph) => (
+                        <label key={ph}>
+                          {labelFor(ph)}
+                          <input
+                            type="text"
+                            value={templateValues[ph] ?? ""}
+                            onChange={(e) => setTemplateValues((prev) => ({ ...prev, [ph]: e.target.value }))}
+                            placeholder={labelFor(ph)}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
                   <label>
                     Objet
                     <input
@@ -326,11 +460,46 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
                     <textarea
                       required
                       maxLength={20000}
-                      rows={12}
+                      rows={selectedTemplate ? 8 : 12}
                       value={body}
                       onChange={(e) => setBody(e.target.value)}
                     />
                   </label>
+
+                  <div className="mp-attachments">
+                    <div className="mp-attachments-head">
+                      <span>Pièces jointes</span>
+                      <label className="mp-attach-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M21.44 11.05 12.25 20.24a5 5 0 0 1-7.07-7.07l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95L9.83 18.42a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
+                        Joindre
+                        <input
+                          type="file"
+                          multiple
+                          hidden
+                          onChange={(e) => {
+                            void handleFilesSelected(e.target.files);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                    </div>
+                    {attachments.length > 0 && (
+                      <ul className="mp-attach-list">
+                        {attachments.map((a) => (
+                          <li key={a.filename} className="mp-attach-chip">
+                            <span className="mp-attach-name" title={a.filename}>{a.filename}</span>
+                            <span className="mp-attach-size">{formatSize(a.size)}</span>
+                            <button type="button" onClick={() => removeAttachment(a.filename)} aria-label={`Retirer ${a.filename}`}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="mp-attach-hint">Jusqu'à {MAX_ATTACHMENTS} fichiers, 10 Mo au total.</div>
+                    {attachmentError && <div className="mp-banner">{attachmentError}</div>}
+                  </div>
+
                   {sendMutation.data && !sendMutation.data.ok && (
                     <div className="mp-banner">
                       {REASON_LABELS[sendMutation.data.reason] ?? "L'envoi a échoué."}
@@ -340,7 +509,7 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
                     <button type="submit" className="mp-btn mp-btn-primary" disabled={sendMutation.isPending}>
                       {sendMutation.isPending ? "Envoi…" : "Envoyer"}
                     </button>
-                    <button type="button" className="mp-btn" onClick={() => setComposing(false)}>
+                    <button type="button" className="mp-btn" onClick={() => { resetCompose(); setComposing(false); }}>
                       Annuler
                     </button>
                   </div>
@@ -366,6 +535,10 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
                               : `Re: ${mailQuery.data!.mail.subject}`,
                           );
                           setBody("");
+                          setTemplateId(0);
+                          setTemplateValues({});
+                          setAttachments([]);
+                          setAttachmentError(null);
                           setComposing(true);
                         }}
                       >
