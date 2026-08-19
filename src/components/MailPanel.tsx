@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyMailAddress, listMyInbox, getMyMail, sendMyMail } from "@/lib/mail.functions";
+import { getMyMailAddress, listMyMail, getMyMail, sendMyMail, type MailFolder } from "@/lib/mail.functions";
 import "./MailPanel.css";
 
 function formatDate(iso: string | null): string {
@@ -40,12 +40,12 @@ const REASON_LABELS: Record<string, string> = {
   network: "Le site n'arrive pas à contacter DeoMail (problème réseau ou service DeoMail indisponible). Réessaie dans un instant.",
 };
 
-// Dossiers façon webmail (Gmail / DeoMail). Seul "Inbox" est réellement
-// branché sur l'API DeoMail pour le moment ; les autres sont affichés pour
-// coller au style d'une vraie boîte mail mais restent désactivés tant que
-// le backend ne les expose pas (pas de notion de brouillons/corbeille/etc.
-// côté sendMyMail / listMyInbox aujourd'hui).
-const FOLDERS: Array<{ key: string; label: string; icon: JSX.Element; enabled: boolean }> = [
+// Dossiers façon webmail (Gmail / DeoMail). Inbox/Envoyés/Archives/
+// Indésirables/Corbeille sont réellement branchés sur l'API DeoMail
+// (GET /v1/emails?folder=...). Suivis et Brouillons restent désactivés :
+// il n'existe pas d'équivalent (flag "starred" ou persistance de brouillon)
+// exposé par l'API aujourd'hui.
+const FOLDERS: Array<{ key: MailFolder | "starred" | "drafts"; label: string; icon: JSX.Element; enabled: boolean }> = [
   {
     key: "inbox",
     label: "Boîte de réception",
@@ -70,7 +70,7 @@ const FOLDERS: Array<{ key: string; label: string; icon: JSX.Element; enabled: b
   {
     key: "sent",
     label: "Envoyés",
-    enabled: false,
+    enabled: true,
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M22 2 11 13" />
@@ -92,7 +92,7 @@ const FOLDERS: Array<{ key: string; label: string; icon: JSX.Element; enabled: b
   {
     key: "archive",
     label: "Archives",
-    enabled: false,
+    enabled: true,
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="3" y="4" width="18" height="5" rx="1" />
@@ -103,7 +103,7 @@ const FOLDERS: Array<{ key: string; label: string; icon: JSX.Element; enabled: b
   {
     key: "spam",
     label: "Indésirables",
-    enabled: false,
+    enabled: true,
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <circle cx="12" cy="12" r="9" />
@@ -114,7 +114,7 @@ const FOLDERS: Array<{ key: string; label: string; icon: JSX.Element; enabled: b
   {
     key: "trash",
     label: "Corbeille",
-    enabled: false,
+    enabled: true,
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M4 7h16M9 7V4h6v3M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" />
@@ -132,7 +132,7 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
   const [body, setBody] = useState("");
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"all" | "unread">("all");
-  const [folder, setFolder] = useState("inbox");
+  const [folder, setFolder] = useState<MailFolder>("inbox");
 
   const addressQuery = useQuery({
     queryKey: ["mail-address"],
@@ -141,8 +141,8 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
   });
 
   const inboxQuery = useQuery({
-    queryKey: ["mail-inbox"],
-    queryFn: () => listMyInbox(),
+    queryKey: ["mail-folder", folder],
+    queryFn: () => listMyMail({ data: { folder } }),
     refetchInterval: 30_000,
     staleTime: 15_000,
     enabled: addressQuery.data?.ok === true,
@@ -162,27 +162,30 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
         setSubject("");
         setBody("");
         setComposing(false);
-        queryClient.invalidateQueries({ queryKey: ["mail-inbox"] });
+        queryClient.invalidateQueries({ queryKey: ["mail-folder", "inbox"] });
+        queryClient.invalidateQueries({ queryKey: ["mail-folder", "sent"] });
       }
     },
   });
 
   const address = addressQuery.data?.ok ? addressQuery.data.email : null;
   const allMails = inboxQuery.data?.ok ? inboxQuery.data.mails : [];
-  const unreadCount = allMails.filter((m) => !m.isRead).length;
+  const isInbox = folder === "inbox";
+  const unreadCount = isInbox ? allMails.filter((m) => !m.isRead).length : 0;
 
   const mails = useMemo(() => {
     const q = search.trim().toLowerCase();
     return allMails
-      .filter((m) => (tab === "unread" ? !m.isRead : true))
+      .filter((m) => (tab === "unread" && isInbox ? !m.isRead : true))
       .filter((m) =>
         q
           ? m.subject.toLowerCase().includes(q) ||
             m.from.toLowerCase().includes(q) ||
+            (m.to ?? "").toLowerCase().includes(q) ||
             (m.preview ?? "").toLowerCase().includes(q)
           : true,
       );
-  }, [allMails, tab, search]);
+  }, [allMails, tab, isInbox, search]);
 
   const globalError =
     (addressQuery.data && !addressQuery.data.ok && REASON_LABELS[addressQuery.data.reason]) ||
@@ -216,7 +219,7 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
                 disabled={!f.enabled}
                 title={f.enabled ? f.label : `${f.label} — bientôt disponible`}
                 className={`mp-folder${folder === f.key ? " active" : ""}`}
-                onClick={() => { if (f.enabled) { setFolder(f.key); setComposing(false); setSelectedId(null); } }}
+                onClick={() => { if (f.enabled) { setFolder(f.key as MailFolder); setComposing(false); setSelectedId(null); } }}
               >
                 {f.icon}
                 <span>{f.label}</span>
@@ -246,7 +249,9 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
             </div>
             <div className="mp-tabs">
               <button type="button" className={`mp-tab${tab === "all" ? " active" : ""}`} onClick={() => setTab("all")}>Tous</button>
-              <button type="button" className={`mp-tab${tab === "unread" ? " active" : ""}`} onClick={() => setTab("unread")}>Non lus</button>
+              {isInbox && (
+                <button type="button" className={`mp-tab${tab === "unread" ? " active" : ""}`} onClick={() => setTab("unread")}>Non lus</button>
+              )}
             </div>
           </div>
 
@@ -259,28 +264,31 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
               )}
               {addressQuery.data?.ok && !inboxQuery.isLoading && mails.length === 0 && !globalError && (
                 <div className="mp-empty">
-                  {search ? "Aucun mail ne correspond à ta recherche." : tab === "unread" ? "Aucun mail non lu." : "Aucun mail reçu pour le moment."}
+                  {search ? "Aucun mail ne correspond à ta recherche." : tab === "unread" ? "Aucun mail non lu." : "Aucun mail dans ce dossier pour le moment."}
                 </div>
               )}
-              {mails.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  className={`mp-item${selectedId === m.id ? " active" : ""}${m.isRead ? "" : " unread"}`}
-                  onClick={() => { setSelectedId(m.id); setComposing(false); }}
-                >
-                  <div className="mp-item-avatar">{initials(m.from)}</div>
-                  <div className="mp-item-main">
-                    <div className="mp-item-top">
-                      <span className="mp-item-from">{m.from}</span>
-                      <span className="mp-item-date">{formatDate(m.createdAt)}</span>
+              {mails.map((m) => {
+                const counterparty = folder === "sent" ? (m.to || m.from) : m.from;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className={`mp-item${selectedId === m.id ? " active" : ""}${isInbox && !m.isRead ? " unread" : ""}`}
+                    onClick={() => { setSelectedId(m.id); setComposing(false); }}
+                  >
+                    <div className="mp-item-avatar">{initials(counterparty)}</div>
+                    <div className="mp-item-main">
+                      <div className="mp-item-top">
+                        <span className="mp-item-from">{folder === "sent" ? `À ${counterparty}` : counterparty}</span>
+                        <span className="mp-item-date">{formatDate(m.createdAt)}</span>
+                      </div>
+                      <div className="mp-item-subject">{m.subject}</div>
+                      {m.preview && <div className="mp-item-preview">{m.preview}</div>}
                     </div>
-                    <div className="mp-item-subject">{m.subject}</div>
-                    {m.preview && <div className="mp-item-preview">{m.preview}</div>}
-                  </div>
-                  {!m.isRead && <span className="mp-item-dot" />}
-                </button>
-              ))}
+                    {isInbox && !m.isRead && <span className="mp-item-dot" />}
+                  </button>
+                );
+              })}
             </aside>
 
             <section className="mp-reader">
@@ -351,7 +359,7 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
                         type="button"
                         className="mp-btn"
                         onClick={() => {
-                          setTo(mailQuery.data!.mail.from);
+                          setTo(folder === "sent" ? (mailQuery.data!.mail.to || mailQuery.data!.mail.from) : mailQuery.data!.mail.from);
                           setSubject(
                             mailQuery.data!.mail.subject.startsWith("Re:")
                               ? mailQuery.data!.mail.subject
@@ -368,7 +376,11 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
 
                     <h3>{mailQuery.data.mail.subject}</h3>
                     <div className="mp-read-meta">
-                      De <b>{mailQuery.data.mail.from}</b> · {formatDate(mailQuery.data.mail.createdAt)}
+                      {folder === "sent" ? (
+                        <>À <b>{mailQuery.data.mail.to || mailQuery.data.mail.from}</b></>
+                      ) : (
+                        <>De <b>{mailQuery.data.mail.from}</b></>
+                      )} · {formatDate(mailQuery.data.mail.createdAt)}
                     </div>
 
                     {mailQuery.data.mail.html ? (
