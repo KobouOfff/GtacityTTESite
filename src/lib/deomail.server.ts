@@ -149,6 +149,33 @@ export async function markEmailRead(emailId: string): Promise<void> {
   }
 }
 
+/**
+ * PATCH /v1/emails/:id/folder — déplace un email vers un autre dossier
+ * (archive / spam / trash / inbox). Même schéma d'authentification et de
+ * gestion d'erreur que markEmailRead ci-dessus.
+ *
+ * NOTE: le endpoint exact ("/folder" + champ "folder") suit la convention
+ * observée sur les autres routes DeoMail de ce client (ex. "/read" +
+ * "is_read"). S'il diverge de la documentation officielle DeoMail, adapter
+ * ici uniquement — le reste de l'app (mail.functions.ts, MailPanel.tsx)
+ * n'a pas besoin de changer.
+ */
+export async function moveEmailToFolder(emailId: string, folder: DeoMailFolder): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(`${DEOMAIL_API_ROOT}/emails/${encodeURIComponent(emailId)}/folder`, {
+      method: "PATCH",
+      headers: authHeaders(),
+      body: JSON.stringify({ folder }),
+    });
+  } catch (e) {
+    throw new DeoMailError(`Impossible de contacter l'API DeoMail : ${String(e)}`, "network");
+  }
+  if (!res.ok) {
+    throw await toApiError(res);
+  }
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")

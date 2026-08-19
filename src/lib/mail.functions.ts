@@ -85,6 +85,35 @@ export const listMyMail = createServerFn({ method: "GET" })
     }
   });
 
+/** Déplace un mail vers un autre dossier (archive/spam/trash/inbox) — refusé si le mail n'appartient pas à l'employé connecté. */
+export const moveMyMail = createServerFn({ method: "POST" })
+  .validator((d: { id: string; folder: MailFolder }) => d)
+  .handler(async ({ data }) => {
+    const user = await currentUser();
+    if (!user) return { ok: false as const, reason: "not_logged_in" as const };
+    if (!data.id || typeof data.id !== "string" || !VALID_FOLDERS.includes(data.folder)) {
+      return { ok: false as const, reason: "invalid" as const };
+    }
+    try {
+      const { getEmployeeByDiscordId } = await import("./employees.server");
+      const employee = await getEmployeeByDiscordId(user.discordId);
+      if (!employee) return { ok: false as const, reason: "not_registered" as const };
+
+      const { getEmailById, moveEmailToFolder, extractAddress } = await import("./deomail.server");
+      const full = await getEmailById(data.id);
+      const isRecipient = extractAddress(full.to) === employee.email;
+      const isSender = extractAddress(full.from) === employee.email;
+      if (!isRecipient && !isSender) {
+        return { ok: false as const, reason: "forbidden" as const };
+      }
+      await moveEmailToFolder(data.id, data.folder);
+      return { ok: true as const, folder: data.folder };
+    } catch (e) {
+      console.error("[moveMyMail]", data.folder, e);
+      return { ok: false as const, reason: deomailReason(e, "read_failed") };
+    }
+  });
+
 /** Contenu complet d'un mail — refusé si le mail n'est pas adressé à l'employé connecté. */
 export const getMyMail = createServerFn({ method: "POST" })
   .validator((d: { id: string }) => d)
