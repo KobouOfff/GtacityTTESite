@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyMailAddress, listMyMail, getMyMail, sendMyMail, type MailFolder, type MailAttachmentInput } from "@/lib/mail.functions";
+import { getMyMailAddress, listMyMail, getMyMail, sendMyMail, moveMyMail, type MailFolder, type MailAttachmentInput } from "@/lib/mail.functions";
 import { MAIL_TEMPLATES, getMailTemplate, getTemplatePlaceholders, labelFor, fillTemplate } from "@/lib/mail-templates";
 import "./MailPanel.css";
 
@@ -154,6 +154,15 @@ const FOLDERS: Array<{ key: MailFolder | "starred" | "drafts"; label: string; ic
   },
 ];
 
+// Dossiers vers lesquels un mail peut être déplacé (on exclut "sent", qui
+// est un dossier calculé sur la direction d'envoi, pas une destination).
+const MOVE_TARGETS: Array<{ key: MailFolder; label: string }> = [
+  { key: "inbox", label: "Boîte de réception" },
+  { key: "archive", label: "Archives" },
+  { key: "spam", label: "Indésirables" },
+  { key: "trash", label: "Corbeille" },
+];
+
 export default function MailPanel({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -260,6 +269,18 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
         setComposing(false);
         queryClient.invalidateQueries({ queryKey: ["mail-folder", "inbox"] });
         queryClient.invalidateQueries({ queryKey: ["mail-folder", "sent"] });
+      }
+    },
+  });
+
+  const moveMutation = useMutation({
+    mutationFn: (vars: { id: string; targetFolder: MailFolder; sourceFolder: MailFolder }) =>
+      moveMyMail({ data: { id: vars.id, folder: vars.targetFolder } }),
+    onSuccess: (res, vars) => {
+      if (res.ok) {
+        setSelectedId(null);
+        queryClient.invalidateQueries({ queryKey: ["mail-folder", vars.sourceFolder] });
+        queryClient.invalidateQueries({ queryKey: ["mail-folder", vars.targetFolder] });
       }
     },
   });
@@ -545,6 +566,33 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3"><path d="m9 17-5-5 5-5M4 12h11a5 5 0 0 1 5 5v1" /></svg>
                         Répondre
                       </button>
+                      <label className="mp-move-select">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M21 8a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5" /><path d="M16 19h6M19 16l3 3-3 3" /></svg>
+                        <select
+                          value=""
+                          disabled={moveMutation.isPending}
+                          onChange={(e) => {
+                            const targetFolder = e.target.value as MailFolder;
+                            if (!targetFolder || targetFolder === folder || !selectedId) return;
+                            moveMutation.mutate({ id: selectedId, targetFolder, sourceFolder: folder });
+                          }}
+                        >
+                          <option value="" disabled>
+                            {moveMutation.isPending ? "Déplacement…" : "Déplacer vers…"}
+                          </option>
+                          {MOVE_TARGETS.filter((t) => t.key !== folder).map((t) => (
+                            <option key={t.key} value={t.key}>{t.label}</option>
+                          ))}
+                        </select>
+                      </label>
+                      {moveMutation.isError && (
+                        <span className="mp-move-error">Échec du déplacement.</span>
+                      )}
+                      {moveMutation.data && !moveMutation.data.ok && (
+                        <span className="mp-move-error">
+                          {REASON_LABELS[moveMutation.data.reason] ?? "Échec du déplacement."}
+                        </span>
+                      )}
                     </div>
 
                     <h3>{mailQuery.data.mail.subject}</h3>
