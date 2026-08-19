@@ -9,6 +9,7 @@ type EventRow = {
   status: string;
   delay_minutes: number;
   public_message: string | null;
+  included_in_recap: boolean | null;
 };
 
 function noStore(body: unknown, status = 200) {
@@ -38,11 +39,15 @@ async function buildRecap(request: Request) {
     // On lit le journal d'historique append-only (timetable_regulation_events)
     // et non l'état courant (timetable_service_updates), pour qu'un
     // "Réinitialiser" ultérieur n'efface pas les incidents déjà survenus.
+    // Un agent peut toutefois choisir, au moment de réinitialiser, de retirer
+    // une régulation précise du récap (included_in_recap = false) ; on filtre
+    // donc ces évènements ici.
     const { data: updateData, error: updateError } = await supabaseAdmin
       .from("timetable_regulation_events" as never)
-      .select("service_id, line, service_date, status, delay_minutes, public_message")
+      .select("service_id, line, service_date, status, delay_minutes, public_message, included_in_recap")
       .gte("service_date", from)
       .lte("service_date", to)
+      .or("included_in_recap.is.null,included_in_recap.eq.true")
       .order("service_date", { ascending: true });
     if (updateError) throw updateError;
     const updates = (updateData ?? []) as unknown as EventRow[];

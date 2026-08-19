@@ -80,7 +80,13 @@ export const departuresSharedScript = String.raw`
         '<td><select data-field="motifPreset" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;margin-bottom:5px"><option value="">Motif prédéfini…</option>'+
           motifPresets.map(function(m){return '<option value="'+esc(m)+'">'+esc(m)+'</option>';}).join("")+'</select>'+
         '<input data-field="message" value="'+esc(record.message||"")+'" placeholder="Message voyageurs" style="min-width:190px;width:100%;padding:6px;border:1px solid var(--line);border-radius:6px">'+
-        '<div style="margin-top:6px;display:flex;gap:5px"><button class="btn sm" data-action="save">Enregistrer</button><button class="btn ghost sm" data-action="reset">Réinitialiser</button></div></td>'+
+        '<div style="margin-top:6px;display:flex;gap:5px;align-items:center;flex-wrap:wrap">'+
+          '<button class="btn sm" data-action="save">Enregistrer</button>'+
+          '<button class="btn ghost sm" data-action="reset">Réinitialiser</button>'+
+          '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);cursor:pointer" title="Si coché, cette régulation ne sera plus comptée dans le récap mensuel après réinitialisation.">'+
+            '<input type="checkbox" data-field="excludeRecap" style="margin:0"> Retirer du récap'+
+          '</label>'+
+        '</div></td>'+
       '</tr>';
     }).join("");
     body.querySelectorAll("tr[data-service]").forEach(function(row){
@@ -132,9 +138,12 @@ export const departuresSharedScript = String.raw`
   }
   async function resetRow(row){
     var date=document.getElementById("depDate").value;
+    var excludeCheckbox=row.querySelector('[data-field="excludeRecap"]');
+    var excludeFromRecap=!!(excludeCheckbox&&excludeCheckbox.checked);
     try{
-      await api("/api/departures?serviceId="+encodeURIComponent(row.dataset.service)+"&date="+encodeURIComponent(date),{method:"DELETE"});
-      notify("Le train est revenu à son horaire normal.","ok"); await load();
+      await api("/api/departures?serviceId="+encodeURIComponent(row.dataset.service)+"&date="+encodeURIComponent(date)+"&excludeFromRecap="+(excludeFromRecap?"1":"0"),{method:"DELETE"});
+      notify(excludeFromRecap?"Le train est revenu à son horaire normal (retiré du récap mensuel).":"Le train est revenu à son horaire normal.","ok");
+      await load();
     }catch(error){console.error("[departures/reset]",error);notify("Impossible de réinitialiser cet horaire.","err");}
   }
 

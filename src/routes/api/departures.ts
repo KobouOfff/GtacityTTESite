@@ -320,17 +320,22 @@ export const Route = createFileRoute("/api/departures")({
         const url = new URL(request.url);
         const serviceId = url.searchParams.get("serviceId") || "";
         const date = url.searchParams.get("date") || "";
+        // Choix laissé à l'agent : la régulation qu'on réinitialise doit-elle
+        // rester comptabilisée dans le récap mensuel (comportement historique,
+        // append-only) ou en être retirée (ex: erreur de saisie, doublon) ?
+        const excludeFromRecap = url.searchParams.get("excludeFromRecap") === "1";
         if (!serviceId || !DATE_PATTERN.test(date)) return noStore({ ok: false, reason: "invalid_fields" }, 400);
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { data: service, error: serviceError } = await supabaseAdmin
             .from("timetable_services" as never)
-            .select("line")
+            .select("line, service_name")
             .eq("id", serviceId)
             .maybeSingle();
           if (serviceError) throw serviceError;
           if (!service) return noStore({ ok: false, reason: "unknown_service" }, 404);
-          if (!canManageDepartures(user, (service as unknown as { line: string }).line)) {
+          const serviceInfo = service as unknown as { line: string; service_name: string };
+          if (!canManageDepartures(user, serviceInfo.line)) {
             return noStore({ ok: false, reason: "forbidden" }, 403);
           }
           const { error } = await supabaseAdmin
@@ -339,7 +344,29 @@ export const Route = createFileRoute("/api/departures")({
             .eq("service_id", serviceId)
             .eq("service_date", date);
           if (error) throw error;
-          return noStore({ ok: true });
+
+          if (excludeFromRecap) {
+            // On ne supprime pas les évènements du journal (traçabilité), on
+            // les marque simplement comme exclus du calcul du récap mensuel.
+            const { error: recapError } = await supabaseAdmin
+              .from("timetable_regulation_events" as never)
+              .update({ included_in_recap: false } as never)
+              .eq("service_id", serviceId)
+              .eq("service_date", date);
+            if (recapError) console.error("[departures/reset-recap]", recapError);
+
+            const { error: logError } = await supabaseAdmin
+              .from("employee_audit_logs" as never)
+              .insert({
+                agent_discord_id: user.discordId,
+                agent_name: user.displayName || user.username,
+                action_text: `A réinitialisé ${serviceInfo.service_name} (${serviceInfo.line}) le ${date} et retiré cette régulation du récap mensuel.`,
+                source: "departures",
+              } as never);
+            if (logError) console.error("[departures/audit]", logError);
+          }
+
+          return noStore({ ok: true, excludedFromRecap: excludeFromRecap });
         } catch (error) {
           console.error("[departures/reset]", error);
           return noStore({ ok: false, reason: "reset_failed" }, 500);
