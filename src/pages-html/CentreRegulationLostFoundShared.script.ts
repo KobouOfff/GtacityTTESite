@@ -69,9 +69,12 @@ export const lostFoundSharedScript = String.raw`
     return fallback + (reason ? " (" + reason + ")" : "");
   }
 
+  var STATUSES = ["En attente", "Restitué", "Transféré", "Corbeille"];
+
   function statusColors(status){
     if(status === "Restitué") return { fg:"var(--ok)", bg:"var(--ok-bg)" };
     if(status === "Transféré") return { fg:"var(--muted)", bg:"var(--bg-alt)" };
+    if(status === "Corbeille") return { fg:"var(--alert)", bg:"var(--alert-bg)" };
     return { fg:"#8A5A12", bg:"var(--warn-bg)" };
   }
 
@@ -93,6 +96,11 @@ export const lostFoundSharedScript = String.raw`
       var date = new Date(item.ts);
       var colors = statusColors(item.st);
       var row = document.createElement("tr");
+
+      var statusOptions = STATUSES.map(function(s){
+        return '<option value="' + esc(s) + '"' + (s === item.st ? " selected" : "") + '>' + esc(s) + '</option>';
+      }).join("");
+
       row.innerHTML =
         '<td style="font-family:var(--ff-mono);font-size:12.5px">' +
           esc(date.toLocaleDateString("fr-FR")) +
@@ -105,42 +113,45 @@ export const lostFoundSharedScript = String.raw`
         '</td>' +
         '<td>' + esc(item.lieu) + '</td>' +
         '<td style="font-family:var(--ff-mono)">' + esc(item.cas) + '</td>' +
-        '<td><span style="background:' + colors.bg + ';color:' + colors.fg +
-          ';font-weight:700;font-size:12px;padding:3px 8px;border-radius:6px">' +
-          esc(item.st) +
-        '</span></td>' +
         '<td>' +
-          (item.st === "Restitué" ? "" : '<button class="btn ok sm" data-shared-rest>Restitué</button> ') +
-          '<button class="btn ghost sm" data-shared-delete>×</button>' +
-        '</td>';
+          '<select data-shared-status style="font-size:12px;padding:4px 6px;border-radius:6px;background:' +
+            colors.bg + ';color:' + colors.fg +
+            ';font-weight:700;border:1px solid ' + colors.fg + '">' +
+            statusOptions +
+          '</select>' +
+        '</td>' +
+        '<td style="white-space:nowrap"><button class="btn ghost sm" data-shared-delete title="Supprimer définitivement">×</button></td>';
 
-      var rest = row.querySelector("[data-shared-rest]");
-      if(rest) rest.addEventListener("click", async function(){
-        rest.disabled = true;
+      var statusSelect = row.querySelector("[data-shared-status]");
+      if(statusSelect) statusSelect.addEventListener("change", async function(){
+        var newStatus = statusSelect.value;
+        if(newStatus === item.st) return;
+        statusSelect.disabled = true;
         try {
           await api("/api/lost-found", {
             method:"PATCH",
             headers:{ "Content-Type":"application/json" },
-            body:JSON.stringify({ id:item.id, status:"Restitué" })
+            body:JSON.stringify({ id:item.id, status:newStatus })
           });
-          notifyShared("Objet marqué restitué pour tous les agents", "ok");
+          notifyShared("Objet déplacé vers « " + newStatus + " » pour tous les agents", "ok");
           await loadRecords();
         } catch(error) {
           console.error("[lost-found/update]", error);
-          notifyShared(apiErrorMessage(error, "Impossible de modifier cet objet"), "err");
-          rest.disabled = false;
+          notifyShared(apiErrorMessage(error, "Impossible de déplacer cet objet"), "err");
+          statusSelect.value = item.st;
+          statusSelect.disabled = false;
         }
       });
 
       var remove = row.querySelector("[data-shared-delete]");
       if(remove) remove.addEventListener("click", async function(){
-        if(!confirm("Supprimer cet objet pour tous les agents ?")) return;
+        if(!confirm("Supprimer définitivement cet objet pour tous les agents ? (préférez « Corbeille » dans le menu déroulant pour une suppression réversible)")) return;
         remove.disabled = true;
         try {
           await api("/api/lost-found?id=" + encodeURIComponent(item.id), {
             method:"DELETE"
           });
-          notifyShared("Objet supprimé pour tous les agents", "ok");
+          notifyShared("Objet supprimé définitivement pour tous les agents", "ok");
           await loadRecords();
         } catch(error) {
           console.error("[lost-found/delete]", error);

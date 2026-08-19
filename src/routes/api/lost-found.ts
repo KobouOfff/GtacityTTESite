@@ -27,7 +27,7 @@ const LOCATIONS = new Set([
   "Bus",
 ]);
 
-const STATUSES = new Set(["En attente", "Restitué", "Transféré"]);
+const STATUSES = new Set(["En attente", "Restitué", "Transféré", "Corbeille"]);
 
 type LostFoundRow = {
   id: string;
