@@ -103,6 +103,7 @@ export const departuresSharedScript = String.raw`
         var now=new Date(), current=now.getHours()*60+now.getMinutes();
         var totalBefore=records.length;
         records=records.filter(function(record){
+          if(record.status!=="on_time"&&record.status!=="boarding") return true;
           var reference=record.departure||record.scheduledDeparture;
           var parts=reference.split(":");
           return Number(parts[0])*60+Number(parts[1])>=current;
