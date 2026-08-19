@@ -8,6 +8,17 @@ export const lostFoundSharedScript = String.raw`
   var legacySave = document.getElementById("lstSave");
   if(!form || !legacySave) return;
 
+  var quiMeBtn = document.getElementById("lstQuiMe");
+  var quiInput = form.querySelector('[name="qui"]');
+  if(quiMeBtn && quiInput){
+    quiMeBtn.addEventListener("click", function(){
+      var name = "";
+      try { name = localStorage.getItem("tte_agent_name") || ""; } catch(e) {}
+      quiInput.value = name || "Agent TTE";
+      quiInput.focus();
+    });
+  }
+
   function esc(value){
     var node = document.createElement("div");
     node.textContent = String(value == null ? "" : value);

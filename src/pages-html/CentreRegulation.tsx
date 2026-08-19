@@ -487,7 +487,12 @@ export default function CentreRegulationPage() {
           <form id="lstForm" className="form-grid">
             <div className="fg col-3"><label>Catégorie</label><select name="cat"><option>Téléphone</option><option>Portefeuille</option><option>Sac / bagage</option><option>Vêtement</option><option>Clés</option><option>Document</option><option>Lunettes</option><option>Électronique</option><option>Autre</option></select></div>
             <div className="fg col-3"><label>Trouvé dans</label><select name="lieu"><option>Train R1</option><option>Train R2</option><option>Train R3</option><option>Train R4</option><option>IC1</option><option>IC2</option><option>Train urbain T</option><option>Gare Townsend</option><option>Bus</option></select></div>
-            <div className="fg col-3"><label>Trouvé par</label><input name="qui" placeholder="Voyageur / agent" value="Agent de quai" /></div>
+            <div className="fg col-3"><label>Trouvé par</label>
+              <div style={{display: "flex", gap: "6px"}}>
+                <input name="qui" placeholder="Voyageur ou nom de l’agent" style={{flex: 1}} />
+                <button type="button" className="btn ghost sm" id="lstQuiMe" title="Remplir avec mon nom">Moi</button>
+              </div>
+            </div>
             <div className="fg col-3"><label>Casier</label><input name="cas" placeholder="N\u00b0 casier" /></div>
             <div className="fg col-12"><label>Description</label><input name="desc" placeholder="Couleur, marque, contenu apparent\u2026" /></div>
           </form>
