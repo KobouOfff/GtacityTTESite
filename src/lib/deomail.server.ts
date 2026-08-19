@@ -157,14 +157,55 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-/** Habille un texte brut en HTML simple (paragraphes), comme email_branding.py côté bot. */
-function textToHtml(text: string): string {
-  const paragraphs = text
-    .split(/\n{2,}/)
-    .map((p) => `<p>${escapeHtml(p).replace(/\n/g, "<br/>")}</p>`)
-    .join("\n");
-  return `<div style="font-family:Arial,sans-serif;font-size:14px;color:#111;line-height:1.5;">${paragraphs}</div>`;
+// Habillage HTML des mails envoyés depuis le site : logo en en-tête, corps
+// du message, puis signature de l'entreprise (site web, adresse, contact)
+// en pied de page. Port de bot_discord/email_branding.py — garder les deux
+// fichiers alignés (même rendu que les mails envoyés via Discord).
+const COMPANY_NAME = "Townsend Transit Express";
+const COMPANY_LOGO_URL = "https://townsendtransitexpress.com/tte-logo-officiel.png";
+const COMPANY_WEBSITE = "https://townsendtransitexpress.com";
+const COMPANY_ADDRESS = "Gare centrale de Townsend, Tennessee";
+const COMPANY_CONTACT_EMAIL = "contact@townsendtransitexpress.com";
+const PRIMARY_COLOR = "#002F6C"; // même bleu que le bot de billets / bot mail
+
+/** Habille un texte brut avec le logo et la signature de l'entreprise, comme email_branding.py côté bot. */
+function buildHtmlEmail(bodyText: string): string {
+  const escapedBody = escapeHtml(bodyText).replace(/\n/g, "<br/>");
+  return `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;
+            background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;
+            overflow: hidden;">
+
+  <div style="background: ${PRIMARY_COLOR}; padding: 20px; text-align: center;">
+    <img src="${COMPANY_LOGO_URL}" alt="${COMPANY_NAME}"
+         style="max-height: 60px; max-width: 260px;">
+  </div>
+
+  <div style="padding: 24px; color: #111827; font-size: 15px; line-height: 1.6;">
+    ${escapedBody}
+  </div>
+
+  <div style="background: #f9fafb; padding: 18px 24px; border-top: 1px solid #e5e7eb;
+              font-size: 12px; color: #6b7280; text-align: center;">
+    <strong style="color: ${PRIMARY_COLOR};">${COMPANY_NAME}</strong><br>
+    ${COMPANY_ADDRESS}<br>
+    <a href="${COMPANY_WEBSITE}" style="color: ${PRIMARY_COLOR}; text-decoration: none;">
+      ${COMPANY_WEBSITE.replace("https://", "")}
+    </a>
+    &nbsp;·&nbsp;
+    <a href="mailto:${COMPANY_CONTACT_EMAIL}" style="color: ${PRIMARY_COLOR}; text-decoration: none;">
+      ${COMPANY_CONTACT_EMAIL}
+    </a>
+  </div>
+
+</div>`;
 }
+
+export type DeoMailAttachment = {
+  filename: string;
+  /** Contenu encodé en base64 (sans préfixe data:...). */
+  content: string;
+  contentType: string;
+};
 
 /** POST /v1/send */
 export async function sendEmail(params: {
@@ -172,14 +213,19 @@ export async function sendEmail(params: {
   to: string;
   subject: string;
   bodyText: string;
+  /** Pièces jointes optionnelles (max 5 fichiers / 10 Mo au total, limite DeoMail). */
+  attachments?: DeoMailAttachment[];
 }): Promise<Record<string, unknown>> {
-  const payload = {
+  const payload: Record<string, unknown> = {
     from: params.from,
     to: [params.to],
     subject: params.subject,
-    html: textToHtml(params.bodyText),
+    html: buildHtmlEmail(params.bodyText),
     fingerprint: false,
   };
+  if (params.attachments && params.attachments.length > 0) {
+    payload.attachments = params.attachments;
+  }
   let res: Response;
   try {
     res = await fetch(`${DEOMAIL_API_ROOT}/send`, {

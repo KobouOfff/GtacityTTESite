@@ -137,9 +137,21 @@ const MAX_SUBJECT = 200;
 const MAX_BODY = 20_000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Mêmes limites que le bot Discord (!mail / !reply) : 5 fichiers max,
+// 10 Mo au total (taille décodée), cf. bot_discord/bot_mail.py.
+const MAX_ATTACHMENTS = 5;
+const MAX_ATTACHMENTS_TOTAL_BYTES = 10 * 1024 * 1024;
+
+export type MailAttachmentInput = {
+  filename: string;
+  /** Contenu encodé en base64 (sans préfixe data:...). */
+  content: string;
+  contentType: string;
+};
+
 /** Envoie un mail depuis l'adresse DeoMail de l'employé connecté. */
 export const sendMyMail = createServerFn({ method: "POST" })
-  .validator((d: { to: string; subject: string; body: string }) => d)
+  .validator((d: { to: string; subject: string; body: string; attachments?: MailAttachmentInput[] }) => d)
   .handler(async ({ data }) => {
     const user = await currentUser();
     if (!user) return { ok: false as const, reason: "not_logged_in" as const };
@@ -157,13 +169,38 @@ export const sendMyMail = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "invalid" as const };
     }
 
+    const rawAttachments = Array.isArray(data.attachments) ? data.attachments : [];
+    if (rawAttachments.length > MAX_ATTACHMENTS) {
+      return { ok: false as const, reason: "invalid" as const };
+    }
+    let attachments: MailAttachmentInput[] | undefined;
+    if (rawAttachments.length > 0) {
+      let totalBytes = 0;
+      for (const a of rawAttachments) {
+        if (!a || typeof a.filename !== "string" || typeof a.content !== "string" || !a.filename || !a.content) {
+          return { ok: false as const, reason: "invalid" as const };
+        }
+        // Taille décodée approximative (base64 -> octets), sans décoder réellement.
+        const base64Len = a.content.length - (a.content.endsWith("==") ? 2 : a.content.endsWith("=") ? 1 : 0);
+        totalBytes += Math.floor((base64Len * 3) / 4);
+      }
+      if (totalBytes > MAX_ATTACHMENTS_TOTAL_BYTES) {
+        return { ok: false as const, reason: "invalid" as const };
+      }
+      attachments = rawAttachments.map((a) => ({
+        filename: a.filename,
+        content: a.content,
+        contentType: a.contentType || "application/octet-stream",
+      }));
+    }
+
     try {
       const { getEmployeeByDiscordId } = await import("./employees.server");
       const employee = await getEmployeeByDiscordId(user.discordId);
       if (!employee) return { ok: false as const, reason: "not_registered" as const };
 
       const { sendEmail } = await import("./deomail.server");
-      await sendEmail({ from: employee.email, to, subject, bodyText: body });
+      await sendEmail({ from: employee.email, to, subject, bodyText: body, attachments });
       return { ok: true as const };
     } catch (e) {
       console.error("[sendMyMail]", e);
