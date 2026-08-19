@@ -110,6 +110,30 @@ export type Database = {
         }
         Relationships: []
       }
+      employees: {
+        Row: {
+          created_at: string
+          discord_id: string
+          email: string
+          name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          discord_id: string
+          email: string
+          name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          discord_id?: string
+          email?: string
+          name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
