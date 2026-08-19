@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./CentreRegulation.css";
 import { script } from "./CentreRegulation.script";
 import { trafficSharedScript } from "./CentreRegulationTrafficShared.script";
@@ -13,6 +13,7 @@ import BlacklistPanel from "@/components/BlacklistPanel";
 import WeatherPanel from "@/components/WeatherPanel";
 import FleetPanel from "@/components/FleetPanel";
 import EffectifsPanel from "@/components/EffectifsPanel";
+import MailPanel from "@/components/MailPanel";
 import { TTELogo } from "@/components/TTELogo";
 import { useCurrentUser } from "@/components/DiscordAuth";
 import {
@@ -30,6 +31,7 @@ import {
 export default function CentreRegulationPage() {
   const { data: user } = useCurrentUser();
   const u = user ?? null;
+  const [mailOpen, setMailOpen] = useState(false);
   const permNotes = canWriteNotes(u);
   const permDepTrain = canManageTrainDepartures(u);
   const permDepBus = canManageBusDepartures(u);
@@ -185,6 +187,9 @@ export default function CentreRegulationPage() {
           <div className="nm" id="agNm">Régulateur</div>
           <div className="role" id="agRl">Poste de commandement</div>
         </div>
+        <button type="button" className="out" title="Boîte mail" onClick={() => setMailOpen(true)}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></svg>
+        </button>
         <a className="out" href="/espace-employes" title="D\u00e9connexion">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M15 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-4M10 17l-5-5 5-5M5 12h12" /></svg>
         </a>
@@ -859,6 +864,8 @@ export default function CentreRegulationPage() {
     </div>
   </main>
 </div>
+
+{mailOpen && <MailPanel onClose={() => setMailOpen(false)} />}
 
 <div className="toast" id="toast"></div>
 
