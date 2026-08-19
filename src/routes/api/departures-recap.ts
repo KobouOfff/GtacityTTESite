@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 const MONTH_PATTERN = /^\d{4}-\d{2}$/;
 
-type ServiceRow = { id: string; line: string; service_name: string };
-type UpdateRow = {
+type EventRow = {
   service_id: string;
+  line: string;
   service_date: string;
   status: string;
   delay_minutes: number;
@@ -35,21 +35,17 @@ async function buildRecap(request: Request) {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: serviceData, error: serviceError } = await supabaseAdmin
-      .from("timetable_services" as never)
-      .select("id, line, service_name");
-    if (serviceError) throw serviceError;
-    const services = (serviceData ?? []) as unknown as ServiceRow[];
-    const serviceById = new Map(services.map((service) => [service.id, service]));
-
+    // On lit le journal d'historique append-only (timetable_regulation_events)
+    // et non l'état courant (timetable_service_updates), pour qu'un
+    // "Réinitialiser" ultérieur n'efface pas les incidents déjà survenus.
     const { data: updateData, error: updateError } = await supabaseAdmin
-      .from("timetable_service_updates" as never)
-      .select("service_id, service_date, status, delay_minutes, public_message")
+      .from("timetable_regulation_events" as never)
+      .select("service_id, line, service_date, status, delay_minutes, public_message")
       .gte("service_date", from)
       .lte("service_date", to)
       .order("service_date", { ascending: true });
     if (updateError) throw updateError;
-    const updates = (updateData ?? []) as unknown as UpdateRow[];
+    const updates = (updateData ?? []) as unknown as EventRow[];
 
     type LineStat = {
       line: string;
@@ -68,8 +64,7 @@ async function buildRecap(request: Request) {
     const days = new Set<string>();
 
     for (const update of updates) {
-      const service = serviceById.get(update.service_id);
-      const line = service?.line || "?";
+      const line = update.line || "?";
       if (!["delayed", "cancelled", "platform_changed"].includes(update.status)) continue;
       days.add(update.service_date);
       if (!byLine.has(line)) {
