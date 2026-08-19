@@ -19,6 +19,7 @@ async function currentUser(): Promise<DiscordSessionUser | null> {
 export type MailSummary = {
   id: string;
   from: string;
+  to?: string;
   subject: string;
   createdAt: string | null;
   isRead: boolean;
@@ -40,34 +41,49 @@ export const getMyMailAddress = createServerFn({ method: "GET" }).handler(async 
   }
 });
 
-/** Boîte de réception filtrée sur l'adresse de l'employé connecté uniquement. */
-export const listMyInbox = createServerFn({ method: "GET" }).handler(async () => {
-  const user = await currentUser();
-  if (!user) return { ok: false as const, reason: "not_logged_in" as const };
-  try {
-    const { getEmployeeByDiscordId } = await import("./employees.server");
-    const employee = await getEmployeeByDiscordId(user.discordId);
-    if (!employee) return { ok: false as const, reason: "not_registered" as const };
+export type MailFolder = "inbox" | "sent" | "archive" | "spam" | "trash";
+const VALID_FOLDERS: readonly MailFolder[] = ["inbox", "sent", "archive", "spam", "trash"];
 
-    const { listInboxEmails, extractAddress } = await import("./deomail.server");
-    const all = await listInboxEmails(200);
-    const mine: MailSummary[] = all
-      .filter((m) => extractAddress(m.to) === employee.email)
-      .map((m) => ({
-        id: String(m.id),
-        from: extractAddress(m.from) || String(m.from ?? ""),
-        subject: (m.subject as string) || "(sans objet)",
-        createdAt: (m.created_at as string) ?? null,
-        isRead: Boolean(m.is_read),
-        preview: typeof m.text === "string" ? m.text.slice(0, 140) : null,
-      }));
+/** Mails d'un dossier DeoMail (inbox/sent/archive/spam/trash), filtrés sur l'employé connecté uniquement. */
+export const listMyMail = createServerFn({ method: "GET" })
+  .validator((d: { folder: MailFolder }) => d)
+  .handler(async ({ data }) => {
+    const user = await currentUser();
+    if (!user) return { ok: false as const, reason: "not_logged_in" as const };
+    const folder = VALID_FOLDERS.includes(data?.folder) ? data.folder : "inbox";
+    try {
+      const { getEmployeeByDiscordId } = await import("./employees.server");
+      const employee = await getEmployeeByDiscordId(user.discordId);
+      if (!employee) return { ok: false as const, reason: "not_registered" as const };
 
-    return { ok: true as const, email: employee.email, mails: mine };
-  } catch (e) {
-    console.error("[listMyInbox]", e);
-    return { ok: false as const, reason: deomailReason(e, "read_failed") };
-  }
-});
+      const { listEmailsByFolder, extractAddress } = await import("./deomail.server");
+      const all = await listEmailsByFolder(folder, 200);
+      // "sent" ne doit contenir que ce que l'employé a lui-même envoyé ;
+      // les autres dossiers (inbox/archive/spam/trash) sont filtrés sur
+      // l'adresse employé côté expéditeur OU destinataire, puisqu'un mail
+      // archivé ou supprimé peut avoir été reçu comme envoyé par elle/lui.
+      const mine: MailSummary[] = all
+        .filter((m) =>
+          folder === "sent"
+            ? extractAddress(m.from) === employee.email
+            : extractAddress(m.to) === employee.email || extractAddress(m.from) === employee.email,
+        )
+        .map((m) => ({
+          id: String(m.id),
+          from: extractAddress(m.from) || String(m.from ?? ""),
+          to: extractAddress(m.to) || String(m.to ?? ""),
+          subject: (m.subject as string) || "(sans objet)",
+          createdAt: (m.created_at as string) ?? null,
+          isRead: Boolean(m.is_read),
+          preview: typeof m.text === "string" ? m.text.slice(0, 140) : null,
+        }));
+
+      return { ok: true as const, email: employee.email, folder, mails: mine };
+    } catch (e) {
+      console.error("[listMyMail]", folder, e);
+      return { ok: false as const, reason: deomailReason(e, "read_failed") };
+    }
+  });
 
 /** Contenu complet d'un mail — refusé si le mail n'est pas adressé à l'employé connecté. */
 export const getMyMail = createServerFn({ method: "POST" })
@@ -85,10 +101,14 @@ export const getMyMail = createServerFn({ method: "POST" })
 
       const { getEmailById, markEmailRead, extractAddress } = await import("./deomail.server");
       const full = await getEmailById(data.id);
-      if (extractAddress(full.to) !== employee.email) {
+      const isRecipient = extractAddress(full.to) === employee.email;
+      const isSender = extractAddress(full.from) === employee.email;
+      if (!isRecipient && !isSender) {
         return { ok: false as const, reason: "forbidden" as const };
       }
-      if (!full.is_read) {
+      // On ne marque "lu" que côté réception : marquer un mail qu'on a
+      // soi-même envoyé (Sent) n'a pas de sens pour ce flag.
+      if (isRecipient && !full.is_read) {
         try {
           await markEmailRead(data.id);
         } catch (e) {
@@ -100,6 +120,7 @@ export const getMyMail = createServerFn({ method: "POST" })
         mail: {
           id: String(full.id),
           from: extractAddress(full.from) || String(full.from ?? ""),
+          to: extractAddress(full.to) || String(full.to ?? ""),
           subject: (full.subject as string) || "(sans objet)",
           createdAt: (full.created_at as string) ?? null,
           text: (full.text as string) ?? "",

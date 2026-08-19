@@ -70,15 +70,28 @@ export type DeoMailFull = DeoMailSummary & {
   attachments?: Array<{ id: string; filename: string; mime_type?: string }>;
 };
 
-/** GET /v1/emails — mails du dossier inbox (tout le domaine, tous employés confondus). */
-export async function listInboxEmails(limit = 100): Promise<DeoMailSummary[]> {
+export type DeoMailFolder = "inbox" | "sent" | "archive" | "spam" | "trash";
+
+// Correspondance dossier -> direction attendue par l'API DeoMail. "sent" est
+// le seul dossier où l'on ne veut que les mails envoyés (direction "out") ;
+// pour les autres on laisse l'API renvoyer les deux sens et on filtre
+// nous-mêmes par adresse employé ensuite (un mail archivé/supprimé peut
+// avoir été reçu ou envoyé par l'employé).
+const FOLDER_DIRECTION: Partial<Record<DeoMailFolder, "in" | "out">> = {
+  inbox: "in",
+  sent: "out",
+};
+
+/** GET /v1/emails?folder=... — mails d'un dossier (tout le domaine, tous employés confondus, filtré ensuite côté appelant). */
+export async function listEmailsByFolder(folder: DeoMailFolder, limit = 100): Promise<DeoMailSummary[]> {
   const params = new URLSearchParams({
-    folder: "inbox",
-    direction: "in",
+    folder,
     limit: String(limit),
     sort: "created_at",
     order: "desc",
   });
+  const direction = FOLDER_DIRECTION[folder];
+  if (direction) params.set("direction", direction);
   let res: Response;
   try {
     res = await fetch(`${DEOMAIL_API_ROOT}/emails?${params}`, { headers: authHeaders() });
