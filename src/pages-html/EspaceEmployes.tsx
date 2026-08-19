@@ -1,11 +1,14 @@
+import { useState } from "react";
 import "./EspaceEmployes.css";
 import { useCurrentUser } from "@/components/DiscordAuth";
 import { getPrimaryRole } from "@/lib/discord-roles";
 import { TTELogo } from "@/components/TTELogo";
+import MailPanel from "@/components/MailPanel";
 
 export default function EspaceEmployesPage() {
   const { data: user } = useCurrentUser();
   const primaryRole = user ? getPrimaryRole(user.roleIds) : null;
+  const [mailOpen, setMailOpen] = useState(false);
 
   return (
     <>
@@ -83,6 +86,7 @@ export default function EspaceEmployesPage() {
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M10 17l5-5-5-5M15 12H3M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5" /></svg>
                 Centre de Contrôle
               </a>
+              <button type="button" className="tool-btn" onClick={() => setMailOpen(true)}>Boîte mail</button>
               <button type="button" className="tool-btn">Planning &amp; roulements</button>
               <button type="button" className="tool-btn">Fiches de service</button>
               <button type="button" className="tool-btn">Documents RH</button>
@@ -95,6 +99,8 @@ export default function EspaceEmployesPage() {
           </div>
         </div>
       </main>
+
+      {mailOpen && <MailPanel onClose={() => setMailOpen(false)} />}
 
       <footer>
         <div className="f-in">
