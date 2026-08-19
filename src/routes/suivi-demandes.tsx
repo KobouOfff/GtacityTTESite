@@ -23,7 +23,7 @@ function SuiviDemandesPage() {
       <Shell>
         <div style={card}>
           <h2 style={{ marginTop: 0 }}>Connexion requise</h2>
-          <p style={muted}>Cette page est réservée à la direction (Gérant, Superviseur, Superviseur assistant).</p>
+          <p style={muted}>Cette page est réservée à la direction, aux gérants de branche et au secrétariat/accueil.</p>
           <a href="/api/public/discord/login?redirect=/suivi-demandes" style={btnPrimary}>Se connecter avec Discord</a>
         </div>
       </Shell>
@@ -34,7 +34,7 @@ function SuiviDemandesPage() {
       <Shell>
         <div style={{ ...card, borderColor: "#7f1d1d" }}>
           <h2 style={{ marginTop: 0 }}>Accès refusé</h2>
-          <p style={muted}>Cet espace est réservé au Gérant, au Superviseur et au Superviseur assistant.</p>
+          <p style={muted}>Cet espace est réservé au Gérant, au Superviseur, au Superviseur assistant, aux gérants de branche et au secrétariat/accueil.</p>
         </div>
       </Shell>
     );
