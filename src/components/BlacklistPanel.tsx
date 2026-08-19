@@ -5,6 +5,7 @@ import {
   createBlacklistEntry,
   revokeBlacklistEntry,
   addBlacklistNoteFn,
+  uploadBlacklistPhotoFn,
 } from "@/lib/blacklist.functions";
 import type { BlacklistRow } from "@/lib/blacklist.server";
 import { createBlacklistPdf, blacklistPdfFilename } from "@/lib/blacklist-pdf";
@@ -75,14 +76,28 @@ function generatePdf(row: BlacklistRow) {
   createBlacklistPdf(row).save(blacklistPdfFilename(row));
 }
 
+const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
+const ALLOWED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function BlacklistPanel() {
   const { data: user } = useCurrentUser();
   const list = useServerFn(listBlacklistEntries);
   const create = useServerFn(createBlacklistEntry);
   const revoke = useServerFn(revokeBlacklistEntry);
   const addNote = useServerFn(addBlacklistNoteFn);
+  const uploadPhoto = useServerFn(uploadBlacklistPhotoFn);
 
   const [rows, setRows] = useState<BlacklistRow[]>([]);
+  const [canManage, setCanManage] = useState(false);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
@@ -91,15 +106,36 @@ export default function BlacklistPanel() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
   const [revokeDraft, setRevokeDraft] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setErr(null);
     const r = await list();
-    if (r.ok) setRows(r.rows);
+    if (r.ok) { setRows(r.rows); setCanManage(r.canManage); }
     else setErr(r.reason);
     setLoading(false);
   }, [list]);
+
+  const onPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setPhotoError(null);
+    if (!file) { setPhotoFile(null); setPhotoPreview(null); return; }
+    if (!ALLOWED_PHOTO_TYPES.has(file.type)) {
+      setPhotoError("Format non pris en charge (JPEG, PNG ou WebP uniquement).");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      setPhotoError("Photo trop volumineuse (8 Mo max).");
+      e.target.value = "";
+      return;
+    }
+    setPhotoFile(file);
+    setPhotoPreview(await readFileAsDataUrl(file));
+  };
 
   useEffect(() => { refresh(); }, [refresh]);
 
@@ -139,6 +175,20 @@ export default function BlacklistPanel() {
       return;
     }
     setSubmitting(true);
+
+    let photo_path: string | null = null;
+    if (photoFile) {
+      const dataUrl = await readFileAsDataUrl(photoFile);
+      const base64 = dataUrl.slice(dataUrl.indexOf(",") + 1);
+      const up = await uploadPhoto({ data: { base64, mimeType: photoFile.type } });
+      if (!up.ok) {
+        setSubmitting(false);
+        alert("Impossible d'envoyer la photo (" + up.reason + "). L'interdiction n'a pas été enregistrée — réessayez.");
+        return;
+      }
+      photo_path = up.path;
+    }
+
     const infractions = draft.infractions
       .split("\n")
       .map((s) => s.trim())
@@ -159,11 +209,14 @@ export default function BlacklistPanel() {
         start_date: draft.start_date,
         end_date: draft.is_permanent ? null : draft.end_date,
         is_permanent: draft.is_permanent,
+        photo_path,
       },
     });
     setSubmitting(false);
     if (r.ok) {
       setDraft(emptyDraft());
+      setPhotoFile(null);
+      setPhotoPreview(null);
       generatePdf(r.row);
       refresh();
       if (r.discordDelivery === "failed") {
@@ -199,10 +252,12 @@ export default function BlacklistPanel() {
     <section className="view" id="v-blk">
       <h1 className="vt">Registre Blacklist — interdictions d'accès</h1>
       <p className="vt-sub">
-        Réservé à la Direction (Gérant, Superviseur, Superviseur assistant). Chaque entrée génère un document
-        officiel PDF téléchargeable, à remettre à la personne concernée.
+        {canManage
+          ? "Réservé à la Direction pour l'ajout et la modification. Chaque entrée génère un document officiel PDF téléchargeable, à remettre à la personne concernée."
+          : "Consultation en lecture seule, ouverte à tout le personnel connecté, pour reconnaître les individus interdits d'accès. Seule la Direction peut ajouter ou modifier une entrée."}
       </p>
 
+      {canManage && (
       <div className="card">
         <h2>
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -230,6 +285,19 @@ export default function BlacklistPanel() {
           <div className="fg col-6">
             <label>Signalement / description physique</label>
             <input value={draft.physical_description} onChange={(e) => setDraft({ ...draft, physical_description: e.target.value })} placeholder="Ex. Homme, ~1m80, veste rouge…" />
+          </div>
+          <div className="fg col-6">
+            <label>Photo de l'individu</label>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {photoPreview && (
+                <img src={photoPreview} alt="" style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, border: "1px solid var(--line, #cbd5e1)" }} />
+              )}
+              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onPhotoChange} style={{ flex: 1 }} />
+              {photoFile && (
+                <button type="button" className="btn ghost sm" onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}>Retirer</button>
+              )}
+            </div>
+            {photoError && <div style={{ color: "#dc2626", fontSize: 12.5, marginTop: 4 }}>{photoError}</div>}
           </div>
 
           <div className="fg col-6">
@@ -327,11 +395,12 @@ export default function BlacklistPanel() {
               <button type="submit" className="btn" disabled={submitting}>
                 {submitting ? "Enregistrement…" : "🚫 Enregistrer & générer le PDF"}
               </button>
-              <button type="button" className="btn ghost" onClick={() => setDraft(emptyDraft())}>Réinitialiser</button>
+              <button type="button" className="btn ghost" onClick={() => { setDraft(emptyDraft()); setPhotoFile(null); setPhotoPreview(null); }}>Réinitialiser</button>
             </div>
           </div>
         </form>
       </div>
+      )}
 
       <div className="card">
         <h2 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -379,16 +448,25 @@ export default function BlacklistPanel() {
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 15 }}>
-                      {row.first_name} <span style={{ textTransform: "uppercase" }}>{row.last_name}</span>
-                      {row.alias && <span style={{ color: "var(--muted)", fontWeight: 500 }}> — « {row.alias} »</span>}
-                    </div>
-                    <div style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 2 }}>
-                      Réf. <b>{row.ref}</b> · {SCOPE_LABELS[row.scope] ?? row.scope} ·{" "}
-                      {row.is_permanent
-                        ? <span style={{ color: "#b91c1c", fontWeight: 600 }}>Permanent</span>
-                        : <>Du {fmtDate(row.start_date)} au {fmtDate(row.end_date)}</>}
+                  <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                    {row.photo_url && (
+                      <img
+                        src={row.photo_url}
+                        alt=""
+                        style={{ width: 52, height: 52, objectFit: "cover", borderRadius: 8, border: "1px solid var(--line, #e5e7eb)", flexShrink: 0 }}
+                      />
+                    )}
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 15 }}>
+                        {row.first_name} <span style={{ textTransform: "uppercase" }}>{row.last_name}</span>
+                        {row.alias && <span style={{ color: "var(--muted)", fontWeight: 500 }}> — « {row.alias} »</span>}
+                      </div>
+                      <div style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 2 }}>
+                        Réf. <b>{row.ref}</b> · {SCOPE_LABELS[row.scope] ?? row.scope} ·{" "}
+                        {row.is_permanent
+                          ? <span style={{ color: "#b91c1c", fontWeight: 600 }}>Permanent</span>
+                          : <>Du {fmtDate(row.start_date)} au {fmtDate(row.end_date)}</>}
+                      </div>
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
@@ -412,7 +490,7 @@ export default function BlacklistPanel() {
                   <button type="button" className="btn ghost sm" onClick={() => setOpenId(isOpen ? null : row.id)}>
                     {isOpen ? "Masquer" : "Détails / notes"}
                   </button>
-                  {!isRevoked && (
+                  {canManage && !isRevoked && (
                     <button type="button" className="btn ghost sm" style={{ color: "#dc2626" }} onClick={() => setOpenId(isOpen ? null : row.id)}>
                       Lever le bannissement
                     </button>
@@ -435,6 +513,11 @@ export default function BlacklistPanel() {
                     )}
                     {row.physical_description && (
                       <div style={{ fontSize: 13, marginBottom: 8 }}><b>Signalement :</b> {row.physical_description}</div>
+                    )}
+                    {row.photo_url && (
+                      <div style={{ marginBottom: 8 }}>
+                        <img src={row.photo_url} alt="" style={{ maxWidth: 220, maxHeight: 220, borderRadius: 8, border: "1px solid var(--line, #e5e7eb)", objectFit: "cover" }} />
+                      </div>
                     )}
                     {isRevoked && (
                       <div style={{ padding: 10, background: "rgba(100,116,139,.15)", borderRadius: 6, fontSize: 13, marginBottom: 10 }}>
@@ -459,6 +542,7 @@ export default function BlacklistPanel() {
                       )}
                     </div>
 
+                    {canManage && (
                     <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
                       <input
                         placeholder="Ajouter une note interne…"
@@ -476,8 +560,9 @@ export default function BlacklistPanel() {
                         }}
                       >Ajouter</button>
                     </div>
+                    )}
 
-                    {!isRevoked && (
+                    {canManage && !isRevoked && (
                       <div style={{ marginTop: 12, padding: 10, border: "1px solid #fecaca", borderRadius: 6, background: "var(--bg, #fff)" }}>
                         <b style={{ fontSize: 12.5, color: "#b91c1c" }}>Lever ce bannissement</b>
                         <div style={{ display: "flex", gap: 8, marginTop: 6, flexWrap: "wrap" }}>

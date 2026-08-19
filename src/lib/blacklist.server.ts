@@ -1,6 +1,9 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { DiscordSessionUser } from "./discord-roles";
 
+const PHOTO_BUCKET = "blacklist-photos";
+const PHOTO_SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 h
+
 export type BlacklistNote = {
   author: string;
   author_id: string;
@@ -34,6 +37,9 @@ export type BlacklistRow = {
   revoke_reason: string | null;
   internal_notes: BlacklistNote[];
   pdf_document_number: string | null;
+  photo_path: string | null;
+  /** URL signée temporaire, calculée à la lecture — jamais stockée en base. */
+  photo_url: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -53,6 +59,7 @@ export type CreateBlacklistPayload = {
   start_date: string;
   end_date: string | null;
   is_permanent: boolean;
+  photo_path?: string | null;
 };
 
 function makeRef() {
@@ -90,15 +97,25 @@ export async function createBlacklist(
         created_by_discord_id: actor.discordId,
         created_by_username: actor.displayName || actor.username,
         pdf_document_number: ref,
+        photo_path: payload.photo_path?.trim() || null,
       } as never)
       .select("*")
       .single();
 
-    if (!error && data) return data as unknown as BlacklistRow;
+    if (!error && data) return withPhotoUrl(data as unknown as BlacklistRow);
     lastError = error;
     if (error && error.code !== "23505") throw error;
   }
   throw new Error(`Impossible d’insérer la blacklist : ${String(lastError)}`);
+}
+
+async function withPhotoUrl(row: BlacklistRow): Promise<BlacklistRow> {
+  if (!row.photo_path) return { ...row, photo_url: null };
+  const { data, error } = await supabaseAdmin.storage
+    .from(PHOTO_BUCKET)
+    .createSignedUrl(row.photo_path, PHOTO_SIGNED_URL_TTL_SECONDS);
+  if (error || !data) return { ...row, photo_url: null };
+  return { ...row, photo_url: data.signedUrl };
 }
 
 export async function listBlacklist(): Promise<BlacklistRow[]> {
@@ -109,7 +126,28 @@ export async function listBlacklist(): Promise<BlacklistRow[]> {
     .limit(500);
 
   if (error) throw error;
-  return (data ?? []) as unknown as BlacklistRow[];
+  const rows = (data ?? []) as unknown as BlacklistRow[];
+  return Promise.all(rows.map(withPhotoUrl));
+}
+
+/**
+ * Téléverse la photo d'un individu blacklisté dans le bucket privé et
+ * renvoie le chemin de l'objet (à stocker dans blacklist_entries.photo_path).
+ * `base64Data` ne doit pas inclure le préfixe "data:image/...;base64,".
+ */
+export async function uploadBlacklistPhoto(
+  actor: DiscordSessionUser,
+  base64Data: string,
+  mimeType: string,
+): Promise<string> {
+  const ext = mimeType === "image/png" ? "png" : mimeType === "image/webp" ? "webp" : "jpg";
+  const path = `${actor.discordId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const bytes = Buffer.from(base64Data, "base64");
+  const { error } = await supabaseAdmin.storage
+    .from(PHOTO_BUCKET)
+    .upload(path, bytes, { contentType: mimeType, upsert: false });
+  if (error) throw error;
+  return path;
 }
 
 export async function revokeBlacklist(

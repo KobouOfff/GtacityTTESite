@@ -181,10 +181,17 @@ export function canManageTrainings(user: DiscordSessionUser | null): boolean {
   return hasAny(user, DIRECTION_ROLES) || hasAny(user, BRANCH_MANAGER_IDS);
 }
 
-// Blacklist : réservée à la Direction (Gérant, Superviseur, Superviseur assistant).
+// Blacklist : la CRÉATION/modification reste réservée à la Direction
+// (Gérant, Superviseur, Superviseur assistant). La LECTURE (voir la liste et
+// les photos des individus interdits) est ouverte à tout le personnel
+// connecté, pour que chacun puisse reconnaître les individus concernés.
 export function canManageBlacklist(user: DiscordSessionUser | null): boolean {
   if (!user) return false;
   return hasAny(user, DIRECTION_ROLES);
+}
+
+export function canViewBlacklist(user: DiscordSessionUser | null): boolean {
+  return !!user;
 }
 
 // Journal d'audit complet des actions des employés :

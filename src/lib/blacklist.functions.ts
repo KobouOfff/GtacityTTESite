@@ -1,12 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
 import { sessionConfig, type SessionData } from "./session.server";
-import { canManageBlacklist, type DiscordSessionUser } from "./discord-roles";
+import { canManageBlacklist, canViewBlacklist, type DiscordSessionUser } from "./discord-roles";
 import type { BlacklistRow, CreateBlacklistPayload } from "./blacklist.server";
 
 const SCOPES = new Set(["all", "stations", "trains", "offices", "events"]);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const ALLOWED_PHOTO_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
+const MAX_PHOTO_BASE64_LENGTH = 8 * 1024 * 1024 * 1.4; // ~8 Mo une fois décodé
 
 async function currentUser(): Promise<DiscordSessionUser | null> {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -36,24 +38,48 @@ function validPayload(data: CreateBlacklistPayload) {
     (!data.alias || data.alias.length <= 100) &&
     (!data.discord_username || data.discord_username.length <= 100) &&
     (!data.steam_id || data.steam_id.length <= 80) &&
-    (!data.physical_description || data.physical_description.length <= 1000)
+    (!data.physical_description || data.physical_description.length <= 1000) &&
+    (!data.photo_path || (typeof data.photo_path === "string" && data.photo_path.length <= 300))
   );
 }
 
 export const listBlacklistEntries = createServerFn({ method: "GET" }).handler(async () => {
   const user = await currentUser();
   if (!user) return { ok: false as const, reason: "not_logged_in" as const };
-  if (!canManageBlacklist(user)) return { ok: false as const, reason: "forbidden" as const };
+  if (!canViewBlacklist(user)) return { ok: false as const, reason: "forbidden" as const };
 
   try {
     const { listBlacklist } = await import("./blacklist.server");
     const rows = (await listBlacklist()) as BlacklistRow[];
-    return { ok: true as const, rows };
+    return { ok: true as const, rows, canManage: canManageBlacklist(user) };
   } catch (error) {
     console.error("[listBlacklistEntries]", error);
     return { ok: false as const, reason: "read_failed" as const };
   }
 });
+
+export const uploadBlacklistPhotoFn = createServerFn({ method: "POST" })
+  .validator((data: { base64: string; mimeType: string }) => data)
+  .handler(async ({ data }) => {
+    const user = await currentUser();
+    if (!user) return { ok: false as const, reason: "not_logged_in" as const };
+    if (!canManageBlacklist(user)) return { ok: false as const, reason: "forbidden" as const };
+    if (!ALLOWED_PHOTO_MIME.has(data.mimeType)) {
+      return { ok: false as const, reason: "invalid_type" as const };
+    }
+    if (typeof data.base64 !== "string" || data.base64.length === 0 || data.base64.length > MAX_PHOTO_BASE64_LENGTH) {
+      return { ok: false as const, reason: "invalid_size" as const };
+    }
+
+    try {
+      const { uploadBlacklistPhoto } = await import("./blacklist.server");
+      const path = await uploadBlacklistPhoto(user, data.base64, data.mimeType);
+      return { ok: true as const, path };
+    } catch (error) {
+      console.error("[uploadBlacklistPhotoFn]", error);
+      return { ok: false as const, reason: "upload_failed" as const };
+    }
+  });
 
 export const createBlacklistEntry = createServerFn({ method: "POST" })
   .validator((data: CreateBlacklistPayload) => data)
