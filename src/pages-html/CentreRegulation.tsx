@@ -152,6 +152,7 @@ export default function CentreRegulationPage() {
       <a data-view="dash" className="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="8" height="9" rx="1.5" /><rect x="13" y="3" width="8" height="5" rx="1.5" /><rect x="13" y="10" width="8" height="11" rx="1.5" /><rect x="3" y="14" width="8" height="7" rx="1.5" /></svg> Tableau de bord</a>
       <a data-view="pub"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 11v2a8 8 0 0 0 16 0V8" /><path d="M19 8a3 3 0 1 0-6 0v6a3 3 0 0 0 6 0V8Z" /><path d="M11 21h4" /></svg> Info trafic & alertes</a>
       <a data-view="dep"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="13" rx="2" /><path d="M3 17l-1 3h20l-1-3M8 8h8M8 12h5" /></svg> Régulation des départs</a>
+      <a data-view="recap"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01" /></svg> Récap mensuel</a>
       <a data-view="notes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h13l3 3v13H4Z" /><path d="M8 9h8M8 13h8M8 17h5" /></svg> Notes de service</a>
       <div className="grp">Sûreté & voyageurs</div>
       <a data-view="incid"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3l10 18H2L12 3Z" /><path d="M12 10v5M12 18h.01" /></svg> Main courante</a>
@@ -318,6 +319,27 @@ export default function CentreRegulationPage() {
             <tbody id="depBody"></tbody>
           </table>
           <p style={{fontSize: "12px", color: "var(--muted)", marginTop: ".9rem"}}>Toute modification apparaît automatiquement sur la page trafic, la recherche d’horaires et les pages des gares.</p>
+        </div>
+      </section>
+
+      {/* ===== RÉCAP MENSUEL ===== */}
+      <section className="view" id="v-recap">
+        <h1 className="vt">Récap mensuel des régulations</h1>
+        <p className="vt-sub">Synthèse des retards, suppressions et changements de voie enregistrés sur l’horaire partagé, mois par mois.</p>
+        <div className="card">
+          <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 10h18" /></svg> Sélection de la période</h2>
+          <div className="btn-row" style={{alignItems: "end", marginBottom: "14px"}}>
+            <label style={{fontSize: "12px", fontWeight: 700}}>Mois<br /><input type="month" id="recapMonth" style={{marginTop: 4, padding: "7px 9px", border: "1px solid var(--line)", borderRadius: 7}} /></label>
+            <button className="btn ghost" id="recapRefresh" type="button">Actualiser</button>
+          </div>
+          <div className="kpi-row" id="recapKpis" style={{display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "16px"}}></div>
+          <table className="tbl">
+            <thead><tr><th>Ligne</th><th>Retards</th><th>Suppressions</th><th>Changements de voie</th><th>Retard moyen</th><th>Pire retard</th></tr></thead>
+            <tbody id="recapLineBody"></tbody>
+          </table>
+          <h2 style={{marginTop: "1.4rem"}}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h13l3 3v13H4Z" /><path d="M8 9h8M8 13h8" /></svg> Motifs les plus fréquents</h2>
+          <ul id="recapMotifs" style={{margin: "8px 0 0", padding: 0, listStyle: "none", fontSize: "13.5px"}}></ul>
+          <p style={{fontSize: "12px", color: "var(--muted)", marginTop: ".9rem"}}>Ce récap est calculé à partir de l’historique des mises à jour publiées sur l’horaire voyageurs pour le mois sélectionné.</p>
         </div>
       </section>
 

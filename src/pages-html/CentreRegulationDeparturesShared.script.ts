@@ -18,6 +18,20 @@ export const departuresSharedScript = String.raw`
     IC1:"#163D7A",IC2:"#B02A72",T:"#E6007E",BUS:"#E09A12",
     B1:"#C68A1C",B2:"#3E7D2C"
   };
+  var motifPresets = [
+    "Incident de signalisation",
+    "Panne de matériel roulant",
+    "Incident sur la voie",
+    "Malaise voyageur",
+    "Colis ou bagage suspect",
+    "Affluence exceptionnelle de voyageurs",
+    "Conditions météorologiques",
+    "Retard d'un train précédent / occupation de quai",
+    "Travaux ou maintenance des infrastructures",
+    "Accident de personne",
+    "Défaut d'aiguillage",
+    "Grève ou mouvement social"
+  ];
 
   function esc(value){
     var node=document.createElement("div");
@@ -63,7 +77,9 @@ export const departuresSharedScript = String.raw`
         '<td><input data-field="platform" value="'+esc(record.platform==="—"?"":record.platform)+'" placeholder="—" style="width:58px;padding:6px;border:1px solid var(--line);border-radius:6px"></td>'+
         '<td><select data-field="status" class="st-sel '+statusClass+'">'+options(record.status)+'</select></td>'+
         '<td><input data-field="delay" type="number" min="0" max="360" value="'+esc(record.delayMinutes||0)+'" style="width:68px;padding:6px;border:1px solid var(--line);border-radius:6px"> min</td>'+
-        '<td><input data-field="message" value="'+esc(record.message||"")+'" placeholder="Message voyageurs" style="min-width:190px;width:100%;padding:6px;border:1px solid var(--line);border-radius:6px">'+
+        '<td><select data-field="motifPreset" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;margin-bottom:5px"><option value="">Motif prédéfini…</option>'+
+          motifPresets.map(function(m){return '<option value="'+esc(m)+'">'+esc(m)+'</option>';}).join("")+'</select>'+
+        '<input data-field="message" value="'+esc(record.message||"")+'" placeholder="Message voyageurs" style="min-width:190px;width:100%;padding:6px;border:1px solid var(--line);border-radius:6px">'+
         '<div style="margin-top:6px;display:flex;gap:5px"><button class="btn sm" data-action="save">Enregistrer</button><button class="btn ghost sm" data-action="reset">Réinitialiser</button></div></td>'+
       '</tr>';
     }).join("");
@@ -134,9 +150,77 @@ export const departuresSharedScript = String.raw`
     if(button.dataset.action==="save") saveRow(row);
     if(button.dataset.action==="reset") resetRow(row);
   });
+  if(body) body.addEventListener("change",function(event){
+    var select=event.target.closest('[data-field="motifPreset"]'); if(!select||!select.value) return;
+    var row=select.closest("tr[data-service]"); if(!row) return;
+    var message=row.querySelector('[data-field="message"]');
+    if(message) message.value=select.value;
+    select.value="";
+  });
   document.querySelectorAll('aside.side nav a[data-view="dep"]').forEach(function(link){link.addEventListener("click",load);});
   clearInterval(window.__tteDeparturesSharedTimer);
   window.__tteDeparturesSharedTimer=setInterval(load,20000);
   load();
+
+  // ===== Récap mensuel =====
+  var recapLoading=false;
+  function currentMonth(){
+    var d=new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  }
+  function kpi(label,value,detail,tone){
+    return '<div class="kpi'+(tone?" "+tone:"")+'" style="min-width:150px"><span class="lab">'+esc(label)+'</span><div class="v">'+esc(value)+'</div>'+(detail?'<div class="d">'+esc(detail)+'</div>':'')+'</div>';
+  }
+  function renderRecap(data){
+    var kpis=document.getElementById("recapKpis");
+    if(kpis){
+      kpis.innerHTML=
+        kpi("Retards",data.totals.delayed,"circulations concernées","warn")+
+        kpi("Suppressions",data.totals.cancelled,"trains supprimés","alert")+
+        kpi("Changements de voie",data.totals.platformChanged,"")+
+        kpi("Retard moyen",data.totals.averageDelayMinutes+" min","sur les circulations retardées")+
+        kpi("Jours impactés",data.totals.affectedDays,"jour(s) avec au moins une régulation");
+    }
+    var lineBody=document.getElementById("recapLineBody");
+    if(lineBody){
+      if(!data.lines.length){
+        lineBody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:1.2rem;color:var(--muted)">Aucune régulation enregistrée sur ce mois.</td></tr>';
+      }else{
+        lineBody.innerHTML=data.lines.map(function(l){
+          var avg=l.delayed?Math.round((l.totalDelayMinutes/l.delayed)*10)/10:0;
+          return '<tr><td><span class="ln-tag" style="background:'+(lineColors[l.line]||"#17458A")+'">'+esc(l.line)+'</span></td>'+
+            '<td>'+esc(l.delayed)+'</td><td>'+esc(l.cancelled)+'</td><td>'+esc(l.platformChanged)+'</td>'+
+            '<td>'+esc(avg)+' min</td><td>'+esc(l.worstDelayMinutes)+' min</td></tr>';
+        }).join("");
+      }
+    }
+    var motifs=document.getElementById("recapMotifs");
+    if(motifs){
+      motifs.innerHTML=data.topMotifs.length
+        ? data.topMotifs.map(function(m){
+            return '<li style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)"><span>'+esc(m.motif)+'</span><b>'+esc(m.count)+'</b></li>';
+          }).join("")
+        : '<li style="color:var(--muted)">Aucun message de régulation enregistré sur ce mois.</li>';
+    }
+  }
+  async function loadRecap(){
+    if(recapLoading) return; recapLoading=true;
+    var monthInput=document.getElementById("recapMonth");
+    if(monthInput&&!monthInput.value) monthInput.value=currentMonth();
+    var month=(monthInput&&monthInput.value)||currentMonth();
+    try{
+      var json=await api("/api/departures-recap?month="+encodeURIComponent(month));
+      renderRecap(json);
+    }catch(error){
+      console.error("[departures/recap]",error);
+      notify("Impossible de charger le récap mensuel.","err");
+    }finally{recapLoading=false;}
+  }
+  var recapMonthInput=document.getElementById("recapMonth");
+  if(recapMonthInput&&!recapMonthInput.value) recapMonthInput.value=currentMonth();
+  if(recapMonthInput) recapMonthInput.addEventListener("change",loadRecap);
+  var recapRefresh=document.getElementById("recapRefresh");
+  if(recapRefresh) recapRefresh.addEventListener("click",loadRecap);
+  document.querySelectorAll('aside.side nav a[data-view="recap"]').forEach(function(link){link.addEventListener("click",loadRecap);});
 })();
 `;
