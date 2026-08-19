@@ -2,6 +2,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
 import { sessionConfig, type SessionData } from "./session.server";
 import type { DiscordSessionUser } from "./discord-roles";
+import type { DeoMailErrorCode } from "./deomail.server";
+
+/** Traduit une erreur DeoMail en reason exploitable côté front (diagnostic direct). */
+function deomailReason(e: unknown, fallback: "read_failed" | "send_failed"): DeoMailErrorCode | typeof fallback {
+  const code = (e as { code?: DeoMailErrorCode } | null)?.code;
+  if (code === "not_configured" || code === "auth_failed" || code === "network") return code;
+  return fallback;
+}
 
 async function currentUser(): Promise<DiscordSessionUser | null> {
   const s = await useSession<SessionData>(sessionConfig);
@@ -57,7 +65,7 @@ export const listMyInbox = createServerFn({ method: "GET" }).handler(async () =>
     return { ok: true as const, email: employee.email, mails: mine };
   } catch (e) {
     console.error("[listMyInbox]", e);
-    return { ok: false as const, reason: "read_failed" as const };
+    return { ok: false as const, reason: deomailReason(e, "read_failed") };
   }
 });
 
@@ -100,7 +108,7 @@ export const getMyMail = createServerFn({ method: "POST" })
       };
     } catch (e) {
       console.error("[getMyMail]", e);
-      return { ok: false as const, reason: "read_failed" as const };
+      return { ok: false as const, reason: deomailReason(e, "read_failed") };
     }
   });
 
@@ -138,6 +146,6 @@ export const sendMyMail = createServerFn({ method: "POST" })
       return { ok: true as const };
     } catch (e) {
       console.error("[sendMyMail]", e);
-      return { ok: false as const, reason: "send_failed" as const };
+      return { ok: false as const, reason: deomailReason(e, "send_failed") };
     }
   });

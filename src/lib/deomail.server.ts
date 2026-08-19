@@ -8,11 +8,25 @@
 const DEOMAIL_API_ROOT = process.env.DEOMAIL_API_ROOT ?? "https://api.deomail.com/v1";
 const DEOMAIL_API_KEY = process.env.DEOMAIL_API_KEY ?? "";
 
-export class DeoMailError extends Error {}
+export type DeoMailErrorCode = "not_configured" | "auth_failed" | "network" | "api_error";
+
+export class DeoMailError extends Error {
+  code: DeoMailErrorCode;
+  constructor(message: string, code: DeoMailErrorCode = "api_error") {
+    super(message);
+    this.code = code;
+  }
+}
 
 function authHeaders(): HeadersInit {
   if (!DEOMAIL_API_KEY) {
-    throw new DeoMailError("DEOMAIL_API_KEY n'est pas configurée (voir .env).");
+    // Cause la plus fréquente d'échec en prod : la variable d'env
+    // DEOMAIL_API_KEY n'est pas définie sur le déploiement du site
+    // (elle peut être configurée pour le bot Discord mais pas ici).
+    throw new DeoMailError(
+      "DEOMAIL_API_KEY n'est pas configurée sur ce déploiement (voir .env / variables d'environnement du site).",
+      "not_configured",
+    );
   }
   return {
     "X-API-Key": DEOMAIL_API_KEY,
@@ -26,6 +40,18 @@ async function parseErrorBody(res: Response): Promise<string> {
   } catch {
     return res.statusText;
   }
+}
+
+/** Convertit une réponse HTTP en erreur, en distinguant 401/403 (mauvaise clé). */
+async function toApiError(res: Response): Promise<DeoMailError> {
+  const body = await parseErrorBody(res);
+  if (res.status === 401 || res.status === 403) {
+    return new DeoMailError(
+      `DeoMail a refusé la clé API (HTTP ${res.status}) : ${body}`,
+      "auth_failed",
+    );
+  }
+  return new DeoMailError(`DeoMail a renvoyé une erreur ${res.status} : ${body}`, "api_error");
 }
 
 export type DeoMailSummary = {
@@ -57,10 +83,10 @@ export async function listInboxEmails(limit = 100): Promise<DeoMailSummary[]> {
   try {
     res = await fetch(`${DEOMAIL_API_ROOT}/emails?${params}`, { headers: authHeaders() });
   } catch (e) {
-    throw new DeoMailError(`Impossible de contacter l'API DeoMail : ${String(e)}`);
+    throw new DeoMailError(`Impossible de contacter l'API DeoMail : ${String(e)}`, "network");
   }
   if (!res.ok) {
-    throw new DeoMailError(`DeoMail a renvoyé une erreur ${res.status} : ${await parseErrorBody(res)}`);
+    throw await toApiError(res);
   }
   const data = (await res.json()) as unknown;
   if (data && typeof data === "object") {
@@ -81,10 +107,10 @@ export async function getEmailById(emailId: string): Promise<DeoMailFull> {
       headers: authHeaders(),
     });
   } catch (e) {
-    throw new DeoMailError(`Impossible de contacter l'API DeoMail : ${String(e)}`);
+    throw new DeoMailError(`Impossible de contacter l'API DeoMail : ${String(e)}`, "network");
   }
   if (!res.ok) {
-    throw new DeoMailError(`DeoMail a renvoyé une erreur ${res.status} : ${await parseErrorBody(res)}`);
+    throw await toApiError(res);
   }
   const data = (await res.json()) as unknown;
   if (data && typeof data === "object" && "email" in (data as Record<string, unknown>)) {
@@ -103,10 +129,10 @@ export async function markEmailRead(emailId: string): Promise<void> {
       body: JSON.stringify({ is_read: true }),
     });
   } catch (e) {
-    throw new DeoMailError(`Impossible de contacter l'API DeoMail : ${String(e)}`);
+    throw new DeoMailError(`Impossible de contacter l'API DeoMail : ${String(e)}`, "network");
   }
   if (!res.ok) {
-    throw new DeoMailError(`DeoMail a renvoyé une erreur ${res.status} : ${await parseErrorBody(res)}`);
+    throw await toApiError(res);
   }
 }
 
@@ -149,10 +175,10 @@ export async function sendEmail(params: {
       body: JSON.stringify(payload),
     });
   } catch (e) {
-    throw new DeoMailError(`Impossible de contacter l'API DeoMail : ${String(e)}`);
+    throw new DeoMailError(`Impossible de contacter l'API DeoMail : ${String(e)}`, "network");
   }
   if (!res.ok) {
-    throw new DeoMailError(`DeoMail a renvoyé une erreur ${res.status} : ${await parseErrorBody(res)}`);
+    throw await toApiError(res);
   }
   try {
     return (await res.json()) as Record<string, unknown>;
