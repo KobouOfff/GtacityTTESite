@@ -6,6 +6,7 @@ import { trafficPublicScript } from "./AccueilTrafficShared.script";
 import { timetablePublicScript } from "./AccueilTimetableShared.script";
 import { DiscordAuthButton } from "@/components/DiscordAuth";
 import { TTELogo } from "@/components/TTELogo";
+import NetworkMap from "@/components/NetworkMap";
 import { T } from "@/components/T";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
@@ -302,86 +303,7 @@ export default function AccueilPage() {
           <b><T fr="Plan schématique du réseau" en="Schematic network map" /></b>
           <span className="upd"><T fr="Mis à jour aujourd'hui" en="Updated today" /></span>
         </div>
-        <div className="mapview"><svg className="netmap" viewBox="0 0 1000 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label={t("Plan schématique du réseau TTE", "Schematic map of the TTE network")}>
-          <rect width="1000" height="520" fill="#F7FAFD" />
-          <g opacity=".5" stroke="#E2EAF3" strokeWidth="1">
-            <line x1="0" y1="130" x2="1000" y2="130" /><line x1="0" y1="260" x2="1000" y2="260" /><line x1="0" y1="390" x2="1000" y2="390" />
-            <line x1="250" y1="0" x2="250" y2="520" /><line x1="500" y1="0" x2="500" y2="520" /><line x1="750" y1="0" x2="750" y2="520" />
-          </g>
-          {/* Townsend = 150,280 */}
-          {/* IC1 (cyan) */}
-          <polyline points="150,280 250,268 360,250 470,228 590,204 700,184 810,164 905,146" fill="none" stroke="var(--l-ic1)" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="10 5" />
-          {/* IC2 (rouge) */}
-          <polyline points="150,280 270,262 400,228 540,198 680,176 800,158 905,146" fill="none" stroke="var(--l-ic2)" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round" />
-          {/* R2 (bleu) */}
-          <polyline points="150,280 240,288 330,292 420,288 480,282" fill="none" stroke="var(--l-r2)" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
-          {/* R3 (violet) */}
-          <polyline points="330,292 420,270 510,252 600,234 670,222" fill="none" stroke="var(--l-r3)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          {/* R4 (orange) */}
-          <polyline points="330,292 365,345 415,390 490,424 580,438 680,436 760,442" fill="none" stroke="var(--l-r4)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          {/* R1 (vert) */}
-          <polyline points="150,280 195,248 250,224 305,210" fill="none" stroke="var(--l-r1)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-          {/* Ligne T - train urbain Townsend (teal) */}
-          <polyline points="150,280 138,322 132,360 128,398" fill="none" stroke="var(--l-t)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          {/* Bus local (ambre tireté) */}
-          <polyline points="150,280 188,316 200,352 206,392" fill="none" stroke="var(--l-bus)" strokeWidth="2.6" strokeLinecap="round" strokeDasharray="3 6" />
-
-          {/* stations */}
-          <g fill="#F7FAFD" strokeWidth="2.6">
-            <circle cx="305" cy="210" r="5" stroke="var(--l-r1)" />
-            <circle cx="480" cy="282" r="5" stroke="var(--l-r2)" />
-            <circle cx="670" cy="222" r="5" stroke="var(--l-r3)" />
-            <circle cx="128" cy="398" r="5" stroke="var(--l-t)" />
-            <circle cx="206" cy="392" r="5" stroke="var(--l-bus)" />
-          </g>
-          {/* hubs */}
-          <circle cx="150" cy="280" r="13" fill="#fff" stroke="var(--navy)" strokeWidth="3" />
-          <circle cx="150" cy="280" r="5" fill="var(--navy)" />
-          <circle cx="330" cy="292" r="9" fill="#fff" stroke="var(--navy)" strokeWidth="3" />
-          <circle cx="330" cy="292" r="3.5" fill="var(--navy)" />
-          <circle cx="760" cy="442" r="8" fill="#fff" stroke="var(--l-r4)" strokeWidth="3" />
-          <circle cx="905" cy="146" r="11" fill="#fff" stroke="var(--navy)" strokeWidth="3" />
-          <circle cx="905" cy="146" r="4" fill="var(--navy)" />
-
-          {/* labels */}
-          <g fontFamily="'Libre Franklin',sans-serif" fontWeight="700" fontSize="14" fill="#16202E">
-            <text x="150" y="312" textAnchor="middle">Townsend</text>
-            <text x="330" y="318" textAnchor="middle">Knoxville</text>
-            <text x="760" y="470" textAnchor="middle" fill="#A8480E">Chattanooga</text>
-            <text x="905" y="130" textAnchor="middle">Nashville</text>
-          </g>
-          <g fontFamily="'Source Sans 3',sans-serif" fontSize="12" fill="#5C6B7D">
-            <text x="305" y="198" textAnchor="middle">Sevierville</text>
-            <text x="670" y="210" textAnchor="middle">Greeneville</text>
-            <text x="118" y="416" textAnchor="end">
-              <tspan className="i18n-fr">Hôpital TMC</tspan>
-              <tspan className="i18n-en">TMC Hospital</tspan>
-            </text>
-          </g>
-          <g fontFamily="'Libre Franklin',sans-serif" fontWeight="800" fontSize="9" letterSpacing=".5">
-            <rect x="118" y="318" width="64" height="15" rx="4" fill="var(--navy)" />
-            <text x="150" y="328.5" textAnchor="middle" fill="#fff">
-              <tspan className="i18n-fr">GARE CENTRALE</tspan>
-              <tspan className="i18n-en">CENTRAL STATION</tspan>
-            </text>
-            <rect x="872" y="102" width="66" height="15" rx="4" fill="var(--l-ic1)" />
-            <text x="905" y="112.5" textAnchor="middle" fill="#fff">TERMINUS</text>
-          </g>
-          <text x="22" y="504" fontFamily="'Source Sans 3',sans-serif" fontSize="11" fill="#9FB0C2">
-            <tspan className="i18n-fr">Schéma non contractuel · 8 lignes · Townsend Transit Express</tspan>
-            <tspan className="i18n-en">Not to scale · 8 lines · Townsend Transit Express</tspan>
-          </text>
-        </svg></div>
-        <div className="maplegend">
-          <span className="leg"><span className="ll" style={{background: "var(--l-r1)"}}></span> R1 · <T fr="Vallées des Smokies" en="Smoky Mountain valleys" /></span>
-          <span className="leg"><span className="ll" style={{background: "var(--l-r2)"}}></span> R2 · Knoxville</span>
-          <span className="leg"><span className="ll" style={{background: "var(--l-r3)"}}></span> R3 · <T fr="Est Tennessee" en="East Tennessee" /></span>
-          <span className="leg"><span className="ll" style={{background: "var(--l-r4)"}}></span> R4 · <T fr="Corridor Sud" en="Southern corridor" /></span>
-          <span className="leg"><span className="ll" style={{background: "var(--l-ic1)"}}></span> IC1 · <T fr="InterCité Est-Ouest" en="East-West Intercity" /></span>
-          <span className="leg"><span className="ll" style={{background: "var(--l-ic2)"}}></span> IC2 · Smoky Express</span>
-          <span className="leg"><span className="ll" style={{background: "var(--l-t)"}}></span> <T fr="Ligne T · Train urbain" en="Line T · Urban train" /></span>
-          <span className="leg"><span className="ll" style={{background: "var(--l-bus)"}}></span> <T fr="Bus · Townsend" en="Bus · Townsend" /></span>
-        </div>
+        <NetworkMap />
       </div>
 
       <div className="net-side">
