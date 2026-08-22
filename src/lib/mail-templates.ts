@@ -140,6 +140,29 @@ export const MAIL_TEMPLATES: MailTemplate[] = [
       "Au plaisir de vous accueillir de nouveau à bord.\n\n" +
       "Cordialement,\nService Voyageurs",
   },
+  {
+    id: 11,
+    title: "Avertissement / blâme (RH)",
+    subject: "Avertissement disciplinaire — {nom_employe}",
+    body:
+      "Bonjour {nom_employe},\n\n" +
+      "Par la présente, la Direction des Ressources Humaines de Townsend " +
+      "Transit Express vous notifie un avertissement disciplinaire " +
+      "concernant votre comportement du {date_incident}.\n\n" +
+      "Motif : {motif}.\n\n" +
+      "Faits reprochés : {details_faits}\n\n" +
+      "Ce comportement est contraire au règlement intérieur de " +
+      "l'entreprise et aux procédures GCOR en vigueur. Nous vous " +
+      "demandons de veiller strictement au respect des consignes de " +
+      "service à l'avenir.\n\n" +
+      "En l'absence d'amélioration constatée, ou en cas de récidive, " +
+      "des mesures disciplinaires plus sévères pourront être engagées, " +
+      "pouvant aller jusqu'à la suspension ou la fin de contrat.\n\n" +
+      "Votre supérieur hiérarchique, {nom_superieur}, a été mis en " +
+      "copie de ce courrier et reste à votre disposition pour en " +
+      "discuter.\n\n" +
+      "Cordialement,\nDirection des Ressources Humaines\nTownsend Transit Express",
+  },
 ];
 
 // Libellés plus lisibles pour les champs à saisir (sinon le nom brut du
@@ -164,6 +187,10 @@ export const MAIL_TEMPLATE_LABELS: Record<string, string> = {
   lieu_rdv: "Lieu du rendez-vous",
   numero_facture: "Numéro de facture",
   date_echeance: "Date d'échéance",
+  nom_employe: "Nom de l'employé",
+  date_incident: "Date de l'incident",
+  details_faits: "Détail des faits reprochés",
+  nom_superieur: "Nom du supérieur hiérarchique",
 };
 
 export function getMailTemplate(id: number): MailTemplate | undefined {

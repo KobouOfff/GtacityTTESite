@@ -198,9 +198,11 @@ export type MailAttachmentInput = {
   contentType: string;
 };
 
+const MAX_CC = 5;
+
 /** Envoie un mail depuis l'adresse DeoMail de l'employé connecté. */
 export const sendMyMail = createServerFn({ method: "POST" })
-  .validator((d: { to: string; subject: string; body: string; attachments?: MailAttachmentInput[] }) => d)
+  .validator((d: { to: string; cc?: string[]; subject: string; body: string; attachments?: MailAttachmentInput[] }) => d)
   .handler(async ({ data }) => {
     const user = await currentUser();
     if (!user) return { ok: false as const, reason: "not_logged_in" as const };
@@ -216,6 +218,20 @@ export const sendMyMail = createServerFn({ method: "POST" })
       body.length > MAX_BODY
     ) {
       return { ok: false as const, reason: "invalid" as const };
+    }
+
+    const rawCc = Array.isArray(data.cc) ? data.cc : [];
+    if (rawCc.length > MAX_CC) {
+      return { ok: false as const, reason: "invalid" as const };
+    }
+    const cc: string[] = [];
+    for (const raw of rawCc) {
+      const addr = String(raw ?? "").trim().toLowerCase();
+      if (!addr) continue;
+      if (!EMAIL_RE.test(addr)) {
+        return { ok: false as const, reason: "invalid" as const };
+      }
+      if (addr !== to && !cc.includes(addr)) cc.push(addr);
     }
 
     const rawAttachments = Array.isArray(data.attachments) ? data.attachments : [];
@@ -249,7 +265,7 @@ export const sendMyMail = createServerFn({ method: "POST" })
       if (!employee) return { ok: false as const, reason: "not_registered" as const };
 
       const { sendEmail } = await import("./deomail.server");
-      await sendEmail({ from: employee.email, to, subject, bodyText: body, attachments });
+      await sendEmail({ from: employee.email, to, cc: cc.length ? cc : undefined, subject, bodyText: body, attachments });
       return { ok: true as const };
     } catch (e) {
       console.error("[sendMyMail]", e);

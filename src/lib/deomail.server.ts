@@ -238,18 +238,28 @@ export type DeoMailAttachment = {
 export async function sendEmail(params: {
   from: string;
   to: string;
+  /** Destinataires mis en copie (ex. le supérieur hiérarchique pour un blâme). Max géré côté appelant. */
+  cc?: string[];
   subject: string;
   bodyText: string;
   /** Pièces jointes optionnelles (max 5 fichiers / 10 Mo au total, limite DeoMail). */
   attachments?: DeoMailAttachment[];
 }): Promise<Record<string, unknown>> {
+  const cc = (params.cc ?? []).filter((addr) => addr && addr !== params.to);
   const payload: Record<string, unknown> = {
     from: params.from,
-    to: [params.to],
+    // Tous les destinataires (principal + copie) reçoivent réellement le
+    // mail via "to" — DeoMail ne distingue pas forcément to/cc côté
+    // livraison — tandis que "cc" (si l'API le supporte) permet un en-tête
+    // "Cc:" propre pour que chacun voie qui est en copie.
+    to: cc.length > 0 ? [params.to, ...cc] : [params.to],
     subject: params.subject,
     html: buildHtmlEmail(params.bodyText),
     fingerprint: false,
   };
+  if (cc.length > 0) {
+    payload.cc = cc;
+  }
   if (params.attachments && params.attachments.length > 0) {
     payload.attachments = params.attachments;
   }
