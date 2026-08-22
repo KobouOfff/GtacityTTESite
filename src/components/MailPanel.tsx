@@ -168,6 +168,8 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [composing, setComposing] = useState(false);
   const [to, setTo] = useState("");
+  const [cc, setCc] = useState<string[]>([]);
+  const [ccInput, setCcInput] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [search, setSearch] = useState("");
@@ -195,6 +197,8 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
 
   function resetCompose() {
     setTo("");
+    setCc([]);
+    setCcInput("");
     setSubject("");
     setBody("");
     setTemplateId(0);
@@ -230,6 +234,23 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
     } catch {
       setAttachmentError("⚠️ Impossible de lire un des fichiers, réessaie.");
     }
+  }
+
+  const MAX_CC = 5;
+  const CC_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function addCc(raw: string) {
+    const addr = raw.trim().toLowerCase();
+    if (!addr || !CC_EMAIL_RE.test(addr)) return;
+    if (addr === to.trim().toLowerCase()) return;
+    if (cc.includes(addr)) return;
+    if (cc.length >= MAX_CC) return;
+    setCc((prev) => [...prev, addr]);
+    setCcInput("");
+  }
+
+  function removeCc(addr: string) {
+    setCc((prev) => prev.filter((a) => a !== addr));
   }
 
   function removeAttachment(filename: string) {
@@ -268,7 +289,7 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
       const attachmentsPayload: MailAttachmentInput[] | undefined = attachments.length
         ? attachments.map((a) => ({ filename: a.filename, content: a.content, contentType: a.contentType }))
         : undefined;
-      return sendMyMail({ data: { to, subject, body, attachments: attachmentsPayload } });
+      return sendMyMail({ data: { to, cc: cc.length ? cc : undefined, subject, body, attachments: attachmentsPayload } });
     },
     onSuccess: (res) => {
       if (res.ok) {
@@ -467,6 +488,70 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
                         </option>
                       ))}
                     </datalist>
+                  </label>
+
+                  <label>
+                    En copie (CC) — ex. le supérieur hiérarchique pour un blâme
+                    <div className="mp-cc-row">
+                      <select
+                        value=""
+                        disabled={cc.length >= MAX_CC}
+                        onChange={(e) => {
+                          if (e.target.value) addCc(e.target.value);
+                          e.target.value = "";
+                        }}
+                      >
+                        <option value="">— Ajouter depuis l'annuaire —</option>
+                        {directory.map((emp) => (
+                          <option key={emp.email} value={emp.email}>
+                            {emp.name ? `${emp.name} — ${emp.email}` : emp.email}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="email"
+                        value={ccInput}
+                        disabled={cc.length >= MAX_CC}
+                        onChange={(e) => setCcInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addCc(ccInput);
+                          }
+                        }}
+                        placeholder="autre.email@domaine.com"
+                      />
+                      <button
+                        type="button"
+                        className="mp-btn"
+                        disabled={cc.length >= MAX_CC || !ccInput.trim()}
+                        onClick={() => addCc(ccInput)}
+                      >
+                        ＋ Ajouter
+                      </button>
+                    </div>
+                    {cc.length > 0 && (
+                      <div className="mp-cc-chips">
+                        {cc.map((addr) => {
+                          const known = directory.find((emp) => emp.email === addr);
+                          return (
+                            <span key={addr} className="mp-cc-chip">
+                              {known?.name ? `${known.name} (${addr})` : addr}
+                              <button
+                                type="button"
+                                aria-label={`Retirer ${addr} de la copie`}
+                                onClick={() => removeCc(addr)}
+                              >
+                                ✕
+                              </button>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {cc.length >= MAX_CC && (
+                      <div className="mp-cc-hint">{MAX_CC} destinataires en copie maximum.</div>
+                    )}
                   </label>
 
                   <label>

@@ -534,6 +534,69 @@
   border-color: var(--blue, #2f6fe0);
 }
 
+.mp-cc-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mp-cc-row select,
+.mp-cc-row input {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.mp-cc-row .mp-btn {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font-size: 12.5px;
+}
+
+.mp-cc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.mp-cc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 4px 6px 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e6ebf5;
+}
+
+.mp-cc-chip button {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 10px;
+  color: #b7c2d9;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mp-cc-chip button:hover {
+  background: rgba(255, 90, 90, 0.25);
+  color: #fff;
+}
+
+.mp-cc-hint {
+  font-size: 11px;
+  font-weight: 500;
+  color: #7C8CAE;
+}
+
 .mp-template-fields {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
