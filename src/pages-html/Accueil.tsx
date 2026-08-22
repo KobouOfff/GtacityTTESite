@@ -1,17 +1,49 @@
-import { useEffect, type CSSProperties as _CSS } from "react";
+import { useEffect, useState, type CSSProperties as _CSS } from "react";
 import * as React from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import "./Accueil.css";
 import { script } from "./Accueil.script";
 import { trafficPublicScript } from "./AccueilTrafficShared.script";
 import { timetablePublicScript } from "./AccueilTimetableShared.script";
-import { DiscordAuthButton } from "@/components/DiscordAuth";
+import { DiscordAuthButton, useCurrentUser } from "@/components/DiscordAuth";
 import { TTELogo } from "@/components/TTELogo";
 import NetworkMap from "@/components/NetworkMap";
 import { T } from "@/components/T";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { SUBSCRIPTION_PLANS, type SubscriptionPlan } from "@/lib/subscription-plans";
+import { SubscriptionPayModal } from "@/components/SubscriptionPayModal";
+import { LoginRequiredModal } from "@/components/LoginRequiredModal";
+import { getMyLoyaltyAccount, startSubscriptionPurchase } from "@/lib/loyalty.functions";
 
 export default function AccueilPage() {
   const { lang, t, toggleLang } = useLanguage();
+  const { data: user } = useCurrentUser();
+  const [activePlan, setActivePlan] = useState<SubscriptionPlan | null>(null);
+  const [loginPromptPlan, setLoginPromptPlan] = useState<SubscriptionPlan | null>(null);
+  const planById = (id: SubscriptionPlan["id"]) => SUBSCRIPTION_PLANS.find((p) => p.id === id)!;
+
+  const loyaltyQuery = useQuery({
+    queryKey: ["my-loyalty-account"],
+    queryFn: () => getMyLoyaltyAccount(),
+    enabled: !!user,
+    staleTime: 30_000,
+  });
+
+  const purchaseMutation = useMutation({
+    mutationFn: (planId: SubscriptionPlan["id"]) => startSubscriptionPurchase({ data: { planId } }),
+    onSuccess: () => { loyaltyQuery.refetch(); },
+  });
+
+  function handleBuyClick(plan: SubscriptionPlan) {
+    if (!user) {
+      setLoginPromptPlan(plan);
+      return;
+    }
+    setActivePlan(plan);
+    purchaseMutation.mutate(plan.id);
+  }
+
+  const myPoints = loyaltyQuery.data?.ok ? loyaltyQuery.data.account?.points ?? 0 : null;
 
   useEffect(() => {
     const el = document.createElement("script");
@@ -746,22 +778,89 @@ export default function AccueilPage() {
         <div className="fare-nm"><T fr="Pass journée" en="Day pass" /></div>
         <div className="fare-pr">$10</div>
         <div className="fare-d"><T fr="Trajets illimités pendant une journée, sur toutes les lignes." en="Unlimited journeys for one day, on all lines." /></div>
-        <span className="fare-where"><T fr="En vente en gare" en="Sold at stations" /></span>
+        <span className="fare-where"><T fr="En gare ou en ligne" en="At stations or online" /></span>
+        <div className="fare-actions">
+          <button type="button" className="btn-outline fare-pay-btn" onClick={() => handleBuyClick(planById("24h"))}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18M7 15h4" /></svg>
+            <T fr="Payer en ligne" en="Pay online" />
+          </button>
+        </div>
       </div>
       <div className="fare feat">
         <span className="fare-tag"><T fr="Le plus choisi" en="Most popular" /></span>
         <div className="fare-nm"><T fr="Pass semaine" en="Weekly pass" /></div>
         <div className="fare-pr">$75</div>
         <div className="fare-d"><T fr="Sept jours de trajets illimités sur l'ensemble du réseau." en="Seven days of unlimited journeys across the whole network." /></div>
-        <span className="fare-where"><T fr="En vente en gare" en="Sold at stations" /></span>
+        <span className="fare-where"><T fr="En gare ou en ligne" en="At stations or online" /></span>
+        <div className="fare-actions">
+          <button type="button" className="btn-outline fare-pay-btn" onClick={() => handleBuyClick(planById("7j"))}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18M7 15h4" /></svg>
+            <T fr="Payer en ligne" en="Pay online" />
+          </button>
+        </div>
       </div>
       <div className="fare">
         <div className="fare-nm"><T fr="Pass mois" en="Monthly pass" /></div>
         <div className="fare-pr">$275</div>
         <div className="fare-d"><T fr="Trente jours de trajets illimités, pour les voyageurs réguliers." en="Thirty days of unlimited journeys, for regular travellers." /></div>
-        <span className="fare-where"><T fr="En vente en gare" en="Sold at stations" /></span>
+        <span className="fare-where"><T fr="En gare ou en ligne" en="At stations or online" /></span>
+        <div className="fare-actions">
+          <button type="button" className="btn-outline fare-pay-btn" onClick={() => handleBuyClick(planById("30j"))}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18M7 15h4" /></svg>
+            <T fr="Payer en ligne" en="Pay online" />
+          </button>
+        </div>
       </div>
     </div>
+
+    <div className="notice usbpay-info-notice">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
+      <p>
+        <T
+          fr={<><b>Les pass 24h, 7 jours et 30 jours peuvent être réglés en ligne</b> via USB Pay, réservé aux clients connectés avec un compte client (Discord). Le paiement en ligne ne délivre pas le titre automatiquement : après avoir payé, contactez un membre du personnel TTE sur Discord ou présentez-vous en gare avec votre reçu pour faire activer votre abonnement. Les billets et carnets restent en vente uniquement aux bornes en gare.</>}
+          en={<><b>The 24h, 7-day and 30-day passes can be paid online</b> via USB Pay, reserved for clients signed in with a client account (Discord). Online payment doesn't deliver the pass automatically: after paying, contact a TTE staff member on Discord or come to a station with your receipt so your pass can be activated. Single tickets and books remain sold only at station ticket machines.</>}
+        />
+      </p>
+    </div>
+
+    {user && (
+      <div className="loyalty-badge">
+        <span className="loyalty-badge-icon">🎖️</span>
+        <span>
+          {loyaltyQuery.isLoading ? (
+            <T fr="Chargement de votre compte fidélité…" en="Loading your loyalty account…" />
+          ) : (
+            <T
+              fr={<>Compte fidélité de <b>{user.displayName || user.username}</b> : <b>{myPoints ?? 0} points</b></>}
+              en={<><b>{user.displayName || user.username}</b>'s loyalty account: <b>{myPoints ?? 0} points</b></>}
+            />
+          )}
+        </span>
+      </div>
+    )}
+
+    {loginPromptPlan && (
+      <LoginRequiredModal plan={loginPromptPlan} onClose={() => setLoginPromptPlan(null)} />
+    )}
+
+    {activePlan && (
+      <SubscriptionPayModal
+        plan={activePlan}
+        onClose={() => { setActivePlan(null); purchaseMutation.reset(); }}
+        purchaseState={
+          purchaseMutation.isError || (purchaseMutation.data && !purchaseMutation.data.ok)
+            ? "error"
+            : purchaseMutation.isSuccess && purchaseMutation.data?.ok
+              ? "success"
+              : "pending"
+        }
+        loyaltyResult={
+          purchaseMutation.data?.ok
+            ? { account: purchaseMutation.data.account, purchase: purchaseMutation.data.purchase }
+            : null
+        }
+      />
+    )}
 
     <p style={{marginTop: "14px", fontSize: "14px", color: "var(--muted)"}}>
       <T

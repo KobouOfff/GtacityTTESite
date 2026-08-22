@@ -235,6 +235,38 @@ td{padding:14px 16px;font-size:13.5px;vertical-align:middle}
 .fare-pr span{font-size:.95rem;font-weight:600;color:var(--muted);letter-spacing:0}
 .fare-d{font-size:13.5px;color:var(--muted);margin-top:.7rem;line-height:1.5}
 .fare-where{margin-top:1rem;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--blue-700)}
+.fare-actions{margin-top:.9rem}
+.fare-pay-btn{width:100%;padding:9px 14px;font-size:13px}
+.usbpay-info-notice{margin-top:1.2rem;margin-bottom:0}
+
+.usbpay-overlay{position:fixed;inset:0;background:rgba(8,15,26,.62);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000}
+.usbpay-modal{position:relative;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:1.6rem}
+.usbpay-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.usbpay-close:hover{background:var(--blue-50);color:var(--blue-700);border-color:var(--blue)}
+.usbpay-modal-head{padding-right:2.2rem}
+.usbpay-modal-head h3{font-family:var(--ff-head);font-weight:800;font-size:1.3rem;color:var(--navy);margin-top:.3rem}
+.usbpay-modal-price{color:var(--blue-700)}
+.usbpay-notice{margin-top:1rem;margin-bottom:1rem}
+.usbpay-iframe{width:100%;height:560px;max-height:60vh;border:1px solid var(--line);border-radius:12px}
+.usbpay-missing{font-size:13.5px;color:var(--muted);background:var(--blue-50);border:1px dashed var(--line);border-radius:10px;padding:1rem;text-align:center}
+.usbpay-loyalty-status{font-size:13px;font-weight:700;border-radius:10px;padding:.7rem 1rem;margin-top:.9rem}
+.usbpay-loyalty-status.ok{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.usbpay-loyalty-status.err{background:var(--alert-bg,#fef2f2);color:#b91c1c;border:1px solid #fecaca}
+
+.loyalty-badge{margin-top:1rem;display:inline-flex;align-items:center;gap:9px;background:#fffbeb;border:1px solid #fde68a;border-radius:999px;padding:.5rem 1.1rem;font-size:13px;color:var(--navy)}
+.loyalty-badge-icon{font-size:16px;line-height:1}
+
+.usbpay-modal-sm{max-width:420px;text-align:center}
+.usbpay-login-icon{font-size:38px;margin-bottom:.3rem}
+.usbpay-login-copy{font-size:14px;color:var(--muted);line-height:1.55;margin:.8rem 0 1.3rem}
+.usbpay-login-btn{width:100%}
+
+html.dark .usbpay-modal{background:#111827;color:var(--ink)}
+html.dark .usbpay-modal-head h3{color:var(--ink)}
+html.dark .usbpay-close{background:#0c1421;color:var(--ink);border-color:var(--line)}
+html.dark .loyalty-badge{background:#2a2210;border-color:#4a3c14;color:var(--ink)}
+html.dark .usbpay-loyalty-status.ok{background:#0f2a20;color:#6ee7b7;border-color:#1c4636}
+html.dark .usbpay-loyalty-status.err{background:#2c1416;color:#fca5a5;border-color:#5c2327}
 
 .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
 .testi{background:#fff;border:1px solid var(--line);border-radius:13px;padding:1.4rem 1.3rem;display:flex;flex-direction:column;gap:.7rem;transition:transform .16s,box-shadow .16s,border-color .16s}
