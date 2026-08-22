@@ -203,6 +203,13 @@ export function canViewAuditLogs(user: DiscordSessionUser | null): boolean {
   return hasAny(user, DIRECTION_ROLES);
 }
 
+// Attribution des billets/abonnements achetés en ligne (recherche par
+// référence + validation au guichet) : ouvert à tout employé connecté,
+// comme au guichet physique en gare — pas réservé à la Direction.
+export function canManageSubscriptions(user: DiscordSessionUser | null): boolean {
+  return !!user;
+}
+
 export function getPrimaryRole(roleIds: string[]): { name: string; color: string } | null {
   let best: { name: string; color: string; level: number } | null = null;
   for (const id of roleIds) {

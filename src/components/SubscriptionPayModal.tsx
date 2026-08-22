@@ -61,6 +61,21 @@ export function SubscriptionPayModal({
           </div>
         )}
 
+        {purchaseState === "success" && loyaltyResult?.purchase.reference && (
+          <div className="usbpay-reference">
+            <span className="eyebrow">
+              <T fr="Référence de votre achat" en="Your purchase reference" />
+            </span>
+            <div className="usbpay-reference-code">{loyaltyResult.purchase.reference}</div>
+            <p>
+              <T
+                fr={<>Présentez cette référence avec votre reçu de paiement à un agent TTE (guichet ou Discord) pour faire activer votre abonnement. Retrouvez-la à tout moment sur <a href="/mon-compte">votre compte</a>.</>}
+                en={<>Show this reference with your payment receipt to a TTE staff member (station desk or Discord) to activate your pass. You can find it anytime on <a href="/mon-compte">your account page</a>.</>}
+              />
+            </p>
+          </div>
+        )}
+
         <div className="notice usbpay-notice">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
           <p>

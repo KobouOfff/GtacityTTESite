@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
 import { sessionConfig, type SessionData } from "./session.server";
-import type { DiscordSessionUser } from "./discord-roles";
+import { canManageSubscriptions, type DiscordSessionUser } from "./discord-roles";
 import type { LoyaltyAccountRow, SubscriptionPurchaseRow } from "./loyalty.server";
+
+const REF_PATTERN = /^BIL-\d{4}-\d{6}$/i;
 
 async function currentUser(): Promise<DiscordSessionUser | null> {
   const s = await useSession<SessionData>(sessionConfig);
@@ -52,5 +54,57 @@ export const startSubscriptionPurchase = createServerFn({ method: "POST" })
     } catch (e) {
       console.error("[startSubscriptionPurchase]", e);
       return { ok: false as const, reason: "insert_failed" as const };
+    }
+  });
+
+// ===== Attribution des billets par un agent TTE (guichet / Discord) =====
+
+export const searchPurchaseByReference = createServerFn({ method: "POST" })
+  .validator((d: { reference: string }) => d)
+  .handler(async ({ data }) => {
+    const user = await currentUser();
+    if (!user) return { ok: false as const, reason: "not_logged_in" as const };
+    if (!canManageSubscriptions(user)) return { ok: false as const, reason: "forbidden" as const };
+    const reference = data.reference?.trim();
+    if (!reference || !REF_PATTERN.test(reference)) {
+      return { ok: false as const, reason: "invalid_reference" as const };
+    }
+    try {
+      const { findPurchaseByReference } = await import("./loyalty.server");
+      const found = await findPurchaseByReference(reference);
+      if (!found) return { ok: false as const, reason: "not_found" as const };
+      return {
+        ok: true as const,
+        purchase: found.purchase as SubscriptionPurchaseRow,
+        account: found.account as LoyaltyAccountRow | null,
+      };
+    } catch (e) {
+      console.error("[searchPurchaseByReference]", e);
+      return { ok: false as const, reason: "read_failed" as const };
+    }
+  });
+
+export const deliverPurchaseByReferenceFn = createServerFn({ method: "POST" })
+  .validator((d: { reference: string }) => d)
+  .handler(async ({ data }) => {
+    const user = await currentUser();
+    if (!user) return { ok: false as const, reason: "not_logged_in" as const };
+    if (!canManageSubscriptions(user)) return { ok: false as const, reason: "forbidden" as const };
+    const reference = data.reference?.trim();
+    if (!reference || !REF_PATTERN.test(reference)) {
+      return { ok: false as const, reason: "invalid_reference" as const };
+    }
+    try {
+      const { deliverPurchaseByReference } = await import("./loyalty.server");
+      const result = await deliverPurchaseByReference(reference, user);
+      if (!result.ok) return { ok: false as const, reason: result.reason };
+      return {
+        ok: true as const,
+        purchase: result.purchase as SubscriptionPurchaseRow,
+        account: result.account as LoyaltyAccountRow | null,
+      };
+    } catch (e) {
+      console.error("[deliverPurchaseByReferenceFn]", e);
+      return { ok: false as const, reason: "update_failed" as const };
     }
   });

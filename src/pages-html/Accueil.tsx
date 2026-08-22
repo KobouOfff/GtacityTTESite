@@ -824,19 +824,19 @@ export default function AccueilPage() {
     </div>
 
     {user && (
-      <div className="loyalty-badge">
+      <a href="/mon-compte" className="loyalty-badge" style={{ textDecoration: "none", cursor: "pointer" }}>
         <span className="loyalty-badge-icon">🎖️</span>
         <span>
           {loyaltyQuery.isLoading ? (
             <T fr="Chargement de votre compte fidélité…" en="Loading your loyalty account…" />
           ) : (
             <T
-              fr={<>Compte fidélité de <b>{user.displayName || user.username}</b> : <b>{myPoints ?? 0} points</b></>}
-              en={<><b>{user.displayName || user.username}</b>'s loyalty account: <b>{myPoints ?? 0} points</b></>}
+              fr={<>Compte fidélité de <b>{user.displayName || user.username}</b> : <b>{myPoints ?? 0} points</b> · voir mon compte</>}
+              en={<><b>{user.displayName || user.username}</b>'s loyalty account: <b>{myPoints ?? 0} points</b> · view my account</>}
             />
           )}
         </span>
-      </div>
+      </a>
     )}
 
     {loginPromptPlan && (

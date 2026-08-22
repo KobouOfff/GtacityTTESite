@@ -19,8 +19,24 @@ export type SubscriptionPurchaseRow = {
   price: number;
   points_earned: number;
   status: string;
+  reference: string;
+  delivered_by_discord_id: string | null;
+  delivered_by_username: string | null;
+  delivered_at: string | null;
   created_at: string;
 };
+
+// Référence courte présentée par le client à un agent pour se faire
+// attribuer le billet (voir recordSubscriptionPurchase / findPurchaseByReference).
+function makePurchaseRef() {
+  const y = new Date().getFullYear();
+  const n = Math.floor(100000 + Math.random() * 900000);
+  return `BIL-${y}-${n}`;
+}
+
+function normalizeRef(input: string): string {
+  return input.trim().toUpperCase();
+}
 
 // 1 point fidélité par dollar dépensé sur un abonnement.
 const POINTS_PER_DOLLAR = 1;
@@ -120,19 +136,32 @@ export async function recordSubscriptionPurchase(
   const account = await ensureLoyaltyAccount(user);
   const pointsEarned = Math.round(plan.price * POINTS_PER_DOLLAR);
 
-  const { data: purchase, error: purErr } = await supabase
-    .from("subscription_purchases")
-    .insert({
-      discord_id: user.discordId,
-      plan_id: plan.id,
-      plan_name: plan.nameFr,
-      price: plan.price,
-      points_earned: pointsEarned,
-      status: "paiement_initie",
-    })
-    .select("*")
-    .single();
-  if (purErr) throw purErr;
+  let purchase: SubscriptionPurchaseRow | null = null;
+  let lastErr: unknown = null;
+  for (let i = 0; i < 4; i++) {
+    const reference = makePurchaseRef();
+    const { data, error } = await supabase
+      .from("subscription_purchases")
+      .insert({
+        discord_id: user.discordId,
+        plan_id: plan.id,
+        plan_name: plan.nameFr,
+        price: plan.price,
+        points_earned: pointsEarned,
+        status: "paiement_initie",
+        reference,
+      })
+      .select("*")
+      .single();
+    if (!error && data) {
+      purchase = data as SubscriptionPurchaseRow;
+      break;
+    }
+    lastErr = error;
+    // 23505 = unique_violation (référence déjà prise) → on retente avec une nouvelle référence
+    if (error && (error as { code?: string }).code !== "23505") throw error;
+  }
+  if (!purchase) throw new Error(`Impossible d'enregistrer l'achat: ${String(lastErr)}`);
 
   const { data: updatedAccount, error: updErr } = await supabase
     .from("loyalty_accounts")
@@ -147,6 +176,73 @@ export async function recordSubscriptionPurchase(
 
   return {
     account: updatedAccount as LoyaltyAccountRow,
-    purchase: purchase as SubscriptionPurchaseRow,
+    purchase,
   };
+}
+
+/**
+ * Recherche un achat par sa référence (donnée par le client à un agent au
+ * guichet ou sur Discord) pour vérification avant attribution du billet.
+ */
+export async function findPurchaseByReference(reference: string): Promise<{
+  purchase: SubscriptionPurchaseRow;
+  account: LoyaltyAccountRow | null;
+} | null> {
+  const supabase = supabaseAdmin;
+  const ref = normalizeRef(reference);
+  const { data: purchase, error } = await supabase
+    .from("subscription_purchases")
+    .select("*")
+    .eq("reference", ref)
+    .maybeSingle();
+  if (error) throw error;
+  if (!purchase) return null;
+
+  const { data: account, error: accErr } = await supabase
+    .from("loyalty_accounts")
+    .select("*")
+    .eq("discord_id", (purchase as SubscriptionPurchaseRow).discord_id)
+    .maybeSingle();
+  if (accErr) throw accErr;
+
+  return {
+    purchase: purchase as SubscriptionPurchaseRow,
+    account: (account as LoyaltyAccountRow) ?? null,
+  };
+}
+
+/**
+ * Attribue le billet : un agent TTE valide la référence présentée par le
+ * client (après vérification du reçu de paiement) et marque l'achat comme
+ * délivré. Idempotent côté statut : refuse si déjà délivré ou annulé.
+ */
+export async function deliverPurchaseByReference(
+  reference: string,
+  agent: DiscordSessionUser,
+): Promise<
+  | { ok: true; purchase: SubscriptionPurchaseRow; account: LoyaltyAccountRow | null }
+  | { ok: false; reason: "not_found" | "already_delivered" | "cancelled" }
+> {
+  const found = await findPurchaseByReference(reference);
+  if (!found) return { ok: false, reason: "not_found" };
+  if (found.purchase.status === "delivre") return { ok: false, reason: "already_delivered" };
+  if (found.purchase.status === "annule") return { ok: false, reason: "cancelled" };
+
+  const supabase = supabaseAdmin;
+  const { data: updated, error } = await supabase
+    .from("subscription_purchases")
+    .update({
+      status: "delivre",
+      delivered_by_discord_id: agent.discordId,
+      delivered_by_username: agent.displayName || agent.username,
+      delivered_at: new Date().toISOString(),
+    })
+    .eq("id", found.purchase.id)
+    .eq("status", found.purchase.status) // évite une double-attribution en cas de course
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  if (!updated) return { ok: false, reason: "already_delivered" };
+
+  return { ok: true, purchase: updated as SubscriptionPurchaseRow, account: found.account };
 }
