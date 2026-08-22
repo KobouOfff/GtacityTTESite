@@ -121,12 +121,15 @@ export async function getLoyaltyAccountWithHistory(discordId: string): Promise<{
 
 /**
  * Enregistre l'intention d'achat d'un abonnement (déclenché quand le client
- * ouvre le terminal de paiement USB Pay) et crédite les points fidélité
- * correspondants sur son compte client.
+ * confirme avoir terminé son paiement dans le terminal USB Pay) et génère
+ * sa référence de suivi.
  *
- * Ne confirme pas le paiement lui-même — USB Pay n'a pas de webhook
- * disponible ici. La délivrance réelle de l'abonnement reste manuelle,
- * faite par un agent TTE après vérification du reçu, comme prévu.
+ * NE crédite PAS les points fidélité ici : USB Pay n'a pas de webhook
+ * disponible, donc rien ne prouve à ce stade que le paiement a réellement
+ * abouti. Les points ne sont crédités qu'à la délivrance du billet
+ * (voir deliverPurchaseByReference), une fois qu'un agent TTE a vérifié le
+ * reçu de paiement — ce qui évite qu'un client accumule des points ou une
+ * référence "valide" sans avoir payé.
  */
 export async function recordSubscriptionPurchase(
   user: DiscordSessionUser,
@@ -163,19 +166,10 @@ export async function recordSubscriptionPurchase(
   }
   if (!purchase) throw new Error(`Impossible d'enregistrer l'achat: ${String(lastErr)}`);
 
-  const { data: updatedAccount, error: updErr } = await supabase
-    .from("loyalty_accounts")
-    .update({
-      points: account.points + pointsEarned,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("discord_id", user.discordId)
-    .select("*")
-    .single();
-  if (updErr) throw updErr;
-
+  // Le compte fidélité n'est PAS modifié ici (voir commentaire ci-dessus) :
+  // on renvoie le solde actuel, inchangé.
   return {
-    account: updatedAccount as LoyaltyAccountRow,
+    account,
     purchase,
   };
 }
@@ -215,6 +209,12 @@ export async function findPurchaseByReference(reference: string): Promise<{
  * Attribue le billet : un agent TTE valide la référence présentée par le
  * client (après vérification du reçu de paiement) et marque l'achat comme
  * délivré. Idempotent côté statut : refuse si déjà délivré ou annulé.
+ *
+ * C'est ICI, et seulement ici, que les points fidélité sont crédités :
+ * la vérification du reçu par l'agent est la seule confirmation réelle du
+ * paiement dont on dispose (pas de webhook USB Pay). Un achat resté au
+ * statut "paiement_initie" (client qui a fermé la fenêtre sans payer, par
+ * exemple) ne crédite donc jamais de points.
  */
 export async function deliverPurchaseByReference(
   reference: string,
@@ -238,11 +238,27 @@ export async function deliverPurchaseByReference(
       delivered_at: new Date().toISOString(),
     })
     .eq("id", found.purchase.id)
-    .eq("status", found.purchase.status) // évite une double-attribution en cas de course
+    .eq("status", found.purchase.status) // évite une double-attribution (et un double crédit de points) en cas de course
     .select("*")
     .maybeSingle();
   if (error) throw error;
   if (!updated) return { ok: false, reason: "already_delivered" };
 
-  return { ok: true, purchase: updated as SubscriptionPurchaseRow, account: found.account };
+  // Crédite les points fidélité maintenant que l'agent a confirmé le paiement.
+  let updatedAccount = found.account;
+  if (found.account) {
+    const { data: creditedAccount, error: creditErr } = await supabase
+      .from("loyalty_accounts")
+      .update({
+        points: found.account.points + (updated as SubscriptionPurchaseRow).points_earned,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("discord_id", found.account.discord_id)
+      .select("*")
+      .single();
+    if (creditErr) throw creditErr;
+    updatedAccount = creditedAccount as LoyaltyAccountRow;
+  }
+
+  return { ok: true, purchase: updated as SubscriptionPurchaseRow, account: updatedAccount };
 }

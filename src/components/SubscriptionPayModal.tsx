@@ -7,11 +7,13 @@ export function SubscriptionPayModal({
   onClose,
   purchaseState,
   loyaltyResult,
+  onConfirmPaid,
 }: {
   plan: SubscriptionPlan;
   onClose: () => void;
-  purchaseState: "pending" | "success" | "error";
+  purchaseState: "idle" | "pending" | "success" | "error";
   loyaltyResult?: { account: LoyaltyAccountRow; purchase: SubscriptionPurchaseRow } | null;
+  onConfirmPaid: () => void;
 }) {
   return (
     <div
@@ -41,23 +43,18 @@ export function SubscriptionPayModal({
           </h3>
         </div>
 
-        {purchaseState === "error" ? (
+        {purchaseState === "error" && (
           <div className="usbpay-loyalty-status err">
             <T
-              fr="Impossible d'enregistrer votre commande pour le moment. Réessayez dans un instant."
-              en="Couldn't register your order right now. Please try again shortly."
+              fr="Impossible d'enregistrer votre demande pour le moment. Réessayez dans un instant."
+              en="Couldn't register your request right now. Please try again shortly."
             />
           </div>
-        ) : (
+        )}
+
+        {purchaseState === "pending" && (
           <div className="usbpay-loyalty-status ok">
-            {purchaseState === "pending" ? (
-              <T fr="Enregistrement de votre commande…" en="Registering your order…" />
-            ) : (
-              <T
-                fr={<>+{loyaltyResult?.purchase.points_earned ?? 0} points fidélité ajoutés à votre compte — solde : <b>{loyaltyResult?.account.points ?? 0} points</b>.</>}
-                en={<>+{loyaltyResult?.purchase.points_earned ?? 0} loyalty points added to your account — balance: <b>{loyaltyResult?.account.points ?? 0} points</b>.</>}
-              />
-            )}
+            <T fr="Enregistrement de votre demande…" en="Registering your request…" />
           </div>
         )}
 
@@ -69,8 +66,8 @@ export function SubscriptionPayModal({
             <div className="usbpay-reference-code">{loyaltyResult.purchase.reference}</div>
             <p>
               <T
-                fr={<>Présentez cette référence avec votre reçu de paiement à un agent TTE (guichet ou Discord) pour faire activer votre abonnement. Retrouvez-la à tout moment sur <a href="/mon-compte">votre compte</a>.</>}
-                en={<>Show this reference with your payment receipt to a TTE staff member (station desk or Discord) to activate your pass. You can find it anytime on <a href="/mon-compte">your account page</a>.</>}
+                fr={<>Présentez cette référence avec votre reçu de paiement à un agent TTE (guichet ou Discord) pour faire activer votre abonnement. Vos points fidélité seront crédités à ce moment-là. Retrouvez votre référence à tout moment sur <a href="/mon-compte">votre compte</a>.</>}
+                en={<>Show this reference with your payment receipt to a TTE staff member (station desk or Discord) to activate your pass. Your loyalty points will be credited at that point. You can find your reference anytime on <a href="/mon-compte">your account page</a>.</>}
               />
             </p>
           </div>
@@ -80,8 +77,8 @@ export function SubscriptionPayModal({
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
           <p>
             <T
-              fr={<><b>Le paiement en ligne ne délivre pas l'abonnement automatiquement.</b> Une fois le paiement effectué, contactez un agent TTE sur Discord ou présentez-vous à un guichet en gare avec votre reçu de paiement pour faire activer votre abonnement.</>}
-              en={<><b>Online payment does not deliver the pass automatically.</b> Once paid, contact a TTE staff member on Discord or come to a station ticket desk with your payment receipt so your pass can be activated.</>}
+              fr={<><b>Le paiement en ligne ne délivre pas l'abonnement automatiquement.</b> Une fois le paiement effectué ci-dessous, cliquez sur « J'ai terminé mon paiement » pour obtenir votre référence, puis contactez un agent TTE sur Discord ou présentez-vous à un guichet en gare avec votre reçu pour faire activer votre abonnement. <b>Aucun point fidélité n'est crédité avant cette vérification.</b></>}
+              en={<><b>Online payment does not deliver the pass automatically.</b> Once you've paid below, click "I've completed my payment" to get your reference, then contact a TTE staff member on Discord or come to a station ticket desk with your receipt so your pass can be activated. <b>No loyalty points are credited before that check.</b></>}
             />
           </p>
         </div>
@@ -101,6 +98,12 @@ export function SubscriptionPayModal({
             />
           </div>
         )}
+
+        {purchaseState === "idle" || purchaseState === "error" ? (
+          <button type="button" className="usbpay-confirm-btn" onClick={onConfirmPaid}>
+            <T fr="✓ J'ai terminé mon paiement" en="✓ I've completed my payment" />
+          </button>
+        ) : null}
       </div>
     </div>
   );

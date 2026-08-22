@@ -39,8 +39,8 @@ export default function AccueilPage() {
       setLoginPromptPlan(plan);
       return;
     }
+    purchaseMutation.reset();
     setActivePlan(plan);
-    purchaseMutation.mutate(plan.id);
   }
 
   const myPoints = loyaltyQuery.data?.ok ? loyaltyQuery.data.account?.points ?? 0 : null;
@@ -847,12 +847,15 @@ export default function AccueilPage() {
       <SubscriptionPayModal
         plan={activePlan}
         onClose={() => { setActivePlan(null); purchaseMutation.reset(); }}
+        onConfirmPaid={() => purchaseMutation.mutate(activePlan.id)}
         purchaseState={
           purchaseMutation.isError || (purchaseMutation.data && !purchaseMutation.data.ok)
             ? "error"
-            : purchaseMutation.isSuccess && purchaseMutation.data?.ok
-              ? "success"
-              : "pending"
+            : purchaseMutation.isPending
+              ? "pending"
+              : purchaseMutation.isSuccess && purchaseMutation.data?.ok
+                ? "success"
+                : "idle"
         }
         loyaltyResult={
           purchaseMutation.data?.ok
