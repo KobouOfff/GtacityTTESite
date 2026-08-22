@@ -35,7 +35,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     price: 10,
     descFr: "Trajets illimités pendant 24h sur l'ensemble du réseau.",
     descEn: "Unlimited journeys for 24h across the whole network.",
-    usbPayUrl: "", // TODO: coller le lien fixe USB Pay du pass 24h ($10)
+    usbPayUrl: "https://usbank.zyrion.dev/pay/cmt4zu1b30qb6ms016s5gsh1x",
   },
   {
     id: "7j",
@@ -44,7 +44,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     price: 75,
     descFr: "Sept jours de trajets illimités sur l'ensemble du réseau.",
     descEn: "Seven days of unlimited journeys across the whole network.",
-    usbPayUrl: "", // TODO: coller le lien fixe USB Pay du pass 7 jours ($75)
+    usbPayUrl: "https://usbank.zyrion.dev/pay/cmt4zucbc0qb8ms01dhd002kv",
   },
   {
     id: "30j",
@@ -53,6 +53,6 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     price: 275,
     descFr: "Trente jours de trajets illimités, pour les voyageurs réguliers.",
     descEn: "Thirty days of unlimited journeys, for regular travellers.",
-    usbPayUrl: "", // TODO: coller le lien fixe USB Pay du pass 30 jours ($275)
+    usbPayUrl: "https://usbank.zyrion.dev/pay/cmt4zulic0qbams01abi8przf",
   },
 ];
