@@ -88,9 +88,6 @@ function normalizeLabel(value: string) {
     .toLowerCase();
 }
 
-// Table de correspondance label normalisé -> clé, construite une seule fois.
-const NORMALIZED_LABELS = new Map(LABELS.map(({ label, key }) => [normalizeLabel(label), key]));
-
 function parseLegacyMessage(content: string): Record<string, string> {
   const found: Array<{ key: string; index: number; end: number }> = [];
   for (const { label, key } of LABELS) {
@@ -109,27 +106,33 @@ function parseLegacyMessage(content: string): Record<string, string> {
 }
 
 /**
- * Les anciens fils postaient le formulaire sous forme d'EMBED Discord
- * (titre + liste de champs name/value), pas en texte brut — c'est ce que
- * l'on voit en copiant le message affiché dans Discord. On extrait donc
- * en priorité les champs de l'embed ; le parsing en texte brut ne sert
- * que de repli si jamais un message a été posté sans embed.
+ * Les anciens fils postaient le formulaire sous forme d'EMBED Discord :
+ * chaque champ de l'embed correspond à une SECTION (ex: "🪪 1) État Civil")
+ * dont la valeur regroupe plusieurs labels ("Prénom(s) + Nom : ... Genre :
+ * ... Date de naissance : ..."), pas un champ = un label. On concatène donc
+ * tout le texte disponible (titre, description, tous les name+value des
+ * champs, et le content brut en repli) puis on cherche les labels dedans,
+ * peu importe comment le texte est découpé entre les champs de l'embed.
  */
 function extractLegacyFields(message: {
   content?: string;
-  embeds?: Array<{ fields?: Array<{ name?: string; value?: string }> }>;
+  embeds?: Array<{
+    title?: string;
+    description?: string;
+    fields?: Array<{ name?: string; value?: string }>;
+  }>;
 }): Record<string, string> {
-  const embedFields = message.embeds?.[0]?.fields;
-  if (embedFields && embedFields.length > 0) {
-    const values: Record<string, string> = {};
-    for (const f of embedFields) {
-      if (!f.name) continue;
-      const key = NORMALIZED_LABELS.get(normalizeLabel(f.name));
-      if (key) values[key] = (f.value ?? "").trim();
+  const parts: string[] = [];
+  if (message.content) parts.push(message.content);
+  for (const embed of message.embeds ?? []) {
+    if (embed.title) parts.push(embed.title);
+    if (embed.description) parts.push(embed.description);
+    for (const f of embed.fields ?? []) {
+      if (f.name) parts.push(f.name);
+      if (f.value) parts.push(f.value);
     }
-    if (Object.keys(values).length > 0) return values;
   }
-  return parseLegacyMessage(message.content ?? "");
+  return parseLegacyMessage(parts.join("\n"));
 }
 
 function splitNomComplet(nomComplet: string): { prenom: string | null; nom: string | null } {
