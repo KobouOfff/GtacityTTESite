@@ -271,7 +271,17 @@ function EditorPanel({
         },
       }),
     onSuccess: (res) => {
-      if (res.ok) onSaved();
+      if (!res.ok) return;
+      if (res.discordSync === "failed") {
+        alert(
+          "Le dossier RH est bien enregistré, mais la synchro du fil Discord a échoué. Vérifiez le salon et les permissions du bot.",
+        );
+      } else if (res.discordSync === "skipped") {
+        alert(
+          "Le dossier RH est bien enregistré. La synchro Discord n'est pas configurée : ajoutez DISCORD_HR_CHANNEL_ID dans Vercel.",
+        );
+      }
+      onSaved();
     },
   });
 

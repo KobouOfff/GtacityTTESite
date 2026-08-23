@@ -48,6 +48,9 @@ export type HrEmployeeFileRow = {
   updated_by_discord_id: string | null;
   updated_by_username: string | null;
 
+  discord_thread_id: string | null;
+  discord_summary_message_id: string | null;
+
   created_at: string;
   updated_at: string;
 };
@@ -128,4 +131,20 @@ export async function upsertHrFile(
     .single();
   if (error) throw error;
   return data as HrEmployeeFileRow;
+}
+
+/** Persiste l'ID du fil Discord + du message récap après une synchro réussie. */
+export async function setHrFileDiscordIds(
+  id: string,
+  discordThreadId: string,
+  discordSummaryMessageId: string,
+): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabaseAdmin.from("hr_employee_files" as any) as any)
+    .update({
+      discord_thread_id: discordThreadId,
+      discord_summary_message_id: discordSummaryMessageId,
+    })
+    .eq("id", id);
+  if (error) throw error;
 }

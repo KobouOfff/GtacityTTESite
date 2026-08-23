@@ -108,13 +108,22 @@ export const saveHrFile = createServerFn({ method: "POST" })
     }
 
     try {
-      const { upsertHrFile } = await import("./hr-files.server");
+      const { upsertHrFile, setHrFileDiscordIds } = await import("./hr-files.server");
       const row = await upsertHrFile(
         { discordId: data.discordId, username: data.username, displayName: data.displayName },
         user,
         data.patch,
       );
-      return { ok: true as const, row: row as HrEmployeeFileRow };
+
+      const { syncHrFileToDiscord } = await import("./hr-files-discord.server");
+      const discordSync = await syncHrFileToDiscord(row);
+      if (discordSync.status === "sent") {
+        await setHrFileDiscordIds(row.id, discordSync.threadId, discordSync.messageId);
+        row.discord_thread_id = discordSync.threadId;
+        row.discord_summary_message_id = discordSync.messageId;
+      }
+
+      return { ok: true as const, row: row as HrEmployeeFileRow, discordSync: discordSync.status };
     } catch (e) {
       console.error("[saveHrFile]", e);
       return { ok: false as const, reason: "save_failed" as const };
