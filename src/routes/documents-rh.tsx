@@ -6,7 +6,13 @@ import { canManageHrFiles, type DiscordSessionUser } from "@/lib/discord-roles";
 import { getMyHrFile, listAllHrFilesFn, getHrFileForEmployee, saveHrFile, importLegacyHrThreadsFn } from "@/lib/hr-files.functions";
 import type { HrEmployeeFileRow, HrEmployeeFilePatch } from "@/lib/hr-files.server";
 import type { LegacyImportReport } from "@/lib/hr-files-legacy-import.server";
-import { listHrWarningsFn, addHrWarningFn, deleteHrWarningFn, uploadHrWarningAttachmentFn } from "@/lib/hr-warnings.functions";
+import {
+  listHrWarningsFn,
+  addHrWarningFn,
+  deleteHrWarningFn,
+  uploadHrWarningAttachmentFn,
+  listHrWarningSummariesFn,
+} from "@/lib/hr-warnings.functions";
 import type { HrWarningType } from "@/lib/hr-warnings.server";
 
 const BRAND = "#4B92DD";
@@ -105,6 +111,12 @@ function RhView({ user }: { user: DiscordSessionUser }) {
     queryKey: ["hr-files-all"],
     queryFn: () => listAllHrFilesFn(),
   });
+
+  const { data: warningsData } = useQuery({
+    queryKey: ["hr-warnings-summaries"],
+    queryFn: () => listHrWarningSummariesFn(),
+  });
+  const warningSummaries = warningsData?.ok ? warningsData.summaries : {};
 
   const legacyImport = useMutation({
     mutationFn: () => importLegacyHrThreadsFn(),
@@ -259,6 +271,7 @@ function RhView({ user }: { user: DiscordSessionUser }) {
           ) : (
             employees.map((e) => {
               const file = filesByDiscordId.get(e.discordId);
+              const warnings = warningSummaries[e.discordId];
               return (
                 <div key={e.discordId} className="tte-card" style={{ ...card, display: "flex", alignItems: "center", gap: 14, justifyContent: "space-between", flexWrap: "wrap" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
@@ -266,7 +279,24 @@ function RhView({ user }: { user: DiscordSessionUser }) {
                       {(e.name || e.email)[0]?.toUpperCase()}
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: 14.5 }}>{e.name || e.email}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                        <span style={{ fontWeight: 700, fontSize: 14.5 }}>{e.name || e.email}</span>
+                        {warnings && (
+                          <span
+                            title={`${warnings.count} entrée(s) au registre disciplinaire`}
+                            style={{
+                              ...pill,
+                              padding: "2px 8px",
+                              fontSize: 11,
+                              color: warnings.hasSevere ? "#F87171" : "#FBBF24",
+                              borderColor: warnings.hasSevere ? "rgba(239,68,68,0.35)" : "rgba(245,158,11,0.3)",
+                              background: warnings.hasSevere ? "rgba(239,68,68,0.14)" : "rgba(245,158,11,0.1)",
+                            }}
+                          >
+                            ⚠️ {warnings.count}
+                          </span>
+                        )}
+                      </div>
                       <div style={{ fontSize: 12, ...muted }}>{e.email}</div>
                     </div>
                   </div>

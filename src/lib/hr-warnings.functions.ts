@@ -39,6 +39,25 @@ export const listHrWarningsFn = createServerFn({ method: "GET" })
     }
   });
 
+/**
+ * Résumé (nombre d'entrées + présence d'un blâme/sanction) du registre de
+ * chaque employé, pour l'annuaire RH. Réservé à la RH / Direction.
+ */
+export const listHrWarningSummariesFn = createServerFn({ method: "GET" }).handler(async () => {
+  const user = await currentUser();
+  if (!user) return { ok: false as const, reason: "not_logged_in" as const };
+  if (!canManageHrFiles(user)) return { ok: false as const, reason: "forbidden" as const };
+
+  try {
+    const { listHrWarningSummaries } = await import("./hr-warnings.server");
+    const summaries = await listHrWarningSummaries();
+    return { ok: true as const, summaries };
+  } catch (e) {
+    console.error("[listHrWarningSummariesFn]", e);
+    return { ok: false as const, reason: "read_failed" as const };
+  }
+});
+
 export const uploadHrWarningAttachmentFn = createServerFn({ method: "POST" })
   .validator((data: { base64: string; mimeType: string; filename: string }) => data)
   .handler(async ({ data }) => {

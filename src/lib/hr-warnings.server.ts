@@ -72,6 +72,34 @@ export async function listHrWarnings(employeeDiscordId: string): Promise<HrWarni
   return Promise.all(rows.map(withAttachmentUrl));
 }
 
+export type HrWarningSummary = {
+  count: number;
+  /** true si au moins une entrée est de type "blame" ou "sanction". */
+  hasSevere: boolean;
+};
+
+/**
+ * Résumé (nombre d'entrées + présence d'un blâme/sanction) du registre de
+ * chaque employé ayant au moins une entrée. Utilisé pour afficher un badge
+ * dans l'annuaire RH sans devoir charger le détail de chaque registre.
+ */
+export async function listHrWarningSummaries(): Promise<Record<string, HrWarningSummary>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabaseAdmin.from("hr_employee_warnings" as any) as any).select(
+    "employee_discord_id, type",
+  );
+  if (error) throw error;
+  const rows = (data ?? []) as Array<{ employee_discord_id: string; type: HrWarningType }>;
+  const summaries: Record<string, HrWarningSummary> = {};
+  for (const row of rows) {
+    const existing = summaries[row.employee_discord_id] ?? { count: 0, hasSevere: false };
+    existing.count += 1;
+    if (row.type === "blame" || row.type === "sanction") existing.hasSevere = true;
+    summaries[row.employee_discord_id] = existing;
+  }
+  return summaries;
+}
+
 export async function addHrWarning(
   actor: DiscordSessionUser,
   payload: CreateHrWarningPayload,
