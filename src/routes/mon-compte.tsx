@@ -11,16 +11,16 @@ import type { RewardClaimRow, RewardTier, RewardTierId } from "@/lib/rewards.ser
  * Palette "bleu ferroviaire sombre"
  * ------------------------------------------------------------------ */
 const C = {
-  bg: "#0B1220",
-  bg2: "#111C2E",
-  line: "rgba(255,255,255,0.09)",
-  text: "#E2E8F0",
-  muted: "#93A4BC",
+  bg: "var(--tte-bg)",
+  bg2: "var(--tte-bg2)",
+  line: "rgba(var(--tte-overlay),0.09)",
+  text: "var(--tte-text)",
+  muted: "var(--tte-muted)",
   accent: "#4B92DD",
   accentSoft: "rgba(75,146,221,0.12)",
   ok: "#34D399",
   warn: "#FBBF24",
-  off: "#7C8CA5",
+  off: "var(--tte-muted)",
   danger: "#F87171",
 };
 
@@ -408,7 +408,7 @@ function RewardTierCard({
         <p style={{ ...mutedText, margin: "6px 0 0", fontSize: 12.5, lineHeight: 1.5 }}>{tier.description}</p>
       </div>
 
-      <div style={{ height: 7, borderRadius: 999, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+      <div style={{ height: 7, borderRadius: 999, background: "rgba(var(--tte-overlay),0.06)", overflow: "hidden" }}>
         <div
           style={{
             height: "100%",
@@ -579,7 +579,7 @@ const page: React.CSSProperties = {
 };
 const topbar: React.CSSProperties = {
   borderBottom: `1px solid ${C.line}`,
-  background: "rgba(11,18,32,0.75)",
+  background: "rgba(var(--tte-bg-rgb),0.75)",
   backdropFilter: "blur(10px)",
   position: "sticky",
   top: 0,
@@ -616,7 +616,7 @@ const navLink: React.CSSProperties = {
   borderRadius: 8,
 };
 const card: React.CSSProperties = {
-  background: `linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015))`,
+  background: `linear-gradient(180deg, rgba(var(--tte-overlay),0.045), rgba(var(--tte-overlay),0.015))`,
   border: `1px solid ${C.line}`,
   borderRadius: 16,
   padding: "18px 20px",
@@ -670,7 +670,7 @@ const statCard: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: 12,
-  background: "rgba(255,255,255,0.035)",
+  background: "rgba(var(--tte-overlay),0.035)",
   border: `1px solid ${C.line}`,
   borderRadius: 13,
   padding: "13px 15px",
@@ -694,7 +694,7 @@ const notice: React.CSSProperties = {
   borderRadius: 14,
   padding: "14px 16px",
   fontSize: 13.5,
-  color: "#CBD8E8",
+  color: "var(--tte-muted)",
 };
 const sectionHead: React.CSSProperties = {
   display: "flex",
@@ -713,7 +713,7 @@ const countPill: React.CSSProperties = {
 };
 const ticketCard: React.CSSProperties = {
   position: "relative",
-  background: `linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015))`,
+  background: `linear-gradient(180deg, rgba(var(--tte-overlay),0.05), rgba(var(--tte-overlay),0.015))`,
   border: `1px solid ${C.line}`,
   borderRadius: 16,
   overflow: "hidden",
@@ -734,7 +734,7 @@ const perfRow: React.CSSProperties = {
 const perfLine: React.CSSProperties = {
   display: "block",
   height: 1,
-  background: "repeating-linear-gradient(90deg, rgba(255,255,255,0.22) 0 6px, transparent 6px 12px)",
+  background: "repeating-linear-gradient(90deg, rgba(var(--tte-overlay),0.22) 0 6px, transparent 6px 12px)",
 };
 const perfNotch: React.CSSProperties = {
   position: "absolute",
@@ -749,7 +749,7 @@ const metaChip: React.CSSProperties = {
   fontSize: 12,
   fontWeight: 600,
   color: C.muted,
-  background: "rgba(255,255,255,0.04)",
+  background: "rgba(var(--tte-overlay),0.04)",
   border: `1px solid ${C.line}`,
   borderRadius: 999,
   padding: "3px 10px",
@@ -782,7 +782,7 @@ const btnGhost: React.CSSProperties = {
   alignItems: "center",
   gap: 8,
   padding: "9px 15px",
-  background: "rgba(255,255,255,0.05)",
+  background: "rgba(var(--tte-overlay),0.05)",
   color: C.text,
   border: `1px solid ${C.line}`,
   borderRadius: 10,
@@ -824,15 +824,15 @@ const css = `
 @keyframes tte-spin { to { transform: rotate(360deg); } }
 @keyframes tte-pulse { 0%,100% { opacity: .45 } 50% { opacity: .8 } }
 .tte-skeleton {
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.07);
+  background: linear-gradient(180deg, rgba(var(--tte-overlay),0.06), rgba(var(--tte-overlay),0.02));
+  border: 1px solid rgba(var(--tte-overlay),0.07);
   animation: tte-pulse 1.4s ease-in-out infinite;
 }
 .tte-btn { transition: background .18s ease, transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-.tte-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); border-color: rgba(75,146,221,0.5); }
+.tte-btn:hover { background: rgba(var(--tte-overlay),0.1); transform: translateY(-1px); border-color: rgba(75,146,221,0.5); }
 .tte-btn:disabled { opacity: .6; cursor: default; transform: none; }
 .tte-navlink { transition: color .18s ease, background .18s ease; }
-.tte-navlink:hover { color: #E2E8F0; background: rgba(255,255,255,0.06); }
+.tte-navlink:hover { color: var(--tte-text); background: rgba(var(--tte-overlay),0.06); }
 .tte-card { transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
 .tte-card:hover { transform: translateY(-2px); border-color: rgba(75,146,221,0.35); box-shadow: 0 18px 40px -28px rgba(0,0,0,0.9); }
 @media (prefers-reduced-motion: reduce) {

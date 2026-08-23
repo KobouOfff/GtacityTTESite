@@ -142,7 +142,7 @@ function SuiviBody({ user }: { user: DiscordSessionUser }) {
               </span>
             </h1>
             <p style={{ ...muted, margin: 0, maxWidth: 560, lineHeight: 1.65 }}>
-              Bonjour <b style={{ color: "#e2e8f0" }}>{user.displayName || user.username}</b>, gère ici les demandes clients,
+              Bonjour <b style={{ color: "var(--tte-text)" }}>{user.displayName || user.username}</b>, gère ici les demandes clients,
               assigne-les aux bonnes branches et suis les échanges en temps réel.
             </p>
           </div>
@@ -159,10 +159,10 @@ function SuiviBody({ user }: { user: DiscordSessionUser }) {
 
         {total > 0 && (
           <div style={statRow}>
-            <Stat label="Total" value={total} color="#e2e8f0" icon="🗂" />
+            <Stat label="Total" value={total} color="var(--tte-text)" icon="🗂" />
             <Stat label="Actives" value={openCount} color={BRAND} icon="⏳" />
             <Stat label="Résolues" value={resolvedCount} color="#22c55e" icon="✓" />
-            <Stat label="Fermées" value={closedCount} color="#94a3b8" icon="✕" />
+            <Stat label="Fermées" value={closedCount} color="var(--tte-muted)" icon="✕" />
           </div>
         )}
       </section>
@@ -289,7 +289,7 @@ function RequestCard({
     onError: (e) => alert("Erreur : " + String(e)),
   });
 
-  const st = CONTACT_STATUSES[row.status] ?? { label: row.status, color: "#64748b" };
+  const st = CONTACT_STATUSES[row.status] ?? { label: row.status, color: "var(--tte-muted)" };
   const bc = getBranchColor(row.assigned_branch);
   const publicMessages = row.messages?.filter((m) => m.visibility === "public") ?? [];
   const internalMessages = row.messages?.filter((m) => m.visibility === "internal") ?? [];
@@ -313,12 +313,12 @@ function RequestCard({
         >
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-              <div style={{ fontSize: 11, color: "#7c8db0", fontFamily: "ui-monospace, monospace", letterSpacing: 0.6 }}>{row.ref}</div>
+              <div style={{ fontSize: 11, color: "var(--tte-muted)", fontFamily: "ui-monospace, monospace", letterSpacing: 0.6 }}>{row.ref}</div>
               <span style={tag}>{CONTACT_CATEGORIES[row.category] ?? row.category}</span>
             </div>
             <div style={{ fontWeight: 700, fontSize: 17, marginTop: 5, letterSpacing: -0.3 }}>{row.subject}</div>
             <div style={{ ...muted, marginTop: 6, fontSize: 13, lineHeight: 1.5 }}>
-              Par <b style={{ color: "#e2e8f0" }}>{row.requester_display_name || row.requester_username}</b> (@{row.requester_username}) ·
+              Par <b style={{ color: "var(--tte-text)" }}>{row.requester_display_name || row.requester_username}</b> (@{row.requester_username}) ·
               déposée le {new Date(row.created_at).toLocaleString("fr-FR")}
             </div>
           </div>
@@ -332,7 +332,7 @@ function RequestCard({
                 → {getBranchLabel(row.assigned_branch)}
               </span>
             ) : (
-              <span style={{ ...pill, background: "rgba(148,163,184,0.12)", color: "#94a3b8", borderColor: "rgba(148,163,184,0.3)" }}>
+              <span style={{ ...pill, background: "rgba(148,163,184,0.12)", color: "var(--tte-muted)", borderColor: "rgba(148,163,184,0.3)" }}>
                 Non assignée
               </span>
             )}
@@ -384,16 +384,16 @@ function RequestCard({
                 <div style={{ display: "grid", gap: 8 }}>
                   {internalMessages.map((m) => (
                     <div key={m.id} style={{ background: "rgba(245,158,11,0.08)", borderRadius: 10, padding: "10px 12px", fontSize: 13 }}>
-                      <div style={{ fontSize: 12, color: "#94a3b8" }}>
+                      <div style={{ fontSize: 12, color: "var(--tte-muted)" }}>
                         <b style={{ color: "#fde68a" }}>{m.author_name}</b> · {new Date(m.created_at).toLocaleString("fr-FR")}
                       </div>
                       <div style={{ marginTop: 4, whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{m.message}</div>
                     </div>
                   ))}
                   {internalMessages.length === 0 && row.notes?.map((n, i) => (
-                    <div key={i} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "10px 12px", fontSize: 13 }}>
-                      <div style={{ fontSize: 12, color: "#94a3b8" }}>
-                        <b style={{ color: "#e2e8f0" }}>{n.author}</b> · {new Date(n.at).toLocaleString("fr-FR")}
+                    <div key={i} style={{ background: "rgba(var(--tte-overlay),0.04)", borderRadius: 10, padding: "10px 12px", fontSize: 13 }}>
+                      <div style={{ fontSize: 12, color: "var(--tte-muted)" }}>
+                        <b style={{ color: "var(--tte-text)" }}>{n.author}</b> · {new Date(n.at).toLocaleString("fr-FR")}
                       </div>
                       <div style={{ marginTop: 4, whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{n.message}</div>
                     </div>
@@ -402,7 +402,7 @@ function RequestCard({
               </div>
             )}
 
-            <div style={{ borderTop: "1px dashed rgba(255,255,255,0.1)", paddingTop: 16, display: "grid", gap: 12 }}>
+            <div style={{ borderTop: "1px dashed rgba(var(--tte-overlay),0.1)", paddingTop: 16, display: "grid", gap: 12 }}>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, ...muted, flex: 1, minWidth: 180 }}>
                   Statut
@@ -525,8 +525,8 @@ function ConversationBubble({
           maxWidth: "min(560px, 82%)",
         }}
       >
-        <div style={{ fontSize: 11.5, color: "#94a3b8" }}>
-          <b style={{ color: "#e2e8f0" }}>{author}</b> · {new Date(at).toLocaleString("fr-FR")}
+        <div style={{ fontSize: 11.5, color: "var(--tte-muted)" }}>
+          <b style={{ color: "var(--tte-text)" }}>{author}</b> · {new Date(at).toLocaleString("fr-FR")}
         </div>
         <div style={{ marginTop: 5, whiteSpace: "pre-wrap", lineHeight: 1.55, fontSize: 14.5 }}>{message}</div>
       </div>
@@ -549,7 +549,7 @@ function Spinner() {
         width: 14,
         height: 14,
         borderRadius: "50%",
-        border: "2px solid rgba(255,255,255,0.15)",
+        border: "2px solid rgba(var(--tte-overlay),0.15)",
         borderTopColor: BRAND,
         display: "inline-block",
         animation: "tte-spin 0.8s linear infinite",
@@ -563,27 +563,27 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div
       style={{
         minHeight: "100vh",
-        background: "radial-gradient(1000px 500px at 15% -10%, rgba(75,146,221,0.18), transparent 60%), #0b1220",
-        color: "#f1f5f9",
+        background: "radial-gradient(1000px 500px at 15% -10%, rgba(75,146,221,0.18), transparent 60%), var(--tte-bg)",
+        color: "var(--tte-heading)",
         fontFamily: "system-ui, sans-serif",
       }}
     >
       <style>{css}</style>
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid rgba(var(--tte-overlay),0.07)",
           padding: "14px 22px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          background: "rgba(11,18,32,0.72)",
+          background: "rgba(var(--tte-bg-rgb),0.72)",
           backdropFilter: "blur(10px)",
           position: "sticky",
           top: 0,
           zIndex: 10,
         }}
       >
-        <a href="/" style={{ color: "#f1f5f9", textDecoration: "none", fontWeight: 800, letterSpacing: -0.5 }}>
+        <a href="/" style={{ color: "var(--tte-heading)", textDecoration: "none", fontWeight: 800, letterSpacing: -0.5 }}>
           <span style={{ color: BRAND }}>TTE</span> · Direction · Suivi des demandes
         </a>
         <nav style={{ display: "flex", gap: 16, fontSize: 13 }}>
@@ -603,7 +603,7 @@ const css = `
 @keyframes tte-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes tte-shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
 .tte-shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+  background: linear-gradient(90deg, rgba(var(--tte-overlay),0.02), rgba(var(--tte-overlay),0.07), rgba(var(--tte-overlay),0.02));
   background-size: 800px 100%;
   animation: tte-shimmer 1.3s linear infinite;
 }
@@ -613,16 +613,16 @@ const css = `
 .tte-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
 .tte-btn:active:not(:disabled) { transform: translateY(0); }
 .tte-link { transition: color .18s ease; }
-.tte-link:hover { color: #f1f5f9 !important; }
+.tte-link:hover { color: var(--tte-heading) !important; }
 .tte-input { transition: border-color .2s ease, box-shadow .2s ease; outline: none; }
 .tte-input:focus { border-color: rgba(75,146,221,0.6); box-shadow: 0 0 0 3px rgba(75,146,221,0.15); }
 `;
 
-const muted: React.CSSProperties = { color: "#94a3b8" };
-const navLink: React.CSSProperties = { color: "#94a3b8", textDecoration: "none" };
+const muted: React.CSSProperties = { color: "var(--tte-muted)" };
+const navLink: React.CSSProperties = { color: "var(--tte-muted)", textDecoration: "none" };
 const card: React.CSSProperties = {
-  background: "rgba(255,255,255,0.035)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(var(--tte-overlay),0.035)",
+  border: "1px solid rgba(var(--tte-overlay),0.08)",
   borderRadius: 16,
   padding: "16px 18px",
 };
@@ -630,8 +630,8 @@ const hero: React.CSSProperties = {
   position: "relative",
   overflow: "hidden",
   borderRadius: 20,
-  border: "1px solid rgba(255,255,255,0.08)",
-  background: "linear-gradient(160deg, rgba(75,146,221,0.16), rgba(255,255,255,0.02) 55%)",
+  border: "1px solid rgba(var(--tte-overlay),0.08)",
+  background: "linear-gradient(160deg, rgba(75,146,221,0.16), rgba(var(--tte-overlay),0.02) 55%)",
   padding: "26px 24px",
 };
 const heroGlow: React.CSSProperties = {
@@ -647,7 +647,7 @@ const heroGrid: React.CSSProperties = {
   position: "absolute",
   inset: 0,
   backgroundImage:
-    "linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)",
+    "linear-gradient(rgba(var(--tte-overlay),0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--tte-overlay),0.035) 1px, transparent 1px)",
   backgroundSize: "34px 34px",
   maskImage: "radial-gradient(120% 90% at 20% 0%, #000, transparent 70%)",
   WebkitMaskImage: "radial-gradient(120% 90% at 20% 0%, #000, transparent 70%)",
@@ -669,8 +669,8 @@ const statRow: React.CSSProperties = {
 };
 const statBox: React.CSSProperties = {
   flex: "1 1 120px",
-  background: "linear-gradient(160deg, rgba(255,255,255,0.06), rgba(0,0,0,0.28))",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "linear-gradient(160deg, rgba(var(--tte-overlay),0.06), rgba(0,0,0,0.28))",
+  border: "1px solid rgba(var(--tte-overlay),0.08)",
   borderRadius: 14,
   padding: "12px 15px",
   display: "flex",
@@ -685,8 +685,8 @@ const statIcon: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   fontSize: 15,
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(var(--tte-overlay),0.05)",
+  border: "1px solid rgba(var(--tte-overlay),0.08)",
   flexShrink: 0,
 };
 const toolbar: React.CSSProperties = {
@@ -695,8 +695,8 @@ const toolbar: React.CSSProperties = {
   alignItems: "center",
   flexWrap: "wrap",
   justifyContent: "space-between",
-  background: "rgba(255,255,255,0.03)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(var(--tte-overlay),0.03)",
+  border: "1px solid rgba(var(--tte-overlay),0.08)",
   borderRadius: 16,
   padding: "12px 14px",
 };
@@ -757,9 +757,9 @@ const btnPrimary: React.CSSProperties = {
 };
 const btnGhost: React.CSSProperties = {
   padding: "9px 15px",
-  background: "rgba(255,255,255,0.05)",
-  color: "#e2e8f0",
-  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(var(--tte-overlay),0.05)",
+  color: "var(--tte-text)",
+  border: "1px solid rgba(var(--tte-overlay),0.12)",
   borderRadius: 10,
   fontSize: 13,
   cursor: "pointer",
@@ -768,8 +768,8 @@ const btnGhost: React.CSSProperties = {
 const selectStyle: React.CSSProperties = {
   padding: "9px 12px",
   background: "rgba(0,0,0,0.3)",
-  color: "#f1f5f9",
-  border: "1px solid rgba(255,255,255,0.13)",
+  color: "var(--tte-heading)",
+  border: "1px solid rgba(var(--tte-overlay),0.13)",
   borderRadius: 10,
   fontSize: 13.5,
 };
