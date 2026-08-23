@@ -100,7 +100,7 @@ export default function EspaceEmployesPage() {
               )}
               <button type="button" className="tool-btn">Planning &amp; roulements</button>
               <button type="button" className="tool-btn">Fiches de service</button>
-              <button type="button" className="tool-btn">Documents RH</button>
+              <a href="/documents-rh" className="tool-btn" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>Documents RH</a>
             </div>
 
             <div className="discord-tip">
