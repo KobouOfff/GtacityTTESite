@@ -95,6 +95,15 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* "Bleu ferroviaire" app pages (mon-compte, mes-demandes, suivi-demandes) */
+  --tte-bg: #F3F6FB;
+  --tte-bg2: #FFFFFF;
+  --tte-bg-rgb: 243, 246, 251;
+  --tte-text: #1E293B;
+  --tte-heading: #0B1220;
+  --tte-muted: #64748B;
+  --tte-overlay: 15, 23, 42;
 }
 
 .dark {
@@ -130,6 +139,15 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+
+  /* "Bleu ferroviaire" app pages (mon-compte, mes-demandes, suivi-demandes) */
+  --tte-bg: #0B1220;
+  --tte-bg2: #111C2E;
+  --tte-bg-rgb: 11, 18, 32;
+  --tte-text: #E2E8F0;
+  --tte-heading: #F1F5F9;
+  --tte-muted: #94A3B8;
+  --tte-overlay: 255, 255, 255;
 }
 
 @layer base {
