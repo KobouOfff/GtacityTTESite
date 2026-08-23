@@ -36,6 +36,18 @@ const REWARD_STATUS: Record<string, { label: string; color: string; dot: string 
   annule: { label: "Annulée", color: C.off, dot: C.off },
 };
 
+// Tolérance réseau : le client peut circuler pendant 24h après son achat en
+// attendant l'attribution du billet par un agent. Passé ce délai sans
+// attribution, il n'est plus autorisé à circuler tant que le billet n'est
+// pas validé.
+const NETWORK_TOLERANCE_MS = 24 * 60 * 60 * 1000;
+
+function getToleranceInfo(row: SubscriptionPurchaseRow): { deadline: Date; expired: boolean } | null {
+  if (row.status !== "paiement_initie") return null;
+  const deadline = new Date(new Date(row.created_at).getTime() + NETWORK_TOLERANCE_MS);
+  return { deadline, expired: Date.now() > deadline.getTime() };
+}
+
 /* ------------------------------------------------------------------ *
  * Page
  * ------------------------------------------------------------------ */
@@ -153,8 +165,10 @@ function MonComptePage() {
       <aside style={notice}>
         <Icon name="info" size={18} />
         <p style={{ margin: 0, lineHeight: 1.6 }}>
-          Après un paiement en ligne, présente la <b style={{ color: C.text }}>référence</b> de ton achat à un agent TTE
-          (guichet en gare ou Discord) avec ton reçu de paiement pour faire attribuer ton billet.
+          Après un paiement en ligne, tu bénéficies d'une <b style={{ color: C.text }}>tolérance de 24h</b> pour circuler sur le
+          réseau le temps de faire attribuer ton billet. Présente la <b style={{ color: C.text }}>référence</b> de ton achat à un
+          agent TTE (guichet en gare ou Discord) avec ton reçu de paiement avant l'expiration de ce délai — passé les 24h et sans
+          billet attribué, tu ne peux plus circuler sur le réseau.
         </p>
       </aside>
 
@@ -258,6 +272,7 @@ function MonComptePage() {
 function PurchaseCard({ row }: { row: SubscriptionPurchaseRow }) {
   const status = STATUS[row.status] ?? { label: row.status, color: C.off, dot: C.off };
   const [copied, setCopied] = useState(false);
+  const tolerance = getToleranceInfo(row);
 
   const copy = async () => {
     try {
@@ -298,6 +313,28 @@ function PurchaseCard({ row }: { row: SubscriptionPurchaseRow }) {
           </span>
         </header>
       </div>
+
+      {tolerance && (
+        <div style={{ padding: "0 20px 14px" }}>
+          {tolerance.expired ? (
+            <div style={{ ...notice, background: "rgba(248,113,113,0.1)", borderColor: "rgba(248,113,113,0.35)", color: "#FCA5A5", padding: "10px 12px", fontSize: 12.5 }}>
+              <Icon name="alert" size={16} />
+              <span style={{ margin: 0 }}>
+                Tolérance de 24h dépassée depuis le {tolerance.deadline.toLocaleString("fr-FR")} — tu ne peux plus circuler sur le
+                réseau tant que ce billet n'est pas attribué par un agent.
+              </span>
+            </div>
+          ) : (
+            <div style={{ ...notice, padding: "10px 12px", fontSize: 12.5 }}>
+              <Icon name="clock" size={16} />
+              <span style={{ margin: 0 }}>
+                Tolérance réseau valable jusqu'au {tolerance.deadline.toLocaleString("fr-FR")} — fais attribuer ton billet avant
+                cette échéance.
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* perforation de billet */}
       <div style={perfRow} aria-hidden="true">

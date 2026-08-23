@@ -18,6 +18,11 @@ const SEARCH_ERRORS: Record<string, string> = {
   read_failed: "Erreur serveur pendant la recherche, réessaie.",
 };
 
+// Le client bénéficie d'une tolérance de 24h après son achat pour circuler
+// sur le réseau en attendant l'attribution ; passé ce délai il n'est plus
+// censé circuler sans billet attribué.
+const NETWORK_TOLERANCE_MS = 24 * 60 * 60 * 1000;
+
 const DELIVER_ERRORS: Record<string, string> = {
   not_logged_in: "Session Discord expirée, reconnecte-toi.",
   forbidden: "Tu n'as pas les droits pour attribuer un billet.",
@@ -66,6 +71,10 @@ export default function BilletsPanel({ onClose }: { onClose: () => void }) {
   const account = result?.account;
   const status = purchase ? (STATUS_LABELS[purchase.status] ?? { label: purchase.status, color: "#64748b" }) : null;
   const canDeliver = purchase && purchase.status === "paiement_initie" && !delivered;
+  const toleranceExpired =
+    purchase &&
+    purchase.status === "paiement_initie" &&
+    Date.now() - new Date(purchase.created_at).getTime() > NETWORK_TOLERANCE_MS;
 
   return (
     <div
@@ -147,6 +156,13 @@ export default function BilletsPanel({ onClose }: { onClose: () => void }) {
 
               {purchase.status === "annule" && (
                 <div className="bp-msg bp-msg-warn">Cet achat a été annulé.</div>
+              )}
+
+              {toleranceExpired && (
+                <div className="bp-msg bp-msg-err">
+                  ⚠ Achat de plus de 24h : la tolérance réseau est dépassée. Ce client ne doit plus circuler sur le réseau tant
+                  que le billet n'est pas attribué.
+                </div>
               )}
 
               {canDeliver && (
