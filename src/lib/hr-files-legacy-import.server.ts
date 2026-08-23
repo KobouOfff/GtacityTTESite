@@ -26,8 +26,18 @@ export type LegacyImportReport = {
   linkedOnly: string[]; // dossier déjà en base, juste relié à son fil
   alreadyLinked: string[]; // dossier déjà relié et déjà rempli, rien à faire
   unmatched: string[]; // nom du fil non retrouvé dans l'annuaire employés
-  parseFailed: string[]; // fil dont le message n'a pas pu être lu/parsé
+  parseFailed: string[]; // fil dont le message n'a pas pu être lu/parsé (label + raison, ex: "Dossier RH - X (0/20 labels trouvés)")
 };
+
+// Espaces "spéciaux" que Discord / le clavier FR peuvent insérer autour des
+// ":" (espace insécable, espace fine insécable, etc.) : on les normalise en
+// espace normal AVANT de chercher les labels, sinon un simple "Nom :" tapé
+// avec une espace insécable ne matche jamais "Nom :" (espace normale) et
+// TOUS les fils (même le Modèle) finissent en "Message illisible / erreur"
+// sans qu'on sache pourquoi.
+function normalizeSpaces(value: string): string {
+  return value.replace(/[\u00A0\u202F\u2007\u2060]/g, " ");
+}
 
 function normalizeName(value: string) {
   return value
@@ -88,10 +98,11 @@ function normalizeLabel(value: string) {
     .toLowerCase();
 }
 
-function parseLegacyMessage(content: string): Record<string, string> {
+function parseLegacyMessage(rawContent: string): Record<string, string> {
+  const content = normalizeSpaces(rawContent);
   const found: Array<{ key: string; index: number; end: number }> = [];
   for (const { label, key } of LABELS) {
-    const idx = content.indexOf(label);
+    const idx = content.indexOf(normalizeSpaces(label));
     if (idx !== -1) found.push({ key, index: idx, end: idx + label.length });
   }
   found.sort((a, b) => a.index - b.index);
@@ -209,17 +220,25 @@ async function fetchAllThreads(token: string, guildId: string, channelId: string
   return results.filter((t) => (seen.has(t.id) ? false : (seen.add(t.id), true)));
 }
 
+type LegacyStarterMessage = { content: string; embeds?: Array<{ fields?: Array<{ name?: string; value?: string }>; title?: string }> };
+
 async function fetchStarterMessage(
   token: string,
   threadId: string,
-): Promise<{ content: string; embeds?: Array<{ fields?: Array<{ name?: string; value?: string }>; title?: string }> } | null> {
+): Promise<{ ok: true; message: LegacyStarterMessage } | { ok: false; reason: string }> {
   // L'ID du message de départ d'un fil est TOUJOURS égal à l'ID du fil.
   const res = await fetch(
     `https://discord.com/api/v10/channels/${threadId}/messages/${threadId}`,
     { headers: { Authorization: `Bot ${token}` } },
   );
-  if (!res.ok) return null;
-  return (await res.json()) as { content: string; embeds?: Array<{ fields?: Array<{ name?: string; value?: string }>; title?: string }> };
+  if (!res.ok) {
+    // On lit le corps pour avoir le vrai motif (permissions manquantes,
+    // rate limit, salon/fil introuvable, etc.) au lieu d'un échec muet.
+    const body = await res.text().catch(() => "");
+    return { ok: false, reason: `HTTP ${res.status}${body ? ` — ${body.slice(0, 200)}` : ""}` };
+  }
+  const message = (await res.json()) as LegacyStarterMessage;
+  return { ok: true, message };
 }
 
 function isEffectivelyEmpty(row: HrEmployeeFileRow): boolean {
@@ -272,15 +291,20 @@ export async function importLegacyHrThreads(
 
   for (const thread of threads) {
     const threadLabel = thread.name;
-    const message = await fetchStarterMessage(token, thread.id);
-    if (!message) {
-      report.parseFailed.push(threadLabel);
+    const fetched = await fetchStarterMessage(token, thread.id);
+    if (!fetched.ok) {
+      report.parseFailed.push(`${threadLabel} (échec récupération message : ${fetched.reason})`);
       continue;
     }
 
-    const values = extractLegacyFields(message);
+    const values = extractLegacyFields(fetched.message);
     if (Object.keys(values).length === 0) {
-      report.parseFailed.push(threadLabel);
+      const rawPreview = (fetched.message.content || "").slice(0, 120).replace(/\s+/g, " ").trim();
+      report.parseFailed.push(
+        `${threadLabel} (0/${LABELS.length} labels reconnus dans le message` +
+          (rawPreview ? ` — aperçu : "${rawPreview}${fetched.message.content && fetched.message.content.length > 120 ? "…" : ""}"` : " — message sans texte (probablement un embed non lisible)") +
+          `)`,
+      );
       continue;
     }
     const nameFromTitle = thread.name.replace(/^Dossier RH\s*-\s*/i, "").trim();
