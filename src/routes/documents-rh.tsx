@@ -3,8 +3,9 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/components/DiscordAuth";
 import { canManageHrFiles, type DiscordSessionUser } from "@/lib/discord-roles";
-import { getMyHrFile, listAllHrFilesFn, getHrFileForEmployee, saveHrFile } from "@/lib/hr-files.functions";
+import { getMyHrFile, listAllHrFilesFn, getHrFileForEmployee, saveHrFile, importLegacyHrThreadsFn } from "@/lib/hr-files.functions";
 import type { HrEmployeeFileRow, HrEmployeeFilePatch } from "@/lib/hr-files.server";
+import type { LegacyImportReport } from "@/lib/hr-files-legacy-import.server";
 
 const BRAND = "#4B92DD";
 
@@ -95,10 +96,29 @@ function RhView({ user }: { user: DiscordSessionUser }) {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<{ discordId: string; username: string | null; displayName: string | null } | null>(null);
+  const [importReport, setImportReport] = useState<LegacyImportReport | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["hr-files-all"],
     queryFn: () => listAllHrFilesFn(),
+  });
+
+  const legacyImport = useMutation({
+    mutationFn: () => importLegacyHrThreadsFn(),
+    onSuccess: (res) => {
+      if (res.ok) {
+        setImportReport(res.report);
+        setImportError(null);
+        qc.invalidateQueries({ queryKey: ["hr-files-all"] });
+      } else {
+        setImportError(
+          res.reason === "missing_env"
+            ? "Configuration manquante : DISCORD_BOT_TOKEN, DISCORD_GUILD_ID ou DISCORD_HR_CHANNEL_ID absent sur Vercel."
+            : "L'import a échoué. Réessayez ou consultez les logs Vercel.",
+        );
+      }
+    },
   });
 
   const filesByDiscordId = useMemo(() => {
@@ -170,6 +190,50 @@ function RhView({ user }: { user: DiscordSessionUser }) {
           <button type="button" className="tte-btn" style={btnGhost} onClick={() => refetch()} disabled={isFetching}>
             {isFetching ? "Actualisation…" : "Actualiser"}
           </button>
+          <button
+            type="button"
+            className="tte-btn"
+            style={btnGhost}
+            disabled={legacyImport.isPending}
+            onClick={() => {
+              if (!confirm("Importer les anciens fils Discord (créés à la main) vers les dossiers RH manquants ?")) return;
+              setImportReport(null);
+              setImportError(null);
+              legacyImport.mutate();
+            }}
+          >
+            {legacyImport.isPending ? "Import en cours…" : "Importer les anciens fils Discord"}
+          </button>
+        </div>
+      )}
+
+      {importError && (
+        <div style={{ ...card, borderColor: "rgba(239,68,68,0.35)" }}>
+          <div style={{ color: "#f87171", fontWeight: 700, marginBottom: 4 }}>Échec de l'import</div>
+          <div style={muted}>{importError}</div>
+        </div>
+      )}
+
+      {importReport && (
+        <div style={card}>
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>
+            Résultat de l'import ({importReport.totalThreads} fil(s) trouvé(s))
+          </div>
+          <div style={{ display: "grid", gap: 6, fontSize: 13 }}>
+            <div>✅ Dossiers créés ({importReport.imported.length}) : {importReport.imported.join(", ") || "—"}</div>
+            <div>🔗 Déjà en base, juste reliés à leur fil ({importReport.linkedOnly.length}) : {importReport.linkedOnly.join(", ") || "—"}</div>
+            <div style={muted}>Déjà reliés, rien à faire ({importReport.alreadyLinked.length})</div>
+            {importReport.unmatched.length > 0 && (
+              <div style={{ color: "#FBBF24" }}>
+                ⚠️ Nom introuvable dans l'annuaire employés ({importReport.unmatched.length}) : {importReport.unmatched.join(", ")}
+              </div>
+            )}
+            {importReport.parseFailed.length > 0 && (
+              <div style={{ color: "#f87171" }}>
+                ❌ Message illisible / erreur ({importReport.parseFailed.length}) : {importReport.parseFailed.join(", ")}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

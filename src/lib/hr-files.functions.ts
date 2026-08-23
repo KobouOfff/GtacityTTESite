@@ -129,3 +129,18 @@ export const saveHrFile = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "save_failed" as const };
     }
   });
+
+/** Import ponctuel des anciens fils RH créés à la main, réservé à la RH / Direction. */
+export const importLegacyHrThreadsFn = createServerFn({ method: "POST" }).handler(async () => {
+  const user = await currentUser();
+  if (!user) return { ok: false as const, reason: "not_logged_in" as const };
+  if (!canManageHrFiles(user)) return { ok: false as const, reason: "forbidden" as const };
+
+  try {
+    const { importLegacyHrThreads } = await import("./hr-files-legacy-import.server");
+    return await importLegacyHrThreads(user);
+  } catch (e) {
+    console.error("[importLegacyHrThreadsFn]", e);
+    return { ok: false as const, reason: "import_failed" as const };
+  }
+});
