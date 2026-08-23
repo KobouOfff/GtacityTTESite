@@ -148,6 +148,42 @@ export const Route = createFileRoute("/api/pv")({
         }
       },
 
+      PATCH: async ({ request }) => {
+        const user = await currentUser();
+        if (!user) {
+          return Response.json({ ok: false, reason: "not_logged_in" }, { status: 401 });
+        }
+
+        let body: Record<string, unknown>;
+        try {
+          body = (await request.json()) as Record<string, unknown>;
+        } catch {
+          return Response.json({ ok: false, reason: "bad_json" }, { status: 400 });
+        }
+
+        const id = typeof body.id === "string" ? body.id : "";
+        const paymentStatus = typeof body.pay === "string" ? body.pay : "";
+        if (!id || !/^[0-9a-f-]{36}$/i.test(id) || !PAYMENT_STATUSES.has(paymentStatus)) {
+          return Response.json({ ok: false, reason: "invalid_fields" }, { status: 400 });
+        }
+
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data, error } = await supabaseAdmin
+            .from("pv_records" as never)
+            .update({ payment_status: paymentStatus } as never)
+            .eq("id", id)
+            .select("*")
+            .maybeSingle();
+          if (error) throw error;
+          if (!data) return Response.json({ ok: false, reason: "not_found" }, { status: 404 });
+          return Response.json({ ok: true, record: toLegacyShape(data as unknown as PvRow) });
+        } catch (error) {
+          console.error("[pv/update]", error);
+          return Response.json({ ok: false, reason: "update_failed" }, { status: 500 });
+        }
+      },
+
       DELETE: async ({ request }) => {
         const user = await currentUser();
         if (!user) {
