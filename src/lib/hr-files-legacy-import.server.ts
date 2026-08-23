@@ -22,8 +22,9 @@ type DiscordThread = {
 export type LegacyImportReport = {
   totalThreads: number;
   imported: string[]; // noms importés (nouveau dossier créé)
+  fixed: string[]; // dossier existant mais vide (bug précédent) -> rempli
   linkedOnly: string[]; // dossier déjà en base, juste relié à son fil
-  alreadyLinked: string[]; // dossier déjà relié, rien à faire
+  alreadyLinked: string[]; // dossier déjà relié et déjà rempli, rien à faire
   unmatched: string[]; // nom du fil non retrouvé dans l'annuaire employés
   parseFailed: string[]; // fil dont le message n'a pas pu être lu/parsé
 };
@@ -79,6 +80,17 @@ const LABELS: Array<{ label: string; key: string }> = [
   { label: "Tampon de la TTE :", key: "tampon" },
 ];
 
+function normalizeLabel(value: string) {
+  return value
+    .normalize("NFKC")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+// Table de correspondance label normalisé -> clé, construite une seule fois.
+const NORMALIZED_LABELS = new Map(LABELS.map(({ label, key }) => [normalizeLabel(label), key]));
+
 function parseLegacyMessage(content: string): Record<string, string> {
   const found: Array<{ key: string; index: number; end: number }> = [];
   for (const { label, key } of LABELS) {
@@ -94,6 +106,30 @@ function parseLegacyMessage(content: string): Record<string, string> {
     values[found[i].key] = content.slice(start, end).trim();
   }
   return values;
+}
+
+/**
+ * Les anciens fils postaient le formulaire sous forme d'EMBED Discord
+ * (titre + liste de champs name/value), pas en texte brut — c'est ce que
+ * l'on voit en copiant le message affiché dans Discord. On extrait donc
+ * en priorité les champs de l'embed ; le parsing en texte brut ne sert
+ * que de repli si jamais un message a été posté sans embed.
+ */
+function extractLegacyFields(message: {
+  content?: string;
+  embeds?: Array<{ fields?: Array<{ name?: string; value?: string }> }>;
+}): Record<string, string> {
+  const embedFields = message.embeds?.[0]?.fields;
+  if (embedFields && embedFields.length > 0) {
+    const values: Record<string, string> = {};
+    for (const f of embedFields) {
+      if (!f.name) continue;
+      const key = NORMALIZED_LABELS.get(normalizeLabel(f.name));
+      if (key) values[key] = (f.value ?? "").trim();
+    }
+    if (Object.keys(values).length > 0) return values;
+  }
+  return parseLegacyMessage(message.content ?? "");
 }
 
 function splitNomComplet(nomComplet: string): { prenom: string | null; nom: string | null } {
@@ -170,15 +206,29 @@ async function fetchAllThreads(token: string, guildId: string, channelId: string
   return results.filter((t) => (seen.has(t.id) ? false : (seen.add(t.id), true)));
 }
 
-async function fetchStarterMessageContent(token: string, threadId: string): Promise<string | null> {
+async function fetchStarterMessage(
+  token: string,
+  threadId: string,
+): Promise<{ content: string; embeds?: Array<{ fields?: Array<{ name?: string; value?: string }>; title?: string }> } | null> {
   // L'ID du message de départ d'un fil est TOUJOURS égal à l'ID du fil.
   const res = await fetch(
     `https://discord.com/api/v10/channels/${threadId}/messages/${threadId}`,
     { headers: { Authorization: `Bot ${token}` } },
   );
   if (!res.ok) return null;
-  const msg = (await res.json()) as { content?: string };
-  return msg.content ?? null;
+  return (await res.json()) as { content: string; embeds?: Array<{ fields?: Array<{ name?: string; value?: string }>; title?: string }> };
+}
+
+function isEffectivelyEmpty(row: HrEmployeeFileRow): boolean {
+  return (
+    !row.prenom &&
+    !row.nom &&
+    !row.telephones &&
+    !row.adresse &&
+    !row.postes_actuels &&
+    !row.appreciation_rh &&
+    !row.observation_rh
+  );
 }
 
 export async function importLegacyHrThreads(
@@ -210,6 +260,7 @@ export async function importLegacyHrThreads(
   const report: LegacyImportReport = {
     totalThreads: threads.length,
     imported: [],
+    fixed: [],
     linkedOnly: [],
     alreadyLinked: [],
     unmatched: [],
@@ -218,13 +269,17 @@ export async function importLegacyHrThreads(
 
   for (const thread of threads) {
     const threadLabel = thread.name;
-    const content = await fetchStarterMessageContent(token, thread.id);
-    if (!content) {
+    const message = await fetchStarterMessage(token, thread.id);
+    if (!message) {
       report.parseFailed.push(threadLabel);
       continue;
     }
 
-    const values = parseLegacyMessage(content);
+    const values = extractLegacyFields(message);
+    if (Object.keys(values).length === 0) {
+      report.parseFailed.push(threadLabel);
+      continue;
+    }
     const nameFromTitle = thread.name.replace(/^Dossier RH\s*-\s*/i, "").trim();
     const nameCandidate = values.nomComplet || nameFromTitle;
     const employee = employeesByName.get(normalizeName(nameCandidate));
@@ -237,12 +292,39 @@ export async function importLegacyHrThreads(
     const existing = filesByDiscordId.get(employee.discordId);
 
     if (existing) {
-      if (existing.discord_thread_id) {
+      const linkedElsewhere = existing.discord_thread_id && existing.discord_thread_id !== thread.id;
+      if (linkedElsewhere && !isEffectivelyEmpty(existing)) {
+        // Déjà relié à un autre fil et déjà rempli : on ne touche à rien.
         report.alreadyLinked.push(threadLabel);
         continue;
       }
-      // Dossier déjà créé via le site : on ne touche pas aux champs déjà
-      // remplis, on relie juste son fil historique.
+      if (existing.discord_thread_id === thread.id && !isEffectivelyEmpty(existing)) {
+        // Déjà relié à CE fil et déjà rempli : rien à faire.
+        report.alreadyLinked.push(threadLabel);
+        continue;
+      }
+
+      if (isEffectivelyEmpty(existing)) {
+        // Dossier vide (créé par un import précédent avant la correction du
+        // parsing, ou jamais rempli) : on (re)remplit à partir du fil.
+        const patch = buildPatchFromLegacy(values);
+        try {
+          const row = await upsertHrFile(
+            { discordId: employee.discordId, username: employee.email, displayName: employee.name },
+            actor,
+            patch,
+          );
+          await setHrFileDiscordIds(row.id, thread.id, "");
+          report.fixed.push(threadLabel);
+        } catch (e) {
+          console.error(`[hr-files/legacy-import] Échec correction "${threadLabel}"`, e);
+          report.parseFailed.push(threadLabel);
+        }
+        continue;
+      }
+
+      // Dossier déjà rempli via le site, pas encore relié à un fil : on ne
+      // touche pas aux champs déjà saisis, on relie juste le fil historique.
       await setHrFileDiscordIds(existing.id, thread.id, "");
       report.linkedOnly.push(threadLabel);
       continue;
