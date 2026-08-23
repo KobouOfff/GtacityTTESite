@@ -221,6 +221,7 @@ function RhView({ user }: { user: DiscordSessionUser }) {
           </div>
           <div style={{ display: "grid", gap: 6, fontSize: 13 }}>
             <div>✅ Dossiers créés ({importReport.imported.length}) : {importReport.imported.join(", ") || "—"}</div>
+            <div>🛠️ Dossiers vides réparés ({importReport.fixed.length}) : {importReport.fixed.join(", ") || "—"}</div>
             <div>🔗 Déjà en base, juste reliés à leur fil ({importReport.linkedOnly.length}) : {importReport.linkedOnly.join(", ") || "—"}</div>
             <div style={muted}>Déjà reliés, rien à faire ({importReport.alreadyLinked.length})</div>
             {importReport.unmatched.length > 0 && (
