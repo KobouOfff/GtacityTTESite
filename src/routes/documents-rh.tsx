@@ -6,6 +6,8 @@ import { canManageHrFiles, type DiscordSessionUser } from "@/lib/discord-roles";
 import { getMyHrFile, listAllHrFilesFn, getHrFileForEmployee, saveHrFile, importLegacyHrThreadsFn } from "@/lib/hr-files.functions";
 import type { HrEmployeeFileRow, HrEmployeeFilePatch } from "@/lib/hr-files.server";
 import type { LegacyImportReport } from "@/lib/hr-files-legacy-import.server";
+import { listHrWarningsFn, addHrWarningFn, deleteHrWarningFn, uploadHrWarningAttachmentFn } from "@/lib/hr-warnings.functions";
+import type { HrWarningType } from "@/lib/hr-warnings.server";
 
 const BRAND = "#4B92DD";
 
@@ -440,6 +442,8 @@ function EditorPanel({
         </Field>
       </Section>
 
+      <WarningsSection employee={employee} canManage />
+
       <Section title="🗒️ 6) Notes internes">
         <Field label="Appréciation(s) RH">
           <Textarea value={form.appreciation_rh ?? ""} onChange={(v) => set("appreciation_rh", v)} />
@@ -526,6 +530,10 @@ function DossierView({ row }: { row: HrEmployeeFileRow }) {
         <Info label="Avertissement(s)" value={row.avertissements} multiline />
         <Info label="Sanction(s)" value={row.sanctions} multiline />
       </Section>
+      <WarningsSection
+        employee={{ discordId: row.employee_discord_id, username: row.employee_username, displayName: row.employee_display_name }}
+        canManage={false}
+      />
       <Section title="🗒️ 6) Notes internes">
         <Info label="Appréciation(s) RH" value={row.appreciation_rh} multiline />
         <Info label="Observation(s) RH" value={row.observation_rh} multiline />
@@ -542,6 +550,250 @@ function DossierView({ row }: { row: HrEmployeeFileRow }) {
         {row.updated_by_username ? ` par ${row.updated_by_username}` : ""}
       </div>
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ *
+ * Registre des avertissements / blâmes (avec pièce jointe optionnelle)
+ * ------------------------------------------------------------------ */
+const WARNING_TYPE_META: Record<HrWarningType, { label: string; color: string; bg: string }> = {
+  avertissement: { label: "Avertissement", color: "#FBBF24", bg: "rgba(245,158,11,0.14)" },
+  blame: { label: "Blâme", color: "#F87171", bg: "rgba(239,68,68,0.14)" },
+  sanction: { label: "Sanction", color: "#F87171", bg: "rgba(239,68,68,0.14)" },
+  note: { label: "Note", color: "#60A5FA", bg: "rgba(59,130,246,0.14)" },
+};
+const MAX_ATTACHMENT_BYTES = 15 * 1024 * 1024;
+const ALLOWED_ATTACHMENT_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function WarningsSection({
+  employee,
+  canManage,
+}: {
+  employee: { discordId: string; username: string | null; displayName: string | null };
+  canManage: boolean;
+}) {
+  const qc = useQueryClient();
+  const queryKey = ["hr-warnings", employee.discordId];
+  const { data, isLoading } = useQuery({
+    queryKey,
+    queryFn: () => listHrWarningsFn({ data: employee.discordId }),
+  });
+  const rows = data?.ok ? data.rows : [];
+
+  const [type, setType] = useState<HrWarningType>("avertissement");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  function resetForm() {
+    setType("avertissement");
+    setTitle("");
+    setDescription("");
+    setFile(null);
+    setFileError(null);
+  }
+
+  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0] || null;
+    setFileError(null);
+    if (!f) {
+      setFile(null);
+      return;
+    }
+    if (!ALLOWED_ATTACHMENT_TYPES.has(f.type)) {
+      setFileError("Format non pris en charge (JPEG, PNG, WebP ou PDF uniquement).");
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+    if (f.size > MAX_ATTACHMENT_BYTES) {
+      setFileError("Fichier trop volumineux (15 Mo max).");
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+    setFile(f);
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!title.trim() || submitting) return;
+    setSubmitting(true);
+    try {
+      let attachmentPath: string | null = null;
+      let attachmentFilename: string | null = null;
+      let attachmentMime: string | null = null;
+      if (file) {
+        const dataUrl = await readFileAsDataUrl(file);
+        const base64 = dataUrl.slice(dataUrl.indexOf(",") + 1);
+        const up = await uploadHrWarningAttachmentFn({ data: { base64, mimeType: file.type, filename: file.name } });
+        if (!up.ok) {
+          alert(`Impossible d'envoyer la pièce jointe (${up.reason}). L'entrée n'a pas été enregistrée.`);
+          return;
+        }
+        attachmentPath = up.path;
+        attachmentFilename = file.name;
+        attachmentMime = file.type;
+      }
+      const res = await addHrWarningFn({
+        data: {
+          employeeDiscordId: employee.discordId,
+          employeeUsername: employee.username,
+          employeeDisplayName: employee.displayName,
+          type,
+          title: title.trim(),
+          description: description.trim() || null,
+          attachmentPath,
+          attachmentFilename,
+          attachmentMime,
+        },
+      });
+      if (!res.ok) {
+        alert(`Échec de l'enregistrement (${res.reason}).`);
+        return;
+      }
+      resetForm();
+      qc.invalidateQueries({ queryKey });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function onDelete(id: string) {
+    if (!confirm("Supprimer définitivement cette entrée du registre ?")) return;
+    const res = await deleteHrWarningFn({ data: id });
+    if (res.ok) qc.invalidateQueries({ queryKey });
+    else alert("Échec de la suppression, réessaie.");
+  }
+
+  return (
+    <Section title="🚨 Registre des avertissements / blâmes">
+      {canManage && (
+        <form
+          onSubmit={onSubmit}
+          style={{
+            display: "grid",
+            gap: 10,
+            paddingBottom: 14,
+            marginBottom: rows.length > 0 || isLoading ? 4 : 0,
+            borderBottom: "1px solid rgba(var(--tte-overlay),0.08)",
+          }}
+        >
+          <Row>
+            <Field label="Type">
+              <select
+                className="tte-input"
+                value={type}
+                onChange={(e) => setType(e.target.value as HrWarningType)}
+                style={{
+                  padding: "9px 12px",
+                  background: "rgba(0,0,0,0.3)",
+                  color: "var(--tte-heading)",
+                  border: "1px solid rgba(var(--tte-overlay),0.13)",
+                  borderRadius: 10,
+                  fontSize: 13.5,
+                }}
+              >
+                <option value="avertissement">Avertissement</option>
+                <option value="blame">Blâme</option>
+                <option value="sanction">Sanction</option>
+                <option value="note">Note</option>
+              </select>
+            </Field>
+            <Field label="Titre">
+              <Input value={title} onChange={setTitle} />
+            </Field>
+          </Row>
+          <Field label="Description (facultatif)">
+            <Textarea value={description} onChange={setDescription} />
+          </Field>
+          <Field label="Pièce jointe (facultatif — image ou PDF, 15 Mo max)">
+            <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={onFileChange} />
+            {file && <span style={{ fontSize: 12, ...muted, display: "block", marginTop: 4 }}>{file.name}</span>}
+            {fileError && <span style={{ fontSize: 12, color: "#F87171", display: "block", marginTop: 4 }}>{fileError}</span>}
+          </Field>
+          <div>
+            <button type="submit" className="tte-btn" style={btnPrimary} disabled={submitting || !title.trim()}>
+              {submitting ? "Envoi…" : "Ajouter au registre"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {isLoading ? (
+        <div style={{ ...muted, display: "flex", alignItems: "center", gap: 10 }}>
+          <Spinner /> Chargement…
+        </div>
+      ) : !data?.ok ? (
+        <div style={muted}>Impossible de charger le registre pour le moment.</div>
+      ) : rows.length === 0 ? (
+        <div style={muted}>Aucune entrée pour le moment.</div>
+      ) : (
+        <div style={{ display: "grid", gap: 10 }}>
+          {rows.map((w) => {
+            const meta = WARNING_TYPE_META[w.type];
+            return (
+              <div
+                key={w.id}
+                style={{
+                  border: "1px solid rgba(var(--tte-overlay),0.1)",
+                  borderRadius: 12,
+                  padding: "10px 12px",
+                  display: "grid",
+                  gap: 6,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                    <span style={{ ...pill, color: meta.color, borderColor: `${meta.color}55`, background: meta.bg }}>
+                      {meta.label}
+                    </span>
+                    <span style={{ fontWeight: 700, fontSize: 13.5 }}>{w.title}</span>
+                  </div>
+                  <span style={{ fontSize: 11.5, ...muted, whiteSpace: "nowrap" }}>
+                    {new Date(w.created_at).toLocaleString("fr-FR")}
+                  </span>
+                </div>
+                {w.description && <div style={{ fontSize: 13, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{w.description}</div>}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 11.5, ...muted }}>
+                    Par {w.created_by_username || "—"}
+                    {w.attachment_url && (
+                      <>
+                        {" · "}
+                        <a href={w.attachment_url} target="_blank" rel="noreferrer" className="tte-link" style={{ color: BRAND }}>
+                          📎 {w.attachment_filename || "Pièce jointe"}
+                        </a>
+                      </>
+                    )}
+                  </span>
+                  {canManage && (
+                    <button
+                      type="button"
+                      onClick={() => onDelete(w.id)}
+                      style={{ background: "none", border: "none", color: "#F87171", fontSize: 11.5, cursor: "pointer", padding: 0 }}
+                    >
+                      Supprimer
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Section>
   );
 }
 
