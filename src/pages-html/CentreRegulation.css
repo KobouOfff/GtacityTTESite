@@ -36,12 +36,14 @@ aside.side{background:linear-gradient(180deg,var(--navy-2),var(--navy-3));color:
 .side nav a.active{background:var(--blue);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.18)}
 .side nav a svg{flex-shrink:0;opacity:.85}
 .side-foot{padding:12px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.18)}
-.agent{display:flex;align-items:center;gap:10px}
+.agent{display:flex;flex-direction:column;gap:9px}
+.agent-id{display:flex;align-items:center;gap:10px;min-width:0}
 .agent .av{width:36px;height:36px;border-radius:9px;background:#3A6EA5;color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-weight:800;font-size:13px;flex-shrink:0}
 .agent .meta{min-width:0;flex:1}
 .agent .nm{font-family:var(--ff-head);font-weight:700;font-size:13px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.agent .role{font-size:11px;color:#8FB3EC}
-.agent .out{background:none;border:1px solid rgba(255,255,255,.18);color:#C9D8EF;border-radius:7px;padding:6px;cursor:pointer}
+.agent .role{font-size:11px;color:#8FB3EC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agent-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.agent .out{background:none;border:1px solid rgba(255,255,255,.18);color:#C9D8EF;border-radius:7px;padding:6px;cursor:pointer;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
 .agent .out:hover{background:rgba(255,255,255,.08);color:#fff}
 
 /* Main */

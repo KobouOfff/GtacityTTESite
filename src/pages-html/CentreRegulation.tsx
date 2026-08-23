@@ -188,27 +188,31 @@ export default function CentreRegulationPage() {
     </nav>
     <div className="side-foot">
       <div className="agent">
-        <div className="av" id="agAv">RG</div>
-        <div className="meta">
-          <div className="nm" id="agNm">Régulateur</div>
-          <div className="role" id="agRl">Poste de commandement</div>
+        <div className="agent-id">
+          <div className="av" id="agAv">RG</div>
+          <div className="meta">
+            <div className="nm" id="agNm" title="Régulateur">Régulateur</div>
+            <div className="role" id="agRl" title="Poste de commandement">Poste de commandement</div>
+          </div>
         </div>
-        <button type="button" className="out" title="Boîte mail" onClick={() => setMailOpen(true)}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></svg>
-        </button>
-        {permBillets && (
-          <button type="button" className="out" title="Attribuer un billet" onClick={() => setBilletsOpen(true)}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9Z" /><path d="M9 7v10" strokeDasharray="2 2" /></svg>
+        <div className="agent-actions">
+          <button type="button" className="out" title="Boîte mail" onClick={() => setMailOpen(true)}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></svg>
           </button>
-        )}
-        {permBillets && (
-          <button type="button" className="out" title="Remettre une récompense" onClick={() => setRecompensesOpen(true)}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="8" r="5" /><path d="M8.5 13 7 21l5-2 5 2-1.5-8" /></svg>
-          </button>
-        )}
-        <a className="out" href="/espace-employes" title="D\u00e9connexion">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M15 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-4M10 17l-5-5 5-5M5 12h12" /></svg>
-        </a>
+          {permBillets && (
+            <button type="button" className="out" title="Attribuer un billet" onClick={() => setBilletsOpen(true)}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9Z" /><path d="M9 7v10" strokeDasharray="2 2" /></svg>
+            </button>
+          )}
+          {permBillets && (
+            <button type="button" className="out" title="Remettre une récompense" onClick={() => setRecompensesOpen(true)}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="8" r="5" /><path d="M8.5 13 7 21l5-2 5 2-1.5-8" /></svg>
+            </button>
+          )}
+          <a className="out" href="/espace-employes" title="D\u00e9connexion">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M15 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-4M10 17l-5-5 5-5M5 12h12" /></svg>
+          </a>
+        </div>
       </div>
     </div>
   </aside>
