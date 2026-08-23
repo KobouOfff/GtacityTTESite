@@ -283,6 +283,16 @@ export function getBranchColor(key: string | null | undefined): string {
 }
 
 // Statuts d'une demande
+// Documents RH : dossiers individuels par employé. Création/modification
+// réservée à la Direction + Secrétariat/Accueil/RH (même périmètre que le
+// standard central des demandes de contact). La lecture de son propre
+// dossier est ouverte à tout employé connecté (vérifiée à part, sur
+// l'identité du dossier consulté).
+export function canManageHrFiles(user: DiscordSessionUser | null): boolean {
+  if (!user) return false;
+  return user.roleIds.some((r) => CONTACT_FULL_ACCESS_ROLES.has(r));
+}
+
 export const CONTACT_STATUSES: Record<string, { label: string; color: string }> = {
   nouveau: { label: "Nouveau", color: "#3b82f6" },
   en_cours: { label: "En cours", color: "#f59e0b" },
