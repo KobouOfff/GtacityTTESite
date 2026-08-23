@@ -39,6 +39,16 @@ function normalizeSpaces(value: string): string {
   return value.replace(/[\u00A0\u202F\u2007\u2060]/g, " ");
 }
 
+// Les messages saisis à la main formatent chaque label en gras Markdown,
+// AVEC les ":" laissés hors du gras : "**Prénom(s) + Nom** : Lucas Casela".
+// Nos labels de référence ("Prénom(s) + Nom :") ne peuvent donc jamais
+// matcher tel quel : le "**" s'intercale entre le label et son ":". On
+// retire tous les marqueurs de mise en forme Markdown (gras/italique/
+// souligné/barré) avant de chercher les labels.
+function stripMarkdown(value: string): string {
+  return value.replace(/(\*\*|__|[*_~])/g, "");
+}
+
 function normalizeName(value: string) {
   return value
     .normalize("NFD")
@@ -99,11 +109,11 @@ function normalizeLabel(value: string) {
 }
 
 function parseLegacyMessage(rawContent: string): Record<string, string> {
-  const content = normalizeSpaces(rawContent);
+  const content = stripMarkdown(normalizeSpaces(rawContent));
   const found: Array<{ key: string; index: number; end: number }> = [];
   for (const { label, key } of LABELS) {
-    const idx = content.indexOf(normalizeSpaces(label));
-    if (idx !== -1) found.push({ key, index: idx, end: idx + label.length });
+    const idx = content.indexOf(stripMarkdown(normalizeSpaces(label)));
+    if (idx !== -1) found.push({ key, index: idx, end: idx + label.replace(/(\*\*|__|[*_~])/g, "").length });
   }
   found.sort((a, b) => a.index - b.index);
 
@@ -111,7 +121,13 @@ function parseLegacyMessage(rawContent: string): Record<string, string> {
   for (let i = 0; i < found.length; i++) {
     const start = found[i].end;
     const end = i + 1 < found.length ? found[i + 1].index : content.length;
-    values[found[i].key] = content.slice(start, end).trim();
+    // Chaque champ est une puce "- **Label** : valeur - **Label suivant** : ...".
+    // On retire la puce/tiret de séparation qui traîne juste avant le label
+    // suivant, sinon elle se retrouve collée à la fin de la valeur.
+    values[found[i].key] = content
+      .slice(start, end)
+      .replace(/\s*-\s*$/, "")
+      .trim();
   }
   return values;
 }
