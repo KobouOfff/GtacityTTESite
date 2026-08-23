@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { DiscordSessionUser } from "./discord-roles";
+import { fetchRecentUsbPayments, isUsbPayConfigured } from "./usb-pay.server";
 
 export type LoyaltyAccountRow = {
   discord_id: string;
@@ -23,6 +24,9 @@ export type SubscriptionPurchaseRow = {
   delivered_by_discord_id: string | null;
   delivered_by_username: string | null;
   delivered_at: string | null;
+  usb_pay_reference: string | null;
+  usb_pay_verified_at: string | null;
+  usb_pay_verify_note: string | null;
   created_at: string;
 };
 
@@ -261,4 +265,120 @@ export async function deliverPurchaseByReference(
   }
 
   return { ok: true, purchase: updated as SubscriptionPurchaseRow, account: updatedAccount };
+}
+
+// ===== Vérification automatique via l'API entreprise USB Pay =====
+
+/**
+ * On ne connaît pas le schéma exact d'un encaissement renvoyé par l'API
+ * USB Pay (noms de champs non documentés côté TTE), donc la recherche se
+ * fait "en profondeur" dans l'objet plutôt que sur des clés précises :
+ * - la référence doit apparaître quelque part dans l'objet ;
+ * - un montant numérique quelque part dans l'objet doit correspondre au
+ *   prix du plan (à 1 cent près), en dollars ou en centimes.
+ * C'est volontairement tolérant : un faux positif nécessiterait qu'un
+ * encaissement totalement différent contienne à la fois la même
+ * référence texte ET le même montant, ce qui n'arrive pas en pratique.
+ */
+function deepContainsText(value: unknown, needle: string): boolean {
+  if (value == null) return false;
+  if (typeof value === "string") return value.toUpperCase().includes(needle);
+  if (typeof value === "number") return String(value).includes(needle);
+  if (Array.isArray(value)) return value.some((v) => deepContainsText(v, needle));
+  if (typeof value === "object") return Object.values(value as object).some((v) => deepContainsText(v, needle));
+  return false;
+}
+
+function deepContainsAmount(value: unknown, target: number): boolean {
+  const matchesNumber = (n: number) => Math.abs(n - target) < 0.01 || Math.abs(n - target * 100) < 1;
+  if (value == null) return false;
+  if (typeof value === "number") return matchesNumber(value);
+  if (typeof value === "string" && value.trim() !== "" && !Number.isNaN(Number(value))) {
+    return matchesNumber(Number(value));
+  }
+  if (Array.isArray(value)) return value.some((v) => deepContainsAmount(v, target));
+  if (typeof value === "object") return Object.values(value as object).some((v) => deepContainsAmount(v, target));
+  return false;
+}
+
+function matchesPayment(payment: unknown, usbReference: string, price: number): boolean {
+  return deepContainsText(payment, usbReference.toUpperCase()) && deepContainsAmount(payment, price);
+}
+
+export type VerifyPaymentResult =
+  | { ok: true; purchase: SubscriptionPurchaseRow }
+  | {
+      ok: false;
+      reason:
+        | "not_configured"
+        | "not_found"
+        | "not_owner"
+        | "already_delivered"
+        | "cancelled"
+        | "already_verified"
+        | "reference_already_used"
+        | "no_match"
+        | "api_error";
+    };
+
+/**
+ * Vérifie automatiquement, via l'API entreprise USB Pay, qu'un encaissement
+ * correspondant à la référence de virement donnée par le client (affichée
+ * par le terminal USB Pay après paiement) a bien été reçu sur le compte
+ * TTE, pour le bon montant.
+ *
+ * Ceci NE délivre PAS le billet et NE crédite PAS les points : ça marque
+ * seulement l'achat comme "vérifié" pour qu'un agent TTE (toujours requis
+ * pour l'attribution finale, voir deliverPurchaseByReference) puisse
+ * l'attribuer en confiance sans avoir à rechercher le reçu lui-même.
+ */
+export async function autoVerifySubscriptionPayment(
+  requester: DiscordSessionUser,
+  purchaseReference: string,
+  usbPayReference: string,
+): Promise<VerifyPaymentResult> {
+  if (!isUsbPayConfigured()) return { ok: false, reason: "not_configured" };
+
+  const found = await findPurchaseByReference(purchaseReference);
+  if (!found) return { ok: false, reason: "not_found" };
+  if (found.purchase.discord_id !== requester.discordId) return { ok: false, reason: "not_owner" };
+  if (found.purchase.status === "delivre") return { ok: false, reason: "already_delivered" };
+  if (found.purchase.status === "annule") return { ok: false, reason: "cancelled" };
+  if (found.purchase.usb_pay_verified_at) return { ok: false, reason: "already_verified" };
+
+  const usbRef = usbPayReference.trim().toUpperCase();
+  if (!usbRef) return { ok: false, reason: "no_match" };
+
+  let payments: unknown[];
+  try {
+    payments = await fetchRecentUsbPayments(50);
+  } catch (e) {
+    console.error("[autoVerifySubscriptionPayment] usb pay api", e);
+    return { ok: false, reason: "api_error" };
+  }
+
+  const match = payments.find((p) => matchesPayment(p, usbRef, found.purchase.price));
+  if (!match) return { ok: false, reason: "no_match" };
+
+  const supabase = supabaseAdmin;
+  const { data: updated, error } = await supabase
+    .from("subscription_purchases")
+    .update({
+      usb_pay_reference: usbRef,
+      usb_pay_verified_at: new Date().toISOString(),
+      usb_pay_verify_note: "Encaissement retrouvé automatiquement via l'API USB Pay.",
+    })
+    .eq("id", found.purchase.id)
+    .is("usb_pay_verified_at", null) // évite une double-vérification en cas de double-clic
+    .select("*")
+    .maybeSingle();
+  if (error) {
+    // Violation de l'index unique usb_pay_reference = cette référence USB Pay
+    // a déjà servi à vérifier un autre achat.
+    if ((error as { code?: string }).code === "23505") return { ok: false, reason: "reference_already_used" };
+    throw error;
+  }
+  if (!updated) return { ok: false, reason: "already_verified" };
+
+  return { ok: true, purchase: updated as SubscriptionPurchaseRow };
 }

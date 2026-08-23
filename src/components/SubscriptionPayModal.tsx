@@ -1,6 +1,38 @@
+import { useState } from "react";
 import { T } from "@/components/T";
 import type { SubscriptionPlan } from "@/lib/subscription-plans";
 import type { LoyaltyAccountRow, SubscriptionPurchaseRow } from "@/lib/loyalty.server";
+
+const VERIFY_ERROR_MSG: Record<string, { fr: string; en: string }> = {
+  not_configured: {
+    fr: "La vérification automatique n'est pas disponible pour le moment. Contacte un agent TTE avec ta référence.",
+    en: "Automatic verification isn't available right now. Contact a TTE staff member with your reference.",
+  },
+  no_match: {
+    fr: "Aucun encaissement correspondant trouvé. Vérifie la référence USB Pay et réessaie dans une minute, ou contacte un agent TTE.",
+    en: "No matching payment found. Double-check your USB Pay reference and try again in a minute, or contact a TTE staff member.",
+  },
+  reference_already_used: {
+    fr: "Cette référence USB Pay a déjà servi à vérifier un autre achat.",
+    en: "This USB Pay reference has already been used to verify another purchase.",
+  },
+  already_verified: {
+    fr: "Cet achat est déjà vérifié.",
+    en: "This purchase is already verified.",
+  },
+  already_delivered: {
+    fr: "Cet achat a déjà été attribué.",
+    en: "This purchase has already been delivered.",
+  },
+  cancelled: {
+    fr: "Cet achat a été annulé.",
+    en: "This purchase was cancelled.",
+  },
+  api_error: {
+    fr: "Erreur de communication avec USB Pay. Réessaie dans un instant.",
+    en: "Couldn't reach USB Pay. Please try again shortly.",
+  },
+};
 
 export function SubscriptionPayModal({
   plan,
@@ -8,13 +40,21 @@ export function SubscriptionPayModal({
   purchaseState,
   loyaltyResult,
   onConfirmPaid,
+  verifyState,
+  verifyErrorReason,
+  onVerifyPayment,
 }: {
   plan: SubscriptionPlan;
   onClose: () => void;
   purchaseState: "idle" | "pending" | "success" | "error";
   loyaltyResult?: { account: LoyaltyAccountRow; purchase: SubscriptionPurchaseRow } | null;
   onConfirmPaid: () => void;
+  verifyState?: "idle" | "pending" | "success" | "error";
+  verifyErrorReason?: string | null;
+  onVerifyPayment?: (usbPayReference: string) => void;
 }) {
+  const [usbRef, setUsbRef] = useState("");
+  const isVerified = !!loyaltyResult?.purchase.usb_pay_verified_at || verifyState === "success";
   return (
     <div
       className="usbpay-overlay"
@@ -70,6 +110,55 @@ export function SubscriptionPayModal({
                 en={<>Show this reference with your payment receipt to a TTE staff member (station desk or Discord) to activate your pass. Your loyalty points will be credited at that point. You can find your reference anytime on <a href="/mon-compte">your account page</a>.</>}
               />
             </p>
+
+            {isVerified ? (
+              <div className="usbpay-verify-ok">
+                <T
+                  fr="✓ Paiement vérifié automatiquement — présentez tout de même votre référence à un agent pour l'activation."
+                  en="✓ Payment automatically verified — still show your reference to a staff member for activation."
+                />
+              </div>
+            ) : (
+              onVerifyPayment && (
+                <div className="usbpay-verify-block">
+                  <label htmlFor="usbpay-ref-input">
+                    <T
+                      fr="Référence de virement USB Pay (affichée après paiement, ex. TRF-20260823-005)"
+                      en="USB Pay transfer reference (shown after payment, e.g. TRF-20260823-005)"
+                    />
+                  </label>
+                  <div className="usbpay-verify-row">
+                    <input
+                      id="usbpay-ref-input"
+                      type="text"
+                      value={usbRef}
+                      onChange={(e) => setUsbRef(e.target.value)}
+                      placeholder="TRF-20260823-005"
+                    />
+                    <button
+                      type="button"
+                      className="usbpay-verify-btn"
+                      disabled={!usbRef.trim() || verifyState === "pending"}
+                      onClick={() => onVerifyPayment(usbRef.trim())}
+                    >
+                      {verifyState === "pending" ? (
+                        <T fr="Vérification…" en="Verifying…" />
+                      ) : (
+                        <T fr="Vérifier mon paiement" en="Verify my payment" />
+                      )}
+                    </button>
+                  </div>
+                  {verifyState === "error" && verifyErrorReason && (
+                    <div className="usbpay-verify-err">
+                      <T
+                        fr={VERIFY_ERROR_MSG[verifyErrorReason]?.fr ?? "Vérification impossible."}
+                        en={VERIFY_ERROR_MSG[verifyErrorReason]?.en ?? "Verification failed."}
+                      />
+                    </div>
+                  )}
+                </div>
+              )
+            )}
           </div>
         )}
 

@@ -57,6 +57,25 @@ export const startSubscriptionPurchase = createServerFn({ method: "POST" })
     }
   });
 
+export const verifySubscriptionPaymentFn = createServerFn({ method: "POST" })
+  .validator((d: { purchaseReference: string; usbPayReference: string }) => d)
+  .handler(async ({ data }) => {
+    const user = await currentUser();
+    if (!user) return { ok: false as const, reason: "not_logged_in" as const };
+    if (!data.purchaseReference?.trim() || !data.usbPayReference?.trim()) {
+      return { ok: false as const, reason: "no_match" as const };
+    }
+    try {
+      const { autoVerifySubscriptionPayment } = await import("./loyalty.server");
+      const result = await autoVerifySubscriptionPayment(user, data.purchaseReference, data.usbPayReference);
+      if (!result.ok) return result;
+      return { ok: true as const, purchase: result.purchase };
+    } catch (e) {
+      console.error("[verifySubscriptionPaymentFn]", e);
+      return { ok: false as const, reason: "api_error" as const };
+    }
+  });
+
 // ===== Attribution des billets par un agent TTE (guichet / Discord) =====
 
 export const searchPurchaseByReference = createServerFn({ method: "POST" })

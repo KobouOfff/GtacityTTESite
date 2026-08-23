@@ -147,6 +147,17 @@ export default function BilletsPanel({ onClose }: { onClose: () => void }) {
                 </span>
               </div>
 
+              {purchase.usb_pay_verified_at ? (
+                <div className="bp-msg bp-msg-ok">
+                  ✓ Paiement vérifié automatiquement via USB Pay le {new Date(purchase.usb_pay_verified_at).toLocaleString("fr-FR")}
+                  {purchase.usb_pay_reference ? ` (réf. ${purchase.usb_pay_reference})` : ""}.
+                </div>
+              ) : purchase.status === "paiement_initie" ? (
+                <div className="bp-msg bp-msg-warn">
+                  ⚠ Non vérifié automatiquement — vérifie le reçu de paiement avant d'attribuer.
+                </div>
+              ) : null}
+
               {purchase.status === "delivre" && purchase.delivered_at && (
                 <div className="bp-msg bp-msg-warn">
                   Déjà attribué le {new Date(purchase.delivered_at).toLocaleString("fr-FR")}

@@ -13,7 +13,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { SUBSCRIPTION_PLANS, type SubscriptionPlan } from "@/lib/subscription-plans";
 import { SubscriptionPayModal } from "@/components/SubscriptionPayModal";
 import { LoginRequiredModal } from "@/components/LoginRequiredModal";
-import { getMyLoyaltyAccount, startSubscriptionPurchase } from "@/lib/loyalty.functions";
+import { getMyLoyaltyAccount, startSubscriptionPurchase, verifySubscriptionPaymentFn } from "@/lib/loyalty.functions";
 
 export default function AccueilPage() {
   const { lang, t, toggleLang } = useLanguage();
@@ -32,6 +32,11 @@ export default function AccueilPage() {
   const purchaseMutation = useMutation({
     mutationFn: (planId: SubscriptionPlan["id"]) => startSubscriptionPurchase({ data: { planId } }),
     onSuccess: () => { loyaltyQuery.refetch(); },
+  });
+
+  const verifyMutation = useMutation({
+    mutationFn: (vars: { purchaseReference: string; usbPayReference: string }) =>
+      verifySubscriptionPaymentFn({ data: vars }),
   });
 
   function handleBuyClick(plan: SubscriptionPlan) {
@@ -846,7 +851,7 @@ export default function AccueilPage() {
     {activePlan && (
       <SubscriptionPayModal
         plan={activePlan}
-        onClose={() => { setActivePlan(null); purchaseMutation.reset(); }}
+        onClose={() => { setActivePlan(null); purchaseMutation.reset(); verifyMutation.reset(); }}
         onConfirmPaid={() => purchaseMutation.mutate(activePlan.id)}
         purchaseState={
           purchaseMutation.isError || (purchaseMutation.data && !purchaseMutation.data.ok)
@@ -862,6 +867,20 @@ export default function AccueilPage() {
             ? { account: purchaseMutation.data.account, purchase: purchaseMutation.data.purchase }
             : null
         }
+        onVerifyPayment={(usbPayReference) => {
+          if (!purchaseMutation.data?.ok) return;
+          verifyMutation.mutate({ purchaseReference: purchaseMutation.data.purchase.reference, usbPayReference });
+        }}
+        verifyState={
+          verifyMutation.isError || (verifyMutation.data && !verifyMutation.data.ok)
+            ? "error"
+            : verifyMutation.isPending
+              ? "pending"
+              : verifyMutation.isSuccess && verifyMutation.data?.ok
+                ? "success"
+                : "idle"
+        }
+        verifyErrorReason={verifyMutation.data && !verifyMutation.data.ok ? verifyMutation.data.reason : null}
       />
     )}
 
