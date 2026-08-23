@@ -111,6 +111,7 @@ export async function syncHrFileToDiscord(
 
   try {
     let threadId = row.discord_thread_id ?? null;
+    let messageId = row.discord_summary_message_id ?? null;
 
     // 1) Fil déjà existant : on vérifie rapidement qu'il est toujours valide
     //    (sinon on retombe sur la création ci-dessous).
@@ -118,57 +119,52 @@ export async function syncHrFileToDiscord(
       const check = await fetch(`https://discord.com/api/v10/channels/${threadId}`, {
         headers: { Authorization: `Bot ${token}` },
       });
-      if (!check.ok) threadId = null;
+      if (!check.ok) {
+        threadId = null;
+        messageId = null;
+      }
     }
 
-    // 2) Pas de fil (premier enregistrement, ou fil invalide) : on poste un
-    //    message d'ouverture dans le salon "dossier personnel" puis on crée
-    //    le fil à partir de ce message.
-    if (!threadId) {
-      const openMsgRes = await fetch(
-        `https://discord.com/api/v10/channels/${encodeURIComponent(channelId)}/messages`,
-        {
-          method: "POST",
-          headers: authHeaders,
-          body: JSON.stringify({
-            allowed_mentions: { parse: [] },
-            content: `📁 Nouveau dossier RH : **${row.prenom ?? ""} ${(row.nom ?? "").toUpperCase()}**`.trim(),
-          }),
-        },
-      );
-      if (!openMsgRes.ok) {
-        console.error(
-          `[hr-files/discord] Échec création message d'ouverture: ${openMsgRes.status} ${await openMsgRes.text()}`,
-        );
-        return { status: "failed" };
-      }
-      const openMsg = (await openMsgRes.json()) as { id: string };
+    const embedPayload = buildEmbed(row);
 
+    // 2) Pas de fil (premier enregistrement, ou fil invalide) : le salon
+    //    1484614182946082898 est un salon de FORUM (poster un message brut
+    //    dedans est refusé par Discord — erreur 50008). Sur un forum, un
+    //    nouveau sujet = un nouveau fil créé directement, message d'ouverture
+    //    inclus dans le même appel.
+    if (!threadId) {
       const threadRes = await fetch(
-        `https://discord.com/api/v10/channels/${encodeURIComponent(channelId)}/messages/${openMsg.id}/threads`,
+        `https://discord.com/api/v10/channels/${encodeURIComponent(channelId)}/threads`,
         {
           method: "POST",
           headers: authHeaders,
           body: JSON.stringify({
             name: safeThreadName(row),
             auto_archive_duration: 10080, // 7 jours
+            message: embedPayload,
           }),
         },
       );
       if (!threadRes.ok) {
         console.error(
-          `[hr-files/discord] Échec création fil: ${threadRes.status} ${await threadRes.text()}`,
+          `[hr-files/discord] Échec création fil forum: ${threadRes.status} ${await threadRes.text()}`,
         );
         return { status: "failed" };
       }
-      const thread = (await threadRes.json()) as { id: string };
+      const thread = (await threadRes.json()) as { id: string; message?: { id: string } };
       threadId = thread.id;
+      // La création d'un fil forum renvoie le channel + le message de départ
+      // (champ "message"). On le récupère pour pouvoir l'éditer plus tard.
+      messageId = thread.message?.id ?? null;
+
+      return {
+        status: "sent",
+        threadId,
+        messageId: messageId ?? "",
+      };
     }
 
-    // 3) Poste (ou édite si déjà présent) le message récapitulatif dans le fil.
-    const embedPayload = buildEmbed(row);
-    let messageId = row.discord_summary_message_id ?? null;
-
+    // 3) Fil déjà existant : on édite (ou reposte si besoin) le message récap.
     if (messageId) {
       const editRes = await fetch(
         `https://discord.com/api/v10/channels/${threadId}/messages/${messageId}`,
