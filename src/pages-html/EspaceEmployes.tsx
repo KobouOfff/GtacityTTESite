@@ -5,12 +5,14 @@ import { getPrimaryRole, canManageSubscriptions } from "@/lib/discord-roles";
 import { TTELogo } from "@/components/TTELogo";
 import MailPanel from "@/components/MailPanel";
 import BilletsPanel from "@/components/BilletsPanel";
+import RecompensesPanel from "@/components/RecompensesPanel";
 
 export default function EspaceEmployesPage() {
   const { data: user } = useCurrentUser();
   const primaryRole = user ? getPrimaryRole(user.roleIds) : null;
   const [mailOpen, setMailOpen] = useState(false);
   const [billetsOpen, setBilletsOpen] = useState(false);
+  const [recompensesOpen, setRecompensesOpen] = useState(false);
   const permBillets = canManageSubscriptions(user ?? null);
 
   return (
@@ -93,6 +95,9 @@ export default function EspaceEmployesPage() {
               {permBillets && (
                 <button type="button" className="tool-btn" onClick={() => setBilletsOpen(true)}>Attribuer un billet</button>
               )}
+              {permBillets && (
+                <button type="button" className="tool-btn" onClick={() => setRecompensesOpen(true)}>Remettre une récompense</button>
+              )}
               <button type="button" className="tool-btn">Planning &amp; roulements</button>
               <button type="button" className="tool-btn">Fiches de service</button>
               <button type="button" className="tool-btn">Documents RH</button>
@@ -108,6 +113,7 @@ export default function EspaceEmployesPage() {
 
       {mailOpen && <MailPanel onClose={() => setMailOpen(false)} />}
       {billetsOpen && <BilletsPanel onClose={() => setBilletsOpen(false)} />}
+      {recompensesOpen && <RecompensesPanel onClose={() => setRecompensesOpen(false)} />}
 
       <footer>
         <div className="f-in">

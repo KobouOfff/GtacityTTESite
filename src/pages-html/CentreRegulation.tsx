@@ -15,6 +15,7 @@ import FleetPanel from "@/components/FleetPanel";
 import EffectifsPanel from "@/components/EffectifsPanel";
 import MailPanel from "@/components/MailPanel";
 import BilletsPanel from "@/components/BilletsPanel";
+import RecompensesPanel from "@/components/RecompensesPanel";
 import { TTELogo } from "@/components/TTELogo";
 import { useCurrentUser } from "@/components/DiscordAuth";
 import {
@@ -35,6 +36,7 @@ export default function CentreRegulationPage() {
   const u = user ?? null;
   const [mailOpen, setMailOpen] = useState(false);
   const [billetsOpen, setBilletsOpen] = useState(false);
+  const [recompensesOpen, setRecompensesOpen] = useState(false);
   const permBillets = canManageSubscriptions(u);
   const permNotes = canWriteNotes(u);
   const permDepTrain = canManageTrainDepartures(u);
@@ -197,6 +199,11 @@ export default function CentreRegulationPage() {
         {permBillets && (
           <button type="button" className="out" title="Attribuer un billet" onClick={() => setBilletsOpen(true)}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9Z" /><path d="M9 7v10" strokeDasharray="2 2" /></svg>
+          </button>
+        )}
+        {permBillets && (
+          <button type="button" className="out" title="Remettre une récompense" onClick={() => setRecompensesOpen(true)}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="8" r="5" /><path d="M8.5 13 7 21l5-2 5 2-1.5-8" /></svg>
           </button>
         )}
         <a className="out" href="/espace-employes" title="D\u00e9connexion">
@@ -876,6 +883,7 @@ export default function CentreRegulationPage() {
 
 {mailOpen && <MailPanel onClose={() => setMailOpen(false)} />}
 {billetsOpen && <BilletsPanel onClose={() => setBilletsOpen(false)} />}
+    {recompensesOpen && <RecompensesPanel onClose={() => setRecompensesOpen(false)} />}
 
 <div className="toast" id="toast"></div>
 

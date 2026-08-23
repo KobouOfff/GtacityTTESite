@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useCurrentUser } from "@/components/DiscordAuth";
 import { getMyLoyaltyAccount } from "@/lib/loyalty.functions";
 import type { SubscriptionPurchaseRow } from "@/lib/loyalty.server";
+import { getRewardCatalog, getMyRewardClaims, claimRewardFn } from "@/lib/rewards.functions";
+import type { RewardClaimRow, RewardTier, RewardTierId } from "@/lib/rewards.server";
 
 /* ------------------------------------------------------------------ *
  * Palette "bleu ferroviaire sombre"
@@ -28,16 +30,46 @@ const STATUS: Record<string, { label: string; color: string; dot: string }> = {
   annule: { label: "Annulé", color: C.off, dot: C.off },
 };
 
+const REWARD_STATUS: Record<string, { label: string; color: string; dot: string }> = {
+  a_recuperer: { label: "En attente de retrait", color: C.warn, dot: C.warn },
+  recupere: { label: "Récompense remise", color: C.ok, dot: C.ok },
+  annule: { label: "Annulée", color: C.off, dot: C.off },
+};
+
 /* ------------------------------------------------------------------ *
  * Page
  * ------------------------------------------------------------------ */
 function MonComptePage() {
   const { data: user, isLoading: userLoading } = useCurrentUser();
+  const queryClient = useQueryClient();
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["my-loyalty-account"],
     queryFn: () => getMyLoyaltyAccount(),
     enabled: !!user,
     staleTime: 15_000,
+  });
+
+  const { data: catalogData } = useQuery({
+    queryKey: ["reward-catalog"],
+    queryFn: () => getRewardCatalog(),
+    staleTime: Infinity,
+  });
+
+  const { data: claimsData, isLoading: claimsLoading } = useQuery({
+    queryKey: ["my-reward-claims"],
+    queryFn: () => getMyRewardClaims(),
+    enabled: !!user,
+    staleTime: 15_000,
+  });
+
+  const claimMutation = useMutation({
+    mutationFn: (tierId: RewardTierId) => claimRewardFn({ data: { tierId } }),
+    onSuccess: (res) => {
+      if (res.ok) {
+        queryClient.invalidateQueries({ queryKey: ["my-loyalty-account"] });
+        queryClient.invalidateQueries({ queryKey: ["my-reward-claims"] });
+      }
+    },
   });
 
   if (userLoading) {
@@ -125,6 +157,59 @@ function MonComptePage() {
           (guichet en gare ou Discord) avec ton reçu de paiement pour faire attribuer ton billet.
         </p>
       </aside>
+
+      {/* ---------- Récompenses fidélité ---------- */}
+      <section>
+        <div style={sectionHead}>
+          <h2 style={{ fontSize: 15, margin: 0, textTransform: "uppercase", letterSpacing: 1.2, color: C.muted }}>
+            Récompenses fidélité
+          </h2>
+        </div>
+
+        {catalogData?.ok && (
+          <div style={{ display: "grid", gap: 14, gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+            {catalogData.tiers.map((tier) => (
+              <RewardTierCard
+                key={tier.id}
+                tier={tier}
+                points={account?.points ?? 0}
+                onClaim={() => claimMutation.mutate(tier.id)}
+                claiming={claimMutation.isPending && claimMutation.variables === tier.id}
+                error={
+                  claimMutation.data && !claimMutation.data.ok && claimMutation.variables === tier.id
+                    ? claimMutation.data.reason
+                    : null
+                }
+              />
+            ))}
+          </div>
+        )}
+
+        {claimMutation.data?.ok && (
+          <div style={{ ...notice, marginTop: 14 }}>
+            <Icon name="check" size={18} />
+            <p style={{ margin: 0, lineHeight: 1.6 }}>
+              Récompense réclamée&nbsp;! Présente le code{" "}
+              <b style={{ color: C.text, fontFamily: "ui-monospace, monospace" }}>{claimMutation.data.claim.code}</b>{" "}
+              à un agent TTE pour la récupérer.
+            </p>
+          </div>
+        )}
+
+        {!!(claimsData?.ok && claimsData.claims.length) && (
+          <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
+            {claimsData.claims.map((c) => (
+              <RewardClaimCard key={c.id} row={c} />
+            ))}
+          </div>
+        )}
+
+        {claimsLoading && (
+          <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
+            <Skeleton height={72} />
+          </div>
+        )}
+      </section>
 
       {/* ---------- Historique ---------- */}
       <section>
@@ -244,6 +329,113 @@ function PurchaseCard({ row }: { row: SubscriptionPurchaseRow }) {
 }
 
 /* ------------------------------------------------------------------ *
+ * Récompenses fidélité
+ * ------------------------------------------------------------------ */
+const CLAIM_ERRORS: Record<string, string> = {
+  not_logged_in: "Session expirée, reconnecte-toi.",
+  unknown_tier: "Récompense inconnue.",
+  account_not_found: "Compte fidélité introuvable, réessaie plus tard.",
+  insufficient_points: "Pas encore assez de points pour cette récompense.",
+  insert_failed: "Erreur serveur, réessaie.",
+};
+
+function RewardTierCard({
+  tier,
+  points,
+  onClaim,
+  claiming,
+  error,
+}: {
+  tier: RewardTier;
+  points: number;
+  onClaim: () => void;
+  claiming: boolean;
+  error: string | null;
+}) {
+  const pct = Math.min(100, Math.round((points / tier.pointsCost) * 100));
+  const unlocked = points >= tier.pointsCost;
+
+  return (
+    <article className="tte-card" style={{ ...card, display: "grid", gap: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
+        <div style={{ ...badgeIcon, width: 40, height: 40, margin: 0 }}>
+          <Icon name="gift" size={18} />
+        </div>
+        <span style={{ ...metaChip, color: C.accent, borderColor: "rgba(75,146,221,0.35)", background: C.accentSoft }}>
+          {tier.pointsCost.toLocaleString("fr-FR")} pts
+        </span>
+      </div>
+
+      <div>
+        <div style={{ fontWeight: 700, fontSize: 15.5 }}>{tier.label}</div>
+        <p style={{ ...mutedText, margin: "6px 0 0", fontSize: 12.5, lineHeight: 1.5 }}>{tier.description}</p>
+      </div>
+
+      <div style={{ height: 7, borderRadius: 999, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+        <div
+          style={{
+            height: "100%",
+            width: `${pct}%`,
+            background: unlocked ? C.ok : C.accent,
+            borderRadius: 999,
+            transition: "width .3s ease",
+          }}
+        />
+      </div>
+      <div style={{ ...mutedText, fontSize: 11.5 }}>
+        {unlocked ? "Disponible" : `${Math.max(0, tier.pointsCost - points).toLocaleString("fr-FR")} points restants`}
+      </div>
+
+      {error && <div style={{ color: C.danger, fontSize: 12 }}>{CLAIM_ERRORS[error] ?? "Réclamation impossible."}</div>}
+
+      <button
+        type="button"
+        className="tte-btn"
+        onClick={onClaim}
+        disabled={!unlocked || claiming}
+        style={{ ...btnGhost, justifyContent: "center", opacity: !unlocked ? 0.5 : 1 }}
+      >
+        {claiming ? "Réclamation…" : unlocked ? "Réclamer" : "Verrouillée"}
+      </button>
+    </article>
+  );
+}
+
+function RewardClaimCard({ row }: { row: RewardClaimRow }) {
+  const status = REWARD_STATUS[row.status] ?? { label: row.status, color: C.off, dot: C.off };
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(row.code ?? "");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* presse-papiers indisponible */
+    }
+  };
+
+  return (
+    <article className="tte-card" style={{ ...card, display: "flex", justifyContent: "space-between", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontWeight: 700, fontSize: 14.5 }}>{row.tier_label}</div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8, alignItems: "center" }}>
+          <code style={{ ...refCode, fontSize: 14, padding: "5px 10px" }}>{row.code}</code>
+          <button onClick={copy} className="tte-btn" style={btnCopy}>
+            <Icon name={copied ? "check" : "copy"} size={13} />
+            {copied ? "Copié" : "Copier"}
+          </button>
+        </div>
+      </div>
+      <span style={{ ...pill, color: status.color, borderColor: status.color + "55", background: status.color + "1A" }}>
+        <span style={{ width: 7, height: 7, borderRadius: "50%", background: status.dot, display: "inline-block" }} />
+        {status.label}
+      </span>
+    </article>
+  );
+}
+
+/* ------------------------------------------------------------------ *
  * Coquille de page
  * ------------------------------------------------------------------ */
 function Shell({ children }: { children: React.ReactNode }) {
@@ -295,7 +487,7 @@ function Skeleton({ height }: { height: number }) {
  * Icônes (inline, aucune dépendance)
  * ------------------------------------------------------------------ */
 type IconName =
-  | "refresh" | "info" | "star" | "check" | "clock" | "copy" | "ticket" | "alert" | "user" | "discord";
+  | "refresh" | "info" | "star" | "check" | "clock" | "copy" | "ticket" | "alert" | "user" | "discord" | "gift";
 
 function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
   const common = {
@@ -328,6 +520,8 @@ function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
       return <svg {...common}><path d="M12 4l9 16H3z" /><path d="M12 10v4M12 17h.01" /></svg>;
     case "user":
       return <svg {...common}><circle cx="12" cy="8" r="4" /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" /></svg>;
+    case "gift":
+      return <svg {...common}><rect x="3" y="8" width="18" height="13" rx="1" /><path d="M12 8v13M3 12h18" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5" /></svg>;
     case "discord":
       return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" style={{ flex: "0 0 auto" }}>
