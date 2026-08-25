@@ -39,6 +39,12 @@ function safeThreadName(row: HrEmployeeFileRow) {
   return truncate(`Dossier RH - ${label}`, 100);
 }
 
+function section(title: string) {
+  // Séparateur de section : occupe toute la largeur de l'embed (inline:false)
+  // et sert uniquement de titre visuel, sans valeur.
+  return { name: title, value: "\u200b", inline: false };
+}
+
 function buildEmbed(row: HrEmployeeFileRow) {
   return {
     allowed_mentions: { parse: [] },
@@ -47,6 +53,7 @@ function buildEmbed(row: HrEmployeeFileRow) {
         title: `📁 Dossier RH — ${row.prenom ?? ""} ${(row.nom ?? "").toUpperCase()}`.trim(),
         color: 0x2563eb,
         fields: [
+          section("🪪 1) État Civil"),
           { name: "Prénom", value: field(row.prenom), inline: true },
           { name: "Nom", value: field(row.nom), inline: true },
           { name: "Genre", value: field(row.genre), inline: true },
@@ -54,25 +61,31 @@ function buildEmbed(row: HrEmployeeFileRow) {
           { name: "Situation familiale", value: field(row.situation_familiale), inline: true },
           { name: "Discord", value: field(row.employee_username) + `\nID : ${row.employee_discord_id}`, inline: true },
 
+          section("📞 2) Coordonnées"),
           { name: "Téléphone(s)", value: field(row.telephones), inline: true },
           { name: "Adresse", value: field(row.adresse), inline: true },
-          { name: "Date d'entrée", value: displayDate(row.date_entree), inline: true },
 
+          section("🔑 3) Historique dans l'Entreprise"),
+          { name: "Date d'entrée", value: displayDate(row.date_entree), inline: true },
           { name: "Poste(s) actuel(s)", value: field(row.postes_actuels), inline: false },
 
+          section("🗓️ 4) Congés et Absences"),
           { name: "Congés pris", value: field(row.conges_pris), inline: true },
           { name: "Congés restants", value: row.conges_restants != null ? String(row.conges_restants) : "—", inline: true },
           { name: "Absences", value: field(row.absences), inline: false },
           { name: "Arrêts maladie", value: field(row.arrets_maladie), inline: false },
 
+          section("📑 5) Discipline et Incidents"),
           { name: "Avertissements", value: field(row.avertissements), inline: false },
           { name: "Sanctions", value: field(row.sanctions), inline: false },
 
+          section("🗒️ 6) Notes Internes"),
           { name: "Appréciation RH", value: field(row.appreciation_rh), inline: false },
           { name: "Observation RH", value: field(row.observation_rh), inline: false },
           { name: "Objectifs", value: field(row.objectifs), inline: false },
           { name: "Règlement intérieur", value: row.reglement_interne_ack ? "✅ Signé" : "❌ Non signé", inline: true },
 
+          section("✅ 7) Signatures et Tampon"),
           { name: "Signataire RH", value: field(row.signature_rh_nom), inline: true },
           { name: "Date de signature", value: displayDate(row.signature_rh_date), inline: true },
           { name: "Tampon", value: row.tampon ? "✅" : "❌", inline: true },
