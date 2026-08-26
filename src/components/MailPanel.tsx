@@ -270,11 +270,19 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
   });
   const directory = directoryQuery.data?.ok ? directoryQuery.data.employees : [];
 
+  // Pas de rafraîchissement automatique périodique ici : la clé DeoMail est
+  // plafonnée à 100 requêtes/heure pour TOUT le site (tous employés
+  // confondus, lecture + envoi). Un refetchInterval de 30s suffisait à lui
+  // seul, pour un employé qui laisse le panneau ouvert, à épuiser tout le
+  // quota horaire du site et à faire échouer la messagerie pour tout le
+  // monde (429 Rate limit). On se contente donc du comportement par défaut
+  // de react-query (refetch au focus de la fenêtre / changement de dossier)
+  // plus les invalidations manuelles après envoi/déplacement, déjà en place
+  // plus bas dans ce fichier.
   const inboxQuery = useQuery({
     queryKey: ["mail-folder", folder],
     queryFn: () => listMyMail({ data: { folder } }),
-    refetchInterval: 30_000,
-    staleTime: 15_000,
+    staleTime: 60_000,
     enabled: addressQuery.data?.ok === true,
   });
 
@@ -397,6 +405,17 @@ export default function MailPanel({ onClose }: { onClose: () => void }) {
               {isInbox && (
                 <button type="button" className={`mp-tab${tab === "unread" ? " active" : ""}`} onClick={() => setTab("unread")}>Non lus</button>
               )}
+              <button
+                type="button"
+                className="mp-btn"
+                title="Actualiser"
+                disabled={inboxQuery.isFetching}
+                onClick={() => { void inboxQuery.refetch(); }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" style={inboxQuery.isFetching ? { animation: "mp-spin 0.8s linear infinite" } : undefined}>
+                  <path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v6h-6" />
+                </svg>
+              </button>
             </div>
           </div>
 
